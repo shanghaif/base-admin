@@ -1,10 +1,14 @@
 'use strict'
 const path = require('path')
+const { HashedModuleIdsPlugin } = require('webpack');
+const CompressionWebpackPlugin = require('compression-webpack-plugin') // 开启压缩
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin') // 去掉注释
 const defaultSettings = require('./src/settings.js')
 
 function resolve(dir) {
   return path.join(__dirname, dir)
 }
+const isProd = process.env.NODE_ENV === 'production'
 
 const name = defaultSettings.title || 'vue Element Admin' // page title
 
@@ -15,6 +19,37 @@ const name = defaultSettings.title || 'vue Element Admin' // page title
 // port = 9527 npm run dev OR npm run dev --port = 9527
 const port = process.env.port || process.env.npm_config_port || 9527 // dev port
 
+// cdn预加载使用
+const externals = {
+  'vue': 'Vue',
+  'vue-router': 'VueRouter',
+  'vuex': 'Vuex',
+  'axios': 'axios',
+  "element-ui": "ELEMENT"
+}
+const cdn = {
+  // 开发环境
+  dev: {
+      css: [
+          'https://unpkg.com/element-ui/lib/theme-chalk/index.css'
+      ],
+      js: []
+  },
+  // 生产环境
+  build: {
+      css: [
+          'https://unpkg.com/element-ui/lib/theme-chalk/index.css'
+      ],
+      js: [
+          'https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.min.js',
+          'https://cdn.jsdelivr.net/npm/vue-router@3.0.2/dist/vue-router.min.js',
+          'https://cdn.jsdelivr.net/npm/vuex@3.1.0/dist/vuex.min.js',
+          'https://cdn.jsdelivr.net/npm/axios@0.18.1/dist/axios.min.js',
+          'https://unpkg.com/element-ui/lib/index.js'
+      ]
+  }
+}
+
 // All configuration item explanations can be find in https://cli.vuejs.org/config/
 module.exports = {
   /**
@@ -24,7 +59,7 @@ module.exports = {
    * In most cases please use '/' !!!
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
-  publicPath: '/',
+  publicPath: './',
   outputDir: 'dist',
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
@@ -45,19 +80,63 @@ module.exports = {
       }
     }
   },
-  configureWebpack: {
-    // provide the app's title in webpack's name field, so that
-    // it can be accessed in index.html to inject the correct title.
-    name: name,
-    resolve: {
-      alias: {
-        '@': resolve('src')
-      }
-    }
-  },
+  configureWebpack: config =>{
+    const plugins = [];
+        if (isProd) {
+            plugins.push(
+                new UglifyJsPlugin({
+                    uglifyOptions: {
+                        output: {
+                            comments: false, // 去掉注释
+                        },
+                        warnings: false,
+                        compress: {
+                            drop_console: true,
+                            drop_debugger: false,
+                            pure_funcs: ['console.log']//移除console
+                        }
+                    }
+                })
+            )
+            // 服务器也要相应开启gzip
+            plugins.push(
+                new CompressionWebpackPlugin({
+                    algorithm: 'gzip',
+                    test: /\.(js|css)$/,// 匹配文件名
+                    threshold: 10000, // 对超过10k的数据压缩
+                    deleteOriginalAssets: false, // 不删除源文件
+                    minRatio: 0.8 // 压缩比
+                })
+            )
+
+            // 用于根据模块的相对路径生成 hash 作为模块 id, 一般用于生产环境
+            plugins.push(
+                new HashedModuleIdsPlugin()
+            )
+
+
+            // 取消webpack警告的性能提示
+            config.performance = {
+                hints: 'warning',
+                //入口起点的最大体积
+                maxEntrypointSize: 1000 * 500,
+                //生成文件的最大体积
+                maxAssetSize: 1000 * 1000,
+                //只给出 js 文件的性能提示
+                assetFilter: function (assetFilename) {
+                    return assetFilename.endsWith('.js');
+                }
+            }
+
+            // 打包时npm包转CDN
+            config.externals = externals;
+        }
+
+        return { plugins }
+    },
+   
   chainWebpack(config) {
-    // it can improve the speed of the first screen, it is recommended to turn on preload
-    // it can improve the speed of the first screen, it is recommended to turn on preload
+    config.resolve.alias.set('@', resolve('src'))
     config.plugin('preload').tap(() => [
       {
         rel: 'preload',
@@ -67,6 +146,11 @@ module.exports = {
         include: 'initial'
       }
     ])
+    //cdn
+    config.plugin('html').tap((args) => {
+      isProd ? args[0].cdn = cdn.build : args[0].cdn = cdn.dev
+      return args
+    })
 
     // when there are many pages, it will cause too many meaningless requests
     config.plugins.delete('prefetch')
