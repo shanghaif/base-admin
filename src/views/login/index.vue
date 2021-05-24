@@ -84,6 +84,7 @@
 import { validUsername } from '@/utils/validate'
 import LangSelect from '@/components/LangSelect'
 import SocialSign from './components/SocialSignin'
+import md5 from 'blueimp-md5'
 
 export default {
   name: 'Login',
@@ -106,7 +107,7 @@ export default {
     return {
       loginForm: {
         username: 'admin',
-        password: '111111'
+        password: 'admin@123'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', validator: validateUsername }],
@@ -164,12 +165,18 @@ export default {
       this.$refs.loginForm.validate(valid => {
         if (valid) {
           this.loading = true
-          this.$store.dispatch('user/login', this.loginForm)
+          const params = {
+            username: this.loginForm.username,
+            password: md5(this.loginForm.password)
+          }
+          this.$store.dispatch('user/login', params)
             .then(() => {
               this.$router.push({ path: this.redirect || '/', query: this.otherQuery })
               this.loading = false
             })
             .catch(() => {
+              this.$message.error('登录失败')
+
               this.loading = false
             })
         } else {
