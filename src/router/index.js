@@ -84,6 +84,11 @@ export const constantRoutes = [
     ]
   },
   {
+    
+    path: '/big-screen',
+    component: () => import('@/views/big-screen/index')
+  },
+  {
     path: '/permission',
     component: Layout,
     redirect: '/permission/page',

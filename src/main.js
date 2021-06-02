@@ -1,7 +1,7 @@
 import Vue from 'vue'
 
 import Cookies from 'js-cookie'
-
+import dayjs from 'dayjs'
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
 
 import Element from 'element-ui'
@@ -32,6 +32,7 @@ import * as filters from './filters' // global filters
 //   const { mockXHR } = require('../mock')
 //   mockXHR()
 // }
+Vue.prototype.$dayjs = dayjs// 可以全局使用dayjs
 
 Vue.use(Element, {
   size: Cookies.get('size') || 'medium', // set element-ui default size

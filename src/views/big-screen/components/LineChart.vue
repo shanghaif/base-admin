@@ -7,6 +7,7 @@ import * as echarts from 'echarts/core'
 import resize from './mixins/resize'
 
 export default {
+  name: 'LineChart',
   mixins: [resize],
   props: {
     className: {
@@ -19,7 +20,7 @@ export default {
     },
     width: {
       type: String,
-      default: '200px'
+      default: '100%'
     },
     height: {
       type: String,
