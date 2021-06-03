@@ -1,20 +1,28 @@
 <template>
-  <div class="chart-box">
-
-    <div class="chart-box-tool">
-      <div class="chart-box-title">告警处理统计</div>
-      
+  <!-- <div class="chart-box-tool">
+      <div class="chart-box-title">分区点位状态统计</div> -->
+  <div class="row-bar">
+    <div class="hart-box-describe">
+      <div class="hart-box-describe-left">
+        <div class="chart-dt chart-dt-big">电解铝二厂 三分区</div>
+      </div>
+      <div class="hart-box-describe-right">
+        <div class="temperature cur-tem">
+          <span>测温点位总数</span>
+          <span class="tem-val num">500</span>
+        </div>
+      </div>
     </div>
     <div :id="id" :class="className" :style="{height:height,width:width}" />
   </div>
+  <!-- </div> -->
 </template>
-
 <script>
 import * as echarts from 'echarts/core'
 import resize from './mixins/resize'
-
+import groupBy from 'lodash/groupBy'
 export default {
-  name: 'SingleBarChart',
+  name: 'BarChartRow',
   mixins: [resize],
   props: {
     className: {
@@ -31,7 +39,7 @@ export default {
     },
     height: {
       type: String,
-      default: '200px'
+      default: '150px'
     }
   },
   data() {
@@ -40,8 +48,12 @@ export default {
       option: null
     }
   },
+  computed: {
+    
+  },
   mounted() {
     this.initChart()
+    console.log('object :>> ', groupBy)
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -72,39 +84,21 @@ export default {
           }
         },
         grid: {
-          top: '30%',
+          top: '5%',
           left: '0%',
           right: '5%',
-          bottom: '10%',
+          bottom: '0%',
           containLabel: true
         },
-        legend: {
-          itemHeight: 8,
-          textStyle: {
-            color: '#fff'
-          },
-          // itemStyle:{
-          //   color:'#000'
-          // },
-          
-          data: ['告警数', '处理数']
-        },
+       
         xAxis: [{
-          type: 'category',
-          color: '#59588D',
-          data: ['2021-05-01', '2021-05-02', '2021-05-03', '2021-05-04', '2021-05-05', '2021-05-06', '2021-05-07'],
+          type: 'value',
+          show: false,
+
           axisLabel: {
             color: '#999',
             textStyle: {
               fontSize: 12
-            },
-            formatter: function(val) {
-              let arr; let str = ''
-              if (val) {
-                arr = val.split('-')
-                str = `${arr[0]}\n${arr[1]}-${arr[2]}`
-              }
-              return str
             }
           },
 
@@ -112,7 +106,7 @@ export default {
             show: false
           }, 
           axisLine: {
-            show: true,
+            show: false,
             lineStyle: {
               color: '#394056'
             }
@@ -123,54 +117,48 @@ export default {
           
         }],
         yAxis: [{
+          type: 'category',
+          color: '#59588D',
+
           axisLabel: {
-            color: '#999',
+            color: '#fff',
             textStyle: {
               fontSize: 12
             }
           },
           axisLine: {
+            show: false,
             lineStyle: {
               color: 'rgba(107,107,107,0.37)'
-
-
-
-
             }
           },
           axisTick: {
             show: false
           },
           splitLine: {
+            show: false,
+
             lineStyle: {
               color: 'rgba(131,101,101,0.2)',
               type: 'dashed'
             }
-          }
+          },
+          data: ['异常点位', '趋势告警', '温度告警', '离线点位']
+
         }],
        
         series: [{
           type: 'bar',
-          name: '告警数',
+          name: '数量',
           
-          data: [40, 100, 40, 40, 90, 120, 40, 120],
-          barWidth: '14px',
-          // itemStyle: {
-          //   normal: {
-          //     color: function(params) {
-          //       // const colorArr = params.value > 0 ? ['#FF9A22', '#FFD56E'] : ['#FFD56E', '#FF9A22']
-          //       const colorArr = params.value > 0 ? ['#f53012', '#d6560b'] : ['#f53012', '#d6560b']
-          //       return new echarts.graphic.LinearGradient(0, 0, 0, 1, [{
-          //         offset: 0,
-          //         color: colorArr[0] // 0% 处的颜色
-          //       }, {
-          //         offset: 1,
-          //         color: colorArr[1]// 100% 处的颜色
-          //       }], true)
-          //     },
-          //     barBorderRadius: [30, 30, 0, 0]
-          //   }
-          // },
+          data: [
+            { value: 190, itemStyle: { color: '#fbd661' }},
+            { value: 160, itemStyle: { color: 'red' }},
+            { value: 120, itemStyle: { color: 'red' }},
+            { value: 100, itemStyle: { color: '#b3b3b3' }}
+          ],
+          barWidth: '10px',
+         
           itemStyle: {
             normal: {
               color: new echarts.graphic.LinearGradient(
@@ -181,8 +169,20 @@ export default {
                   { offset: 1, color: '#d6560b' } // 柱图渐变色
                 ]
               ),
-              barBorderRadius: [30, 30, 0, 0]
+              barBorderRadius: [30, 30, 30, 30]
 
+            }
+          },
+          emphasis: {
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(
+                0, 0, 0, 1,
+                [
+                  { offset: 0, color: '#2378f7' },
+                  { offset: 0.7, color: '#2378f7' },
+                  { offset: 1, color: '#83bff6' }
+                ]
+              )
             }
           },
           label: {
@@ -190,33 +190,13 @@ export default {
               show: true,
               fontSize: 12,
               fontWeight: 'bold',
-              color: '#f53012',
-              position: 'top'
+              color: '#fff',
+              position: 'right'
             }
           }
        
-        }, 
-        {
-          data: [40, 80, 20, 16, 70, 90, 20, 100],
-          type: 'line',
-          smooth: false,
-          name: '处理数',
-          // symbol: 'none',
-          symbolSize: 10,
-          lineStyle: {
-            color: '#18BAD7',
-            width: 4,
-            shadowColor: 'rgba(0, 0, 0, 0.3)', // 设置折线阴影
-            shadowBlur: 15,
-            shadowOffsetY: 20
-          }
-          // markPoint: {
-          //       data: [
-          //           {type: 'max', name: '最大值'},
-          //           {type: 'min', name: '最小值'}
-          //       ]
-          //   },
         }
+      
         ]
       }
 
@@ -226,5 +206,16 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-   
+  .row-bar{
+    position: relative;
+    &::after{
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 10px;
+      height: 1px;
+      width: 100%;
+      background: rgba(255,255,255,.1);
+    }
+  }
 </style>

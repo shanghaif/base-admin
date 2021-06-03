@@ -1,0 +1,77 @@
+.chart-box {
+  // height: 100%;
+  width: 100%;
+}
+.go-link {
+  &:hover {
+    font-weight: bold;
+    color: $defaultColor;
+    // text-decoration: underline;
+  }
+}
+.chart-box-title {
+  font-size: 24px;
+  font-family: PingFang SC;
+  font-weight: bold;
+  color: $defaultColor;
+
+  background: linear-gradient(0deg, #067dc2 0%, $defaultColor 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  &.big {
+    font-size: 30px;
+  }
+}
+.chart-box-tool {
+  .hart-box-describe {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    line-height: 22px;
+    .hart-box-describe-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      .chart-dt {
+        color: #fff;
+        font-size: 12px;
+        &.chart-dt-big {
+          font-size: 16px;
+        }
+      }
+      .err-text {
+        color: $err;
+        font-size: 16px;
+        font-weight: bold;
+      }
+    }
+    .hart-box-describe-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: flex-start;
+      color: #fff;
+      .temperature {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        color: #fff;
+        font-size: 12px;
+        .tem-val {
+          font-size: 16px;
+          color: $defaultColor;
+          font-weight: bold;
+          &.err {
+            color: $err;
+          }
+          &.num {
+            font-size: 20px;
+            margin-left: 6px;
+          }
+        }
+      }
+    }
+  }
+}
