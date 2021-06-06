@@ -10,7 +10,7 @@ function resolve(dir) {
 }
 const isProd = process.env.NODE_ENV === 'production'
 
-const name = defaultSettings.title || 'vue Element Admin' // page title
+const name = defaultSettings.title || '新视智科' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
@@ -62,6 +62,7 @@ module.exports = {
   publicPath: './',
   outputDir: 'dist',
   assetsDir: 'static',
+
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
   devServer: {
@@ -136,6 +137,7 @@ module.exports = {
     },
    
   chainWebpack(config) {
+    config.name = name
     config.resolve.alias.set('@', resolve('src'))
     config.plugin('preload').tap(() => [
       {

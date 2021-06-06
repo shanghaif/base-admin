@@ -3,15 +3,18 @@
     <div class="chart-box-title big">重庆分公司 电解铝二厂</div>
     <div class="tip">
       <span class="time">告警信息汇总 2021年5月19日</span>
-      <span
-        class="link"
-      >告警信息日志 <i
-        class="el-icon-arrow-right go-link"
-      /></span>
+      <span class="link">告警信息日志 <i class="el-icon-arrow-right go-link" /></span>
     </div>
     <div class="cells">
-      <div v-for="(item, i) in list" :key="i + 'a'" class="cell">
-        <span class="num" :class="item.class">{{ item.num }}</span>
+      <div
+        v-for="(item, i) in list"
+        :key="i + 'a'"
+        class="cell"
+      >
+        <span
+          class="num"
+          :class="item.class"
+        >{{ item.num }}</span>
         <span class="text">{{ item.text }}</span>
       </div>
     </div>

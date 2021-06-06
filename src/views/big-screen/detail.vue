@@ -11,14 +11,20 @@
       <div class="content">
         <div class="content-top">
           <div class="detail-item detail-item-left">
-            <!-- <electrolyzer :list="list" /> -->
+            <div class="detail-cells">
 
-            <virtual-list
+              <el-scrollbar wrap-class="detail-cells">
+                <electrolyzer :list="list" />
+
+              </el-scrollbar>
+            </div>
+
+            <!-- <virtual-list
               style="height: 360px; overflow-y: auto"
               :data-key="'id'"
               :data-sources="list"
               :data-component="itemComponent"
-            />
+            /> -->
           </div>
         </div>
       </div>
@@ -29,7 +35,7 @@
  
 <script>
 import Electrolyzer from './components/Electrolyzer'
-import VirtualList from 'vue-virtual-scroll-list'
+// import VirtualList from 'vue-virtual-scroll-list'
 
 function createData(len) {
   const arr = []
@@ -39,9 +45,9 @@ function createData(len) {
       name: `电解槽${len}`,
       type: 'warning',
       dot: 168,
-      temperatureDot: 6,
-      trendDot: 2,
-      unusualDot: 1
+      temperatureDot: 1,
+      trendDot: 0,
+      unusualDot: 0
     }
     arr.push(obj)
   }
@@ -50,12 +56,13 @@ function createData(len) {
 export default {
   name: 'BigScreen',
   components: {
-    VirtualList
+    // VirtualList,
+    Electrolyzer
   },
 
   data() {
     return {
-      itemComponent: Electrolyzer,
+      // itemComponent: Electrolyzer,
       // list: [
       //   { id: '10000', name: '电解槽1', type: 'warning', dot: 168, temperatureDot: 6, trendDot: 2, unusualDot: 1 },
       //   { id: '10001', name: '电解槽2', type: 'defual', dot: 168, temperatureDot: 6, trendDot: 2, unusualDot: 1 },
@@ -139,7 +146,19 @@ $top-Height: 10vh;
       .detail-item {
         width: 20%;
 
-        .detail-item-left {
+        &.detail-item-left {
+        }
+        ::v-deep .el-scrollbar {
+          height: 100%;
+        }
+        ::v-deep .el-scrollbar__wrap {
+          overflow: auto;
+        }
+        .detail-cells {
+          width: 390px;
+          height: 430px;
+          padding: 15px;
+          background: rgba(255, 255, 255, 0.04);
         }
       }
     }

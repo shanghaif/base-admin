@@ -1,11 +1,17 @@
 <template>
   <div>
-    <!-- <div v-for="(item,i) in list" :key="(i + 'a')" class="electrolyzer-wrap" :class="className(item) + (curCell === item.id ? ' active' : '')" @click="checkCell(item)"> -->
     <div
+      v-for="(source,i) in list"
+      :key="(i + 'a')"
       class="electrolyzer-wrap"
       :class="className(source) + (curCell === source.id ? ' active' : '')"
       @click="checkCell(source)"
     >
+      <!-- <div
+      class="electrolyzer-wrap"
+      :class="className(source) + (curCell === source.id ? ' active' : '')"
+      @click="checkCell(source)"
+    > -->
       <div class="left">
         <img
           :src="imgObj[className(source)]"
@@ -80,12 +86,12 @@ export default {
   name: 'Electrolyzer',
 
   props: {
-    source: {
-      type: Object,
-      default() {
-        return {}
-      }
-    },
+    // source: {
+    //   type: Object,
+    //   default() {
+    //     return {}
+    //   }
+    // },
     list: {
       type: Array,
       default() {
@@ -154,6 +160,9 @@ export default {
   height: 80px;
   padding: 8px 10px;
   margin-bottom: 10px;
+  &:last-child {
+    margin-bottom: 0;
+  }
   .left {
     width: 80px;
     height: 54px;
@@ -170,6 +179,7 @@ export default {
     height: 100%;
     .cell-name {
       font-size: 14px;
+      color: #fff;
     }
     .cell-types {
       width: 100%;
