@@ -73,7 +73,7 @@ export default {
       const color = ['#fbd661', 'red', 'red', '#b3b3b3']
       const arr = []
       this.data.child.forEach((v, i) => {
-        const obj = { itemStyle: {}}
+        const obj = { itemStyle: {} }
         obj.value = v.num
         obj.itemStyle.color = color[i]
         arr.push(obj)

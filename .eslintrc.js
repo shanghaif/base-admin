@@ -193,7 +193,7 @@ module.exports = {
     'no-unused-vars': process.env.NODE_ENV === 'production' ? 2 : 0,
     'no-trailing-spaces': process.env.NODE_ENV === 'production' ? 2 : 0,
     'no-multiple-empty-lines': process.env.NODE_ENV === 'production' ? 2 : 0,
-    'object-curly-spacing': [2, 'always', {
+    'object-curly-spacing': [0, 'always', {
       objectsInObjects: false
     }],
     'array-bracket-spacing': [2, 'never']
