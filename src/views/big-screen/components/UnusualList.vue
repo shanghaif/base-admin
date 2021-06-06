@@ -59,6 +59,9 @@ export default {
   methods: {
     choose(val) {
       this.activeTab = val
+    },
+    detail(id) {
+      this.$router.push({ path: '/big-screen/detail' })
     }
   }
 }

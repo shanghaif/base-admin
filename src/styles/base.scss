@@ -1,6 +1,38 @@
+::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.5s;
+}
+
+::-webkit-scrollbar-thumb:window-inactive {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.4);
+}
 .chart-box {
   // height: 100%;
   width: 100%;
+}
+.mask-chart {
+  background: rgba(255, 255, 255, 0.04);
+  &.inner {
+    background: rgba(255, 255, 255, 1);
+  }
 }
 .go-link {
   &:hover {
@@ -15,7 +47,7 @@
   font-weight: bold;
   color: $defaultColor;
 
-  background: linear-gradient(0deg, #067dc2 0%, $defaultColor 100%);
+  background: linear-gradient(90deg, #067dc2 0%, $defaultColor 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   &.big {
@@ -27,7 +59,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 20px;
+    margin-top: 10px;
     line-height: 22px;
     .hart-box-describe-left {
       display: flex;
@@ -39,6 +71,7 @@
         font-size: 12px;
         &.chart-dt-big {
           font-size: 16px;
+          font-weight: bold;
         }
       }
       .err-text {
@@ -57,7 +90,7 @@
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        color: #fff;
+        color: #ccc;
         font-size: 12px;
         .tem-val {
           font-size: 16px;

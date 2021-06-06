@@ -13,8 +13,8 @@
         <div class="item">
           <div class="chart-box">
             <div class="chart-box-tool">
-              <div class="chart-box-title">分区点位状态统计</div>
-              <bar-chart-row v-for="(item,i) in list" :id="'bar_row' + i" :key="i + 'a'" /> 
+              <div class="chart-box-title tj">分区点位状态统计</div>
+              <bar-chart-row v-for="(item,i) in list" :id="'bar_row' + i" :key="i + 'bar_row'" :data="item" /> 
             </div>
           </div>
           <single-bar-chart id="line_l" /> 
@@ -59,9 +59,9 @@ export default {
   data() {
     return {
       list: [
-        { factory: '电解铝二厂', area: '一分区', child: [{ name: '异常点位', num: 10 }, { name: '趋势告警', num: 20 }, { name: '温度告警', num: 30 }, { name: '离线点位', num: 40 }] },
-        { factory: '电解铝二厂', area: '二分区', child: [{ name: '异常点位', num: 10 }, { name: '趋势告警', num: 20 }, { name: '温度告警', num: 30 }, { name: '离线点位', num: 40 }] },
-        { factory: '电解铝二厂', area: '三分区', child: [{ name: '异常点位', num: 10 }, { name: '趋势告警', num: 20 }, { name: '温度告警', num: 30 }, { name: '离线点位', num: 40 }] }
+        { factory: '电解铝二厂', area: '一分区', child: [{ name: '异常点位', num: 10 }, { name: '趋势告警', num: 20 }, { name: '温度告警', num: 30 }, { name: '离线点位', num: 400 }] },
+        { factory: '电解铝二厂', area: '二分区', child: [{ name: '异常点位', num: 20 }, { name: '趋势告警', num: 20 }, { name: '温度告警', num: 30 }, { name: '离线点位', num: 40 }] },
+        { factory: '电解铝二厂', area: '三分区', child: [{ name: '异常点位', num: 30 }, { name: '趋势告警', num: 20 }, { name: '温度告警', num: 30 }, { name: '离线点位', num: 40 }] }
       ]
     }
   },
@@ -154,6 +154,9 @@ $top-Height: 10vh;
         width: 50%;
       background: rgba(0,0,0,0);
 
+      }
+      .tj{
+        margin-bottom: 20px;
       }
     }
     
