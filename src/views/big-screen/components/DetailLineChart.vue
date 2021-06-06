@@ -1,27 +1,5 @@
 <template>
   <div class="chart-box">
-
-    <div class="chart-box-tool">
-      <div class="chart-box-title">异常点位温度曲线</div>
-      <div class="hart-box-describe">
-        <div class="hart-box-describe-left">
-          <div class="chart-dt">三分区/电解槽2027</div>
-          <div class="err-text">A17_RIGHT: 温度过高</div>
-        </div>
-        <div class="hart-box-describe-right">
-          <div class="temperature cur-tem">
-            <span>当前温度：</span>
-            <span class="tem-val err">500℃</span>
-
-          </div>
-          <div class="temperature average-tem">
-            <span>平均温度：</span>
-            <span class="tem-val">123.8℃</span>
-
-          </div>
-        </div>
-      </div>
-    </div>
     <div
       :id="id"
       :class="className"
@@ -31,11 +9,11 @@
 </template>
 
 <script>
-import * as echarts from 'echarts/core'
+import * as echarts from 'echarts'
 import resize from './mixins/resize'
 
 export default {
-  name: 'SingleLineChart',
+  name: 'DetailLineChart',
   mixins: [resize],
   props: {
     className: {
@@ -97,11 +75,8 @@ export default {
       }
     },
     initChart() {
-      console.log('echarts :>> ', echarts)
-
       this.chart = echarts.init(document.getElementById(this.id))
       this.now = this.$dayjs().valueOf()
-
       for (let i = 0; i < 100; i++) {
         this.xData.push(this.randomData())
       }

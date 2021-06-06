@@ -155,6 +155,8 @@ export default {
 
 <style lang="scss" scoped>
 .electrolyzer-wrap {
+  color: #fff;
+
   @include flex(flex-start, center);
   background: rgba(255, 255, 255, 0.1);
   height: 80px;
