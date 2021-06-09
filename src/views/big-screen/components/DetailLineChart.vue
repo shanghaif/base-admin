@@ -1,11 +1,38 @@
 <template>
-  <div class="chart-box">
-    <div
-      :id="id"
-      :class="className"
-      :style="{height:height,width:width}"
-    />
+  <div class="detail-chart">
+    <div class="chart-tool">
+      <div class="left-text">
+
+        <div class="chart-box-title">测温点温度曲线</div>
+        <div class="content-crumbs">
+          <div class="content-crumb">电解槽2021</div>
+          <div class="content-crumb">A12_LEFT</div>
+
+        </div>
+      </div>
+      <div class="right-btns">
+        <div class="btn"><i class="el-icon-refresh-right" /> 刷新</div>
+        <div class="btn"><i class="el-icon-upload" /> 导出</div>
+      </div>
+    </div>
+    <div class="detail-chart-box">
+      <div class="select-date">
+        <span class="select-date-text">数据日期：</span>
+        <el-date-picker
+          v-model="date"
+          type="date"
+          placeholder="选择日期"
+          class="screen-select"
+        />
+      </div>
+      <div
+        :id="id"
+        :class="className"
+        :style="{height:height,width:width}"
+      />
+    </div>
   </div>
+
 </template>
 
 <script>
@@ -30,7 +57,7 @@ export default {
     },
     height: {
       type: String,
-      default: '200px'
+      default: '90%'
     }
   },
   data() {
@@ -40,6 +67,7 @@ export default {
       timer: null,
       xData: [],
       now: 0,
+      date: '',
       value: Math.random() * 100,
       // step:  60 * 1000 // 1分钟
       step: (10 / 60) * 60 * 1000
@@ -97,10 +125,10 @@ export default {
           }
         },
         grid: {
-          top: '20%',
+          top: '10%',
           left: '0%',
           right: '5%',
-          bottom: '10%',
+          bottom: '5%',
           containLabel: true
         },
         visualMap: [
@@ -213,6 +241,7 @@ export default {
                   lineStyle: { width: 1.656, color: 'red' },
                   label: { show: false }
                 }
+                // { type: 'average', name: '平均值' }
               ]
             },
             /*
@@ -250,6 +279,8 @@ export default {
                 //     formatter: ''
                 //   }
                 // },
+                // { type: 'max', name: '最大值' },
+                // { type: 'min', name: '最小值' }
               ]
             }
           }
@@ -271,4 +302,62 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.detail-chart {
+  height: 80%;
+  width: 100%;
+
+  .chart-tool {
+    @include flex(space-between, center);
+    margin-bottom: 15px;
+    .left-text {
+      @include flex(flex-start, baseline);
+      .content-crumbs {
+        margin-left: 20px;
+      }
+    }
+    .right-btns {
+      @include flex();
+
+      .btn {
+        @include flex();
+        width: 100px;
+        height: 32px;
+        background: rgba(255, 255, 255, 0.1);
+        margin-right: 15px;
+        border-radius: 4px;
+        color: #fff;
+        cursor: pointer;
+      }
+    }
+  }
+  .detail-chart-box {
+    @include flex(space-between, center);
+    flex-direction: column;
+    padding: 20px 0;
+    width: 100%;
+    height: calc(100% - 49px);
+    background: rgba(255, 255, 255, 0.04);
+    .select-date {
+      @include flex(flex-end, center);
+      padding: 0 20px;
+      width: 100%;
+      ::v-deep .el-date-editor.el-input {
+        width: 160px;
+      }
+      ::v-deep .el-input__inner {
+        background: rgba(255, 255, 255, 0.1);
+        height: 24px;
+        line-height: 24px;
+        border: 0;
+        border-radius: 0;
+        color: #fff;
+      }
+      ::v-deep .el-input__icon {
+        line-height: 24px;
+      }
+      .select-date-text {
+      }
+    }
+  }
+}
 </style>

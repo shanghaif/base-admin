@@ -86,12 +86,24 @@ export const constantRoutes = [
   {
     
     path: '/big-screen',
-    component: () => import('@/views/big-screen/index')
+    component: () => import('@/views/big-screen/index'),
+    hidden: true,
+    
+    meta: {
+      
+      index: 1
+    }
   },
   {
     
     path: '/big-screen/detail',
-    component: () => import('@/views/big-screen/detail')
+    component: () => import('@/views/big-screen/detail'),
+    hidden: true,
+
+    meta: {
+      
+      index: 2
+    }
   },
   {
     path: '/permission',

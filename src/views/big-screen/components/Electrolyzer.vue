@@ -117,15 +117,7 @@ export default {
         temperatureDot: '温度告警',
         trendDot: '趋势告警',
         unusualDot: '异常点位'
-      },
-      // list1: [
-      //   { id: '10000', name: '电解槽1', type: 'warning', dot: 168, temperatureDot: 6, trendDot: 2, unusualDot: 1 },
-      //   { id: '10001', name: '电解槽2', type: 'defual', dot: 168, temperatureDot: 6, trendDot: 2, unusualDot: 1 },
-      //   { id: '10002', name: '电解槽3', type: 'warning', dot: 168, temperatureDot: 6, trendDot: 2, unusualDot: 1 },
-      //   { id: '10003', name: '电解槽4', type: 'off', dot: 168, temperatureDot: 0, trendDot: 0, unusualDot: 1 },
-      //   { id: '10004', name: '电解槽5', type: 'off', dot: 168, temperatureDot: 0, trendDot: 0, unusualDot: 0 }
-      // ]
-      list1: createData(4)
+      }
     }
   },
   computed: {},
@@ -165,6 +157,13 @@ export default {
   &:last-child {
     margin-bottom: 0;
   }
+  &:hover {
+    background: linear-gradient(
+      90deg,
+      rgba(24, 186, 215, 0),
+      rgba(24, 186, 215, 0.3)
+    ) !important;
+  }
   .left {
     width: 80px;
     height: 54px;
@@ -193,7 +192,8 @@ export default {
         .num {
           font-size: 16px;
           line-height: 28px;
-          color: #67c23a;
+          // color: #67c23a;
+          color: #fff;
           &.red {
             color: $err;
           }
@@ -213,7 +213,12 @@ export default {
   }
 
   &.active {
-    background: rgba(24, 186, 215, 0.3) !important;
+    // background: rgba(24, 186, 215, 0.3) !important;
+    background: linear-gradient(
+      90deg,
+      rgba(24, 186, 215, 0),
+      rgba(24, 186, 215, 0.3)
+    ) !important;
     border: 1px solid $defaultColor !important;
 
     .left {
@@ -235,8 +240,11 @@ export default {
     }
   }
   &.warning {
-    background: linear-gradient(90deg, rgba(255, 47, 20, 0.3) 100%);
-    border: 1px solid $err;
+    background: linear-gradient(
+      90deg,
+      rgba(255, 47, 20, 0),
+      rgba(255, 47, 20, 0.3)
+    );
     .left {
       .electrolyzer-img {
       }
@@ -248,6 +256,7 @@ export default {
       .cell-types {
         .cell-type {
           .num {
+            color: $err;
           }
           .num-text {
           }
@@ -256,8 +265,11 @@ export default {
     }
   }
   &.yellow {
-    background: linear-gradient(90deg, rgba(237, 168, 46, 0.3) 100%);
-    border: 1px solid $yl;
+    background: linear-gradient(
+      90deg,
+      rgba(237, 168, 46, 0),
+      rgba(237, 168, 46, 0.3)
+    );
     .left {
       .electrolyzer-img {
       }

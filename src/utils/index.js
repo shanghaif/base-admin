@@ -8,6 +8,7 @@
  * @param {string} cFormat
  * @returns {string | null}
  */
+
 export function parseTime(time, cFormat) {
   if (arguments.length === 0 || !time) {
     return null
@@ -353,5 +354,67 @@ export function removeClass(ele, cls) {
   if (hasClass(ele, cls)) {
     const reg = new RegExp('(\\s|^)' + cls + '(\\s|$)')
     ele.className = ele.className.replace(reg, ' ')
+  }
+}
+
+
+export function screenSize(editorDom) {
+  const screenWidth = document.body.clientWidth || document.documentElement.clientWidth
+  const screenHeight = document.body.clientHeight || document.documentElement.clientHeight
+  console.log('screenWidth :>> ', screenWidth)
+  console.log('screenHeight :>> ', screenHeight)
+  const defWidth = 1920
+  const defHeight = 1080
+  let xScale = screenWidth / defWidth
+  let yScale = screenHeight / defHeight
+  editorDom.style.cssText += ';transform: scale(' + xScale + ',' + yScale + ')'
+  window.addEventListener('resize', bounce(() => {
+    const screenWidth = document.body.clientWidth || document.documentElement.clientWidth
+    const screenHeight = document.body.clientHeight || document.documentElement.clientHeight
+    xScale = screenWidth / defWidth
+    yScale = screenHeight / defHeight
+    editorDom.style.cssText += ';transform: scale(' + xScale + ',' + yScale + ')'
+  }, 100))
+  // $(window).resize(() => {
+  //   let screenWidth = document.body.clientWidth || document.documentElement.clientWidth;
+  //   let screenHeight = document.body.clientHeight || document.documentElement.clientHeight;
+  //   xScale = screenWidth / defWidth;
+  //   yScale = screenHeight / defHeight;
+  //   editorDom.style.cssText += ';transform: scale(' + xScale + ',' + yScale + ')';
+  // })
+}
+
+function bounce(func, wait, immediate) {
+  let timeout, args, context, timestamp, result
+
+  const later = function() {
+    // 据上一次触发时间间隔
+    const last = +new Date() - timestamp
+
+    // 上次被包装函数被调用时间间隔 last 小于设定时间间隔 wait
+    if (last < wait && last > 0) {
+      timeout = setTimeout(later, wait - last)
+    } else {
+      timeout = null
+      // 如果设定为immediate===true，因为开始边界已经调用过了此处无需调用
+      if (!immediate) {
+        result = func.apply(context, args)
+        if (!timeout) context = args = null
+      }
+    }
+  }
+
+  return function(...args) {
+    context = this
+    timestamp = +new Date()
+    const callNow = immediate && !timeout
+    // 如果延时不存在，重新设定延时
+    if (!timeout) timeout = setTimeout(later, wait)
+    if (callNow) {
+      result = func.apply(context, args)
+      context = args = null
+    }
+
+    return result
   }
 }

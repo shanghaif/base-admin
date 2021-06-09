@@ -1,12 +1,39 @@
 <template>
-  <div :id="id" :class="className" :style="{height:height,width:width}" />
+  <div class="map-wrap">
+    <div class="map-tips">
+
+      <div class="map-tips-title">云南分公司</div>
+      <div class="map-comp-names">
+        <div class="map-comp-name active">电解铝一厂</div>
+        <div class="map-comp-name">电解铝二厂</div>
+        <div class="map-comp-name">电解铝三厂</div>
+        <div class="map-comp-name">电解铝四厂</div>
+      </div>
+      <i class="el-icon-caret-bottom" />
+    </div>
+    <div
+      :id="id"
+      :class="className"
+      :style="{height:height,width:width}"
+    />
+  </div>
 </template>
 
 <script>
 import * as echarts from 'echarts/core'
 import resize from './mixins/resize'
 import '@/assets/china'
-
+var XAData = [
+  { name: '广州白云机场', province: '广东' },
+  { name: '深圳宝安机场', province: '广东' },
+  { name: '东莞机场', province: '广东' },
+  { name: '北京西机场', province: '北京' },
+  { name: '北京南机场', province: '北京' },
+  { name: '北京密云机场', province: '北京' },
+  { name: '上海浦东机场', province: '上海' },
+  { name: '昆明', province: '云南' },
+  { name: '西安', province: '陕西' }
+]
 export default {
   name: 'MapChart',
   mixins: [resize],
@@ -32,7 +59,6 @@ export default {
     return {
       chart: null,
       geoCoordMap: {}
-
     }
   },
   mounted() {
@@ -46,69 +72,59 @@ export default {
     this.chart = null
   },
   methods: {
-     
-    initChart() { // 初始化地图数据
+    initChart() {
+      // 初始化地图数据
       this.chart = echarts.init(document.getElementById(this.id))
       const option = {
         // backgroundColor: '#363739',
-        dataset: {
-          'source': [
-            ['湖南', '112.929238', '28.249957', '90', '28', '66', 'rgba(19,198,249,1)'],
-            ['上海', '121.481115', '31.234694', '88', '48', '75', 'rgba(19,198,249,1)'],
-            ['湖北', '114.311073', '30.601099', '79', '56', '85', 'rgba(245, 42, 118,1)'],
-            ['澳门', '113.545265', '22.170938', '82', '36', '68', 'rgba(245, 42, 118,1)'],
-            ['江苏', '119.750934', '33.196174', '82', '36', '68', 'rgba(245, 42, 118,1)']
-          ]
-        },
-        'tooltip': {
-          'triggerOn': 'mousemove',
-          'backgroundColor': '#fff',
-          'alwaysShowContent': false
+        center: [110.712251, 23.040609],
+        tooltip: {
+          triggerOn: 'mousemove',
+          backgroundColor: '#fff',
+          alwaysShowContent: false
           // "formatter": "function formatter(params) {\n            var html = \"<div style=\\\"width:140px;height:80px;background-image:url(/UploadFile/ImgSource/ZH092468/a42d82bce9344df1825d70ef0210b9e4.png);background-size:100% 100%;background-repeat:no-repeat;background-position:center;padding-top:5px;padding-left:10px;box-sizing:border-box;\\\">\\n                      <div style=\\\"width:130px;height:20px;color:#f9f500\\\">\".concat(params.data[0], \"\\u5927\\u533A<div>\\n                      <div style=\\\"width:130px;height:10px;\\\">\\n                          <div style=\\\"width:120px;display:flex;justify-content:space-between;\\\">\\n                              <span style=\\\"color:#fff\\\">\\u8865\\u8D27\\u53EF\\u5F97\\u7387</span>\\n                              <span style=\\\"color:#0ae9ff\\\">\").concat(params.data[1], \"%</span>\\n                          </div>\\n                      <div>\\n                      <div style=\\\"width:100px;height:10px;\\\">\\n                          <div style=\\\"width:120px;display:flex;justify-content:space-between;\\\">\\n                              <span style=\\\"color:#fff\\\">\\u65E5\\u73AF\\u6BD4</span>\\n                              <span style=\\\"color:#0ae9ff\\\">\").concat(params.data[2], \"%</span>\\n                          </div>\\n                      <div>\\n                  </div>\");\n            return html;\n          }"
         },
-        'visualMap': {
-          'min': 0,
-          'max': 100,
-          'left': 26,
-          'bottom': 40,
-          'showLabel': true,
-          'text': [
-            '高',
-            '低'
-          ],
-          'inRange': {
-            'color': [
-              'rgba(19,198,249,0)',
-              'rgba(19,198,249,0)'
-            ]
+        visualMap: {
+          min: 0,
+          max: 100,
+          left: 26,
+          bottom: 40,
+          showLabel: true,
+          text: ['高', '低'],
+          inRange: {
+            color: ['rgba(19,198,249,0)', 'rgba(19,198,249,0)']
           },
-          'show': false
+          show: false
         },
-        'geo': {
-          'map': 'china',
-          'roam': 1,
-          'scaleLimit': {
-            'min': 1,
-            'max': 2
+        geo: {
+          map: 'china',
+          roam: true,
+          scaleLimit: {
+            min: 1,
+            max: 2
           },
-          'zoom': 1,
-          'label': {
-            'show': false,
-            'color': '#fff',
-            'fontSize': 10
+          zoom: 1.5,
+          label: {
+            show: false,
+            color: '#fff',
+            fontSize: 10
           },
-          'emphasis': {
-            'label': {
-              'show': false,
-              'color': '#fff',
-              'fontSize': 10
+          emphasis: {
+            label: {
+              show: false,
+              color: '#fff',
+              fontSize: 10
             }
           },
-          'itemStyle': {
-            'normal': {
-              'borderColor': '#666',
-              'borderWidth': 0.5,
-              'color': 'rgba(0,0,0,0)',
+          regions: {
+            name: '云南',
+            selected: true
+          },
+          itemStyle: {
+            normal: {
+              borderColor: '#666',
+              borderWidth: 0.5,
+              color: 'rgba(0,0,0,0)',
               areaColor: '#363739',
               /*   "areaColor": {
           "type": "radial",
@@ -128,116 +144,229 @@ export default {
           "global": false
         }, */
               // "shadowColor": "rgba(19,198,249,1)",
-              'shadowOffsetX': 0,
-              'shadowOffsetY': 0
+              shadowOffsetX: 0,
+              shadowOffsetY: 0
               // "shadowBlur": 10
             },
-            'emphasis': {
-              'areaColor': 'rgba(24, 186, 215, .2)',
+            emphasis: {
+              areaColor: 'rgba(24, 186, 215, .2)',
               borderColor: '#18BAD7'
               // "shadowOffsetX": 0,
               // "shadowOffsetY": 0,
               // "borderWidth": 0
             }
           },
-          
-          'regions': [
+          regions: [
             {
-              'name': '南海诸岛',
-              'itemStyle': {
-                'normal': {
-                  'opacity': 0
+              name: '南海诸岛',
+              itemStyle: {
+                normal: {
+                  opacity: 0
                 }
               },
-              'label': {
-                'show': false
+              label: {
+                show: false
               }
             }
           ]
         },
-        'series': [
+        series: [
           {
-            'type': 'effectScatter',
-            'coordinateSystem': 'geo',
-            'showEffectOn': 'render',
-            'zlevel': 1,
+            type: 'effectScatter',
+            coordinateSystem: 'geo',
+            showEffectOn: 'render',
+            zlevel: 1,
             // 'symbol': 'path://M409,271.9c0,40.2-69.6,73.8-155.5,73.8S98,313.1,98,272.9s69.6-72.8,155.5-72.8S409,231.7,409,271.9z M362,274.3c0,28.2-48.8,51.7-109,51.7s-109-22.8-109-51s48.8-51,109-51S362,246.1,362,274.3z M252.1,309.5c-37.9,0-67.6-14.7-67.6-33.5s29.7-33.5,67.6-33.5c17.7,0,34.3,3.2,46.8,8.9c13.4,6.2,20.8,14.8,20.8,24.2C319.7,294.6,290,309.5,252.1,309.5z M252.1,249.5c-32.9,0-60.6,12.1-60.6,26.5s27.8,26.5,60.6,26.5c16.6,0,32.1-3.1,43.8-8.7c10.7-5.1,16.8-11.7,16.8-18.3C312.7,261.4,285,249.5,252.1,249.5z M250.5,223h-2v-8h2V223z M258.5,215h-2v-8h2V215z M250.5,207h-2v-8h2V207z M258.5,199h-2v-8h2V199z M250.5,191h-2v-8h2V191z M258.5,183h-2v-8h2V183z M250.5,175h-2v-8h2V175z M258.5,167h-2v-8h2V167z M250.5,159h-2v-8h2V159z M258.5,151h-2v-8h2V151z M250.5,143h-2v-8h2V143z M258.5,135h-2v-8h2V135z M250.5,127h-2v-8h2V127z M258.5,119h-2v-8h2V119z M250.5,111h-2v-8h2V111z M258.5,103h-2v-8h2V103z M250.5,95h-2v-8h2V95z M258.5,87h-2v-8h2V87z M250.5,79h-2v-8h2V79z M258.5,71h-2v-8h2V71z M250.5,63h-2v-8h2V63z M258.5,55h-2v-8h2V55z M250.5,47h-2v-5h5v2h-3V47z',
             // symbol:'path://M1705.06,1318.313v-89.254l-319.9-221.799l0.073-208.063c0.521-84.662-26.629-121.796-63.961-121.491c-37.332-0.305-64.482,36.829-63.961,121.491l0.073,208.063l-319.9,221.799v89.254l330.343-157.288l12.238,241.308l-134.449,92.931l0.531,42.034l175.125-42.917l175.125,42.917l0.531-42.034l-134.449-92.931l12.238-241.308L1705.06,1318.313z',
-            'rippleEffect': {
-              'period': 15,
-              'scale': 2,
-              'brushType': 'fill'
+            rippleEffect: {
+              period: 15,
+              scale: 2,
+              brushType: 'fill'
             },
-            'hoverAnimation': true,
-            'label': {
-              'normal': {
-                'formatter': '{b}',
-                'position': 'bottom',
-                'offset': [
-                  0,
-                  10
-                ],
-                'color': '#fff',
-                'show': true
+            hoverAnimation: true,
+            label: {
+              normal: {
+                formatter: '{b}',
+                position: 'bottom',
+                offset: [0, 10],
+                color: '#fff',
+                show: true
               }
             },
-            'itemStyle': {
-              'normal': {
-                'color': '#18BAD7',
-                'shadowBlur': 10,
-                'shadowColor': '#333'
+            itemStyle: {
+              normal: {
+                color: '#18BAD7',
+                shadowBlur: 10,
+                shadowColor: '#333'
               }
             },
-            'symbolSize': 8,
-            'data': [
+            symbolSize: 8,
+
+            data: [
               {
-                'name': '北京',
-                'value': [
-                  116.405285,
-                  39.904989
-                ],
-                
-                'visualMap': false
-              },
-              {
-                'name': '天津',
-                'value': [
-                  117.190182,
-                  39.12559
-                ],
-                'visualMap': false
-              },
-              {
-                'name': '山西',
-                'value': [
-                  112.549248,
-                  37.857014
-                ],
-                'visualMap': false
-              },
-              {
-                'name': '内蒙古',
-                'value': [
-                  111.670801,
-                  40.818311
-                ],
-                'visualMap': false
-              },
-              {
-                'name': '辽宁',
-                'value': [
-                  123.429096,
-                  41.796767
-                ],
-                'visualMap': false
+                selected: true,
+                name: '云南',
+                value: [102.712251, 23.040609],
+
+                visualMap: false
               }
+
+              // {
+              //   name: '天津',
+              //   value: [117.190182, 39.12559],
+              //   visualMap: false
+              // },
+              // {
+              //   name: '山西',
+              //   value: [112.549248, 37.857014],
+              //   visualMap: falses
+              // },
+              // {
+              //   name: '内蒙古',
+              //   value: [111.670801, 40.818311],
+              //   visualMap: false
+              // },视
+              // {
+              //   name: '辽宁',
+              //   value: [123.429096, 41.796767],
+              //   visualMap: false
+              // }
             ]
           }
         ]
       }
 
       this.chart.setOption(option, true)
+
+      this.chart.on('click', function (params) {
+        if (params.componentType === 'geo') {
+          console.log(params)
+
+          // 点击的是省份区域
+          setTimeout(function () {
+            var h = document.documentElement.clientHeight
+            var x = params.event.offsetX
+            var y = params.event.offsetY
+            var prov = params.name
+            var flag = true // 此省份有无机场
+            // arr = groupBy(XAData, 'ProvinceCName')[prov] // 点击的省份机场
+            if (flag) {
+              // airportArrTips(arr, x, y, prov)
+
+              // 渲染出来的tips位置如果底部超过浏览器底部,重新定位
+              var dom = document.querySelector('.map-tips')
+              var rect = dom.getBoundingClientRect()
+              var top = rect.top
+              var right = rect.right
+              var bottom = rect.bottom
+              var left = rect.left
+              var domHeight = dom.offsetHeight
+              var domWidth = dom.offsetWidth
+              var winHeight = document.documentElement.clientHeight
+              var winWidth = document.documentElement.clientWidth
+              dom.style.left = x - domWidth / 2 + 'px'
+              dom.style.top = y - domHeight - 15 + 'px'
+              if (bottom > winHeight) {
+                // 超出底部时重新定位
+                dom.style.top = y - domHeight + 'px'
+              }
+              if (right > winWidth) {
+                // 超出右边时重新定位
+                dom.style.left = x - domWidth + 'px'
+              }
+            } else {
+              // airportArrTips([], x, y, prov)
+            }
+          }, 0)
+        }
+      })
+      this.chart.dispatchAction({
+        type: 'mapSelect',
+        // 可选，系列 index，可以是一个数组指定多个系列
+        // seriesIndex: 0,
+        // 可选，系列名称，可以是一个数组指定多个系列
+        // seriesName: string|Array,
+        // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
+        // dataIndex: number,
+        // 可选，数据名称，在有 dataIndex 的时候忽略
+        name: '云南'
+      })
     }
   }
 }
 </script>
+<style lang="scss" scoped>
+.map-wrap {
+  height: 100%;
+}
+.map-tips {
+  position: absolute;
+  z-index: 100;
+  background: rgba(29, 29, 29, 0.8);
+  width: 310px;
+  height: 156px;
+  padding: 14px;
+  // border: 1px solid #01adf9;
+  border-radius: 10px;
+  // max-height: 400px;
+  // overflow: auto;
+  z-index: 300;
+  .map-tips-title {
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+  .map-comp-names {
+    @include flex();
+    flex-wrap: wrap;
+    .map-comp-name {
+      width: 110px;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.04);
+
+      @include flex();
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #fff;
+      &:nth-child(odd) {
+        margin-right: 10px;
+      }
+      &.active {
+        color: #18bad7;
+        border: 2px solid #18bad7;
+        box-shadow: 0px 0px 12px 0px rgba(24, 186, 215, 0.7);
+        background: linear-gradient(
+          90deg,
+          rgba(24, 186, 215, 0.1),
+          rgba(24, 186, 215, 0.3)
+        ) !important;
+      }
+    }
+  }
+  .el-icon-caret-bottom {
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translate(-50%, 50%);
+    color: rgba(29, 29, 29, 0.8);
+    font-size: 32px;
+  }
+}
+
+.map-tips::-webkit-scrollbar {
+  width: 8px;
+}
+.map-tips::-webkit-scrollbar-track {
+  background-color: #ccc;
+  -webkit-border-radius: 2em;
+  -moz-border-radius: 2em;
+  border-radius: 2em;
+}
+.map-tips::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.4);
+  -webkit-border-radius: 2em;
+  -moz-border-radius: 2em;
+  border-radius: 2em;
+}
+</style>

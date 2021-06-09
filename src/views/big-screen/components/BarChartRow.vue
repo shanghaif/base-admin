@@ -1,4 +1,4 @@
-script<template>
+<template>
   <!-- <div class="chart-box-tool">
       <div class="chart-box-title">分区点位状态统计</div> -->
   <div class="row-bar">
@@ -10,8 +10,14 @@ script<template>
       </div>
       <div class="hart-box-describe-right">
         <div class="temperature cur-tem">
+          <span>测温槽总数</span>
+          <span class="tem-val num">{{ data.cells }}</span>
+        </div>
+      </div>
+      <div class="hart-box-describe-right">
+        <div class="temperature cur-tem">
           <span>测温点位总数</span>
-          <span class="tem-val num">{{ sum }}</span>
+          <span class="tem-val num">{{ data.cells }} x {{ data.point }}</span>
         </div>
       </div>
     </div>

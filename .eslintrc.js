@@ -80,7 +80,7 @@ module.exports = {
     'no-delete-var': 2,
     'no-dupe-args': 2,
     'no-dupe-class-members': 2,
-    'no-dupe-keys': 2,
+    'no-dupe-keys': 1,
     'no-duplicate-case': 2,
     'no-empty-character-class': 2,
     'no-empty-pattern': 2,
@@ -171,9 +171,9 @@ module.exports = {
       'before': false,
       'after': true
     }],
-    'space-before-blocks': [2, 'always'],
-    'space-before-function-paren': [2, 'never'],
-    'space-in-parens': [2, 'never'],
+    'space-before-blocks': [0, 'always'],
+    'space-before-function-paren': [0, 'never'],
+    'space-in-parens': [0, 'never'],
     'space-infix-ops': 2,
     'space-unary-ops': [2, {
       'words': true,
