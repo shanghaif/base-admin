@@ -27,7 +27,7 @@ export default {
 </script>
 <style lang="scss">
 #app {
-  background-image: url('~@/assets/images/bg.jpg');
+  // background-image: url('~@/assets/images/bg.jpg');
 }
 .slide-right-enter-active,
 .slide-right-leave-active,

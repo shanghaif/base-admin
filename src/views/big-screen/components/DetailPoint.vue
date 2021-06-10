@@ -22,6 +22,7 @@
               :title="point.name"
               width="200"
               trigger="hover"
+              :close-delay="50"
             >
 
               <div
@@ -32,7 +33,7 @@
                 slot="reference"
                 :ref="`top${i}${j}${k}`"
                 class="point"
-                :class="{'point-small':k === 1,red: point.value > 120,yellow:point.value > 100 && point.value <120,}"
+                :class="{'point-small':k === 1,red: point.value > max,yellow:point.value > min&& point.value <max,}"
                 @click="selectPoint(point.id,i,j,k)"
                 @mouseenter="pointStatus(i,j,k,1)"
                 @mouseleave="pointStatus(i,j,k)"
@@ -56,6 +57,7 @@
               :title="point.name"
               width="200"
               trigger="hover"
+              :close-delay="50"
             >
 
               <div
@@ -66,7 +68,7 @@
                 slot="reference"
                 :ref="`bottom${i}${j}${k}`"
                 class="point"
-                :class="{'point-small':k === 1,red: point.value > 120,yellow:point.value > 100 && point.value <120,}"
+                :class="{'point-small':k === 1,red: point.value > max,yellow:point.value > min&& point.value <max,}"
                 @click="selectPoint(point.id,i,j,k)"
                 @mouseenter="pointStatus(i,j,k,1)"
                 @mouseleave="pointStatus(i,j,k)"
@@ -123,6 +125,14 @@ export default {
       default() {
         return [{ arr: [] }]
       }
+    },
+    min: {
+      type: Number,
+      default: 0
+    },
+    max: {
+      type: Number,
+      default: 0
     }
   },
   data() {
@@ -135,8 +145,10 @@ export default {
   },
   computed: {
     cellWidth() {
+      const num = 100 / this.list[0].arr.length
       return {
-        '--width': `calc(100% / ${this.list[0].arr.length})`
+        '--width': `calc(100% / ${num})`
+        // '--width': `54px`
       }
     }
   },
@@ -144,7 +156,7 @@ export default {
     selectPoint(id, i, j, k) {
       const str1 = `top${i}${j}${k}`
       const str2 = `bottom${i}${j}${k}`
-      const otherDom = document.querySelectorAll('.point.active') // 已存在高亮
+      const otherDom = document.querySelectorAll('.point.active') // 存在高亮时
       if (otherDom.length > 0) {
         otherDom[0].classList.remove('active')
         otherDom[1].classList.remove('active')
@@ -152,13 +164,14 @@ export default {
       this.$refs[str1][0].classList.add('active')
       this.$refs[str2][0].classList.add('active')
     },
+    // tips
     statusClass(val, n) {
       let result = ''
 
-      if (val > 100 && val < 200) {
-        result = 'red'
-      } else if (val > 200) {
+      if (val > this.min && val < this.max) {
         result = 'yellow'
+      } else if (val > this.max) {
+        result = 'red'
       }
       if (n === 1) {
         result += ' point-small'
@@ -184,7 +197,7 @@ export default {
 <style lang="scss" scoped>
 body {
   ::v-deep .el-popover {
-    background: #000;
+    background: #000 !important;
   }
 }
 
@@ -194,6 +207,11 @@ body {
   &.red {
     .cur-num {
       color: $err;
+    }
+  }
+  &.yellow {
+    .cur-num {
+      color: $yl;
     }
   }
   .cur-num {
@@ -260,6 +278,7 @@ body {
             background: rgba(24, 186, 215, 0.4) !important;
           }
           &.point-small {
+            width: 100%;
           }
         }
       }
@@ -278,13 +297,12 @@ body {
       border-top: 1px solid rgba(255, 255, 255, 0.4);
 
       &.point-small {
-        width: 100%;
       }
     }
     .point-group {
       > span {
         &:nth-child(2) {
-          margin: 7px 6% 0 6%;
+          margin: 7px 2px 0 2px;
         }
         ::v-deep .el-popover__reference-wrapper {
           .point {
@@ -308,14 +326,13 @@ body {
       border-bottom: 1px solid rgba(255, 255, 255, 0.4);
 
       &.point-small {
-        width: 100%;
       }
     }
 
     .point-group {
       > span {
         &:nth-child(2) {
-          margin: 0 6% 5px 6%;
+          margin: 0 2px 5px 2px;
         }
         ::v-deep .el-popover__reference-wrapper {
           .point {
@@ -336,19 +353,6 @@ body {
       font-size: 16px;
       width: var(--width);
     }
-  }
-
-  .cell-top .yellow,
-  .cell-bottom .yellow {
-    border-width: 2px;
-    border-color: rgba(237, 168, 46, 1);
-    background: rgba(237, 168, 46, 0.4);
-  }
-  .cell-top .red,
-  .cell-bottom .red {
-    border-width: 2px;
-    border-color: rgba(255, 47, 20, 1);
-    background: rgba(255, 47, 20, 0.4);
   }
 }
 </style>

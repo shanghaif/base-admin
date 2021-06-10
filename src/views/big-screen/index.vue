@@ -189,7 +189,7 @@ $top-Height: 10vh;
   //   height: 1080px;
   //   overflow: auto;
   //   transform-origin: 0px 0px 0px;
-  //   background-image: url('~@/assets/images/bg.jpg');
+  background-image: url('~@/assets/images/bg.jpg');
   //   background-size: contain;
   //   background-position: 50% 0;
   //   background-color: rgb(0, 0, 0);

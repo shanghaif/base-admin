@@ -169,17 +169,61 @@
           </div>
           <div class="point-wrap">
 
-            <detail-point :list="pointList" />
+            <detail-point
+              :list="pointList"
+              :min="unusualVal"
+              :max="warningVal"
+            />
           </div>
 
         </div>
       </div>
     </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="centerDialogVisible"
+      width="38%"
+      center
+    >
+      <div class="wran-alert-body">
+        <!-- <svg-icon icon-class="warning" /> -->
+        <svg-icon icon-class="abnormal" />
+        <div class="wran-alert-body-content">
+          <div class="content-crumbs">
+            <div class="content-crumb">云南分公司</div>
+            <div class="content-crumb">电解铝二厂</div>
+            <div class="content-crumb">一分区</div>
+            <div class="content-crumb">电解槽2021</div>
+          </div>
+          <div class="wran-alert-reason-box">
+
+            <span class="wran-alert-reason un">温度过高</span>
+            <span class="now-text">当前温度,</span>
+            <span class="err temp-num">200.5℃</span>
+          </div>
+        </div>
+      </div>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          class="detail-ok-btn"
+          @click="centerDialogVisible = false"
+        >查看点位</el-button>
+        <el-button
+          class="detail-cancel-btn"
+          @click="centerDialogVisible = false"
+        >取消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
  
 <script>
+import { mapGetters } from 'vuex'
+
 import Electrolyzer from './components/Electrolyzer'
 import DetailLineChart from './components/DetailLineChart'
 import Header from './components/Header'
@@ -227,7 +271,7 @@ function createCellList(len) {
   return arr
 }
 export default {
-  name: 'BigScreen',
+  name: 'Detail',
   components: {
     Electrolyzer,
     Header,
@@ -237,12 +281,13 @@ export default {
 
   data() {
     return {
+      centerDialogVisible: true,
       baseTemperature: 1500,
       basePct: 50,
       currentCell: {},
 
       updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
-      pointList: [{ arr: createCellList(27) }, { arr: createCellList(27) }],
+      pointList: [{ arr: createCellList(39) }, { arr: createCellList(30) }],
 
       cellTypeOptions: [
         { value: 'defual', label: '温度告警' },
@@ -344,6 +389,7 @@ export default {
     }
   },
   computed: {
+    ...mapGetters(['warningVal', 'unusualVal']),
     averageTemperature() {
       let sum = 0
       for (const key in this.temperatureObj) {
@@ -433,12 +479,75 @@ export default {
 </script>
 <style lang="scss" scoped>
 $top-Height: 10vh;
+::v-deep .el-dialog__wrapper {
+  .el-dialog {
+    box-shadow: 0px 0px 27px 3px rgba(255, 47, 20, 0.5);
+    background: rgba(29, 29, 29, 0.9);
+    .el-dialog__header {
+      .el-dialog__title {
+        color: #fff;
+        font-size: 18px;
+        line-height: 1;
+      }
+      .el-dialog__headerbtn {
+        display: none;
+      }
+    }
+    .el-dialog__body {
+      color: #fff;
+      .wran-alert-body {
+        @include flex(flex-start, center);
+        .wran-alert-body-content {
+          margin-left: 20px;
+          .wran-alert-reason-box {
+            margin-top: 20px;
+            font-size: 18px;
+            .wran-alert-reason {
+              color: $err;
+              font-weight: bold;
+              &.un {
+                color: $yl;
+              }
+            }
+            .now-text {
+              margin: 0 10px;
+            }
+            .temp-num {
+              &.err {
+                color: $err;
+                font-weight: bold;
+              }
+            }
+          }
+        }
+        .svg-icon {
+          width: 120px;
+          height: 120px;
+        }
+      }
+    }
+    .el-dialog__footer {
+      .detail-ok-btn {
+        background: $selfColor;
+        color: #fff;
+        border: 0;
+      }
+      .detail-cancel-btn {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.2);
+        border: 0;
+        margin-left: 40px;
+      }
+    }
+  }
+}
 
 .detail-wrap {
   height: 100%;
   color: #fff;
   background-image: url('~@/assets/images/bg.jpg');
   overflow: hidden;
+
   .content {
     width: 96%;
     height: 100vh;
