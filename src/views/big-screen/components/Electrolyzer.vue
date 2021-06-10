@@ -198,7 +198,7 @@ export default {
             color: $err;
           }
           &.def {
-            color: $defaultColor;
+            color: $selfColor;
           }
           &.yellow {
             color: $yl;
@@ -219,7 +219,7 @@ export default {
       rgba(24, 186, 215, 0),
       rgba(24, 186, 215, 0.3)
     ) !important;
-    border: 1px solid $defaultColor !important;
+    border: 1px solid $selfColor !important;
 
     .left {
       .electrolyzer-img {
@@ -227,7 +227,7 @@ export default {
     }
     .right {
       .cell-name {
-        color: $defaultColor !important;
+        color: $selfColor !important;
       }
       .cell-types {
         .cell-type {

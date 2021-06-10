@@ -131,7 +131,7 @@ export default {
           color: $err;
         }
         &.blue {
-          color: $defaultColor;
+          color: $selfColor;
         }
         &.yellow {
           color: $yl;

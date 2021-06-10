@@ -158,7 +158,7 @@
         <div class="content-bottom">
           <div class="content-bottom-title">
 
-            <div class="chart-box-title">电解槽总览</div>
+            <div class="chart-box-title">电解槽详情</div>
 
             <div class="content-crumbs">
               <div class="content-crumb">云南分公司</div>
@@ -207,6 +207,25 @@ function createData(len) {
   }
   return arr
 }
+function createCellList(len) {
+  const arr = []
+  const obj = {}
+  const i = 3
+  while (len--) {
+    const innerArr = []
+    const num = len
+    for (let i = 0; i < 3; i++) {
+      const innerObj = {}
+      innerObj.id = `${len}_${i}LEFT`
+      innerObj.name = `${len}_${i}LEFT`
+      innerObj.value = i * 110
+      innerArr.push(innerObj)
+    }
+    obj.pointList = innerArr
+    arr.push(obj)
+  }
+  return arr
+}
 export default {
   name: 'BigScreen',
   components: {
@@ -223,6 +242,8 @@ export default {
       currentCell: {},
 
       updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
+      pointList: [{ arr: createCellList(27) }, { arr: createCellList(27) }],
+
       cellTypeOptions: [
         { value: 'defual', label: '温度告警' },
         { value: 'warning', label: '趋势告警' },
@@ -313,7 +334,6 @@ export default {
           unusualDot: 0
         }
       ],
-      pointList: [],
       selectType: '',
       selectFreshTime: '',
       selectTime: '',
@@ -418,7 +438,7 @@ $top-Height: 10vh;
   height: 100%;
   color: #fff;
   background-image: url('~@/assets/images/bg.jpg');
-
+  overflow: hidden;
   .content {
     width: 96%;
     height: 100vh;
@@ -464,7 +484,7 @@ $top-Height: 10vh;
             cursor: pointer;
             &:hover {
               text-decoration: underline;
-              color: $defaultColor;
+              color: $selfColor;
             }
           }
 
@@ -537,7 +557,7 @@ $top-Height: 10vh;
                     color: $err;
                   }
                   .success {
-                    color: $defaultColor;
+                    color: $selfColor;
                   }
                 }
                 .bar-item-content {
@@ -576,11 +596,11 @@ $top-Height: 10vh;
                     margin-left: 25px;
                     // transform: translateY(-50%);
 
-                    color: $defaultColor;
+                    color: $selfColor;
                     background: linear-gradient(
                       90deg,
                       #067dc2 0%,
-                      $defaultColor 100%
+                      $selfColor 100%
                     );
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
@@ -593,22 +613,22 @@ $top-Height: 10vh;
       }
     }
     .content-bottom {
-      height: 28%;
+      height: 250px;
       width: 100%;
       position: absolute;
       left: 0;
       bottom: 20px;
       .content-bottom-title {
         @include flex(flex-start, center);
-        margin-bottom: 20px;
+        margin-bottom: 15px;
         .chart-box-title {
           margin-right: 20px;
         }
       }
       .point-wrap {
         background: rgba(255, 255, 255, 0.04);
-        height: 200px;
-        padding: 20px 15px;
+        height: 220px;
+        padding: 20px 30px 20px 20px;
         .line-point-item {
           @include flex(flex-start, center);
           height: 56px;

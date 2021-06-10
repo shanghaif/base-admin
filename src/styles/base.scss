@@ -81,7 +81,7 @@
     background: linear-gradient(90deg, #067dc2, #18bad7);
   }
   &.selected {
-    color: $defaultColor;
+    color: $selfColor;
   }
 }
 .chart-box {
@@ -97,7 +97,7 @@
 .go-link {
   &:hover {
     font-weight: bold;
-    color: $defaultColor;
+    color: $selfColor;
     // text-decoration: underline;
   }
 }
@@ -122,9 +122,9 @@
   font-size: 24px;
   font-family: PingFang SC;
   font-weight: bold;
-  color: $defaultColor;
+  color: $selfColor;
 
-  background: linear-gradient(90deg, #067dc2 0%, $defaultColor 100%);
+  background: linear-gradient(90deg, #067dc2 0%, $selfColor 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   &.big {
@@ -171,7 +171,7 @@
         font-size: 12px;
         .tem-val {
           font-size: 16px;
-          color: $defaultColor;
+          color: $selfColor;
           font-weight: bold;
           &.err {
             color: $err;

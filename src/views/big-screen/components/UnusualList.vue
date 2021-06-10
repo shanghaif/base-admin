@@ -153,7 +153,7 @@ export default {
       font-size: 14px;
       cursor: pointer;
       &.active {
-        background: $defaultColor;
+        background: $selfColor;
       }
     }
   }
@@ -218,7 +218,7 @@ export default {
         .el-icon-arrow-right {
           &:hover {
             font-weight: bold;
-            color: $defaultColor;
+            color: $selfColor;
           }
         }
       }
