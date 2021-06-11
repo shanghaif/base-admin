@@ -1,16 +1,6 @@
 <template>
   <div class="map-wrap">
-    <div class="map-tips">
 
-      <div class="map-tips-title">云南分公司</div>
-      <div class="map-comp-names">
-        <div class="map-comp-name active">电解铝一厂</div>
-        <div class="map-comp-name">电解铝二厂</div>
-        <div class="map-comp-name">电解铝三厂</div>
-        <div class="map-comp-name">电解铝四厂</div>
-      </div>
-      <i class="el-icon-caret-bottom" />
-    </div>
     <div
       :id="id"
       :class="className"
@@ -58,8 +48,19 @@ export default {
   data() {
     return {
       chart: null,
-      geoCoordMap: {}
+      companyName: '电解铝一厂',
+
+      geoCoordMap: {},
+      compList: [
+        { name: '电解铝一厂' },
+        { name: '电解铝二厂' },
+        { name: '电解铝三厂' },
+        { name: '电解铝四厂' }
+      ]
     }
+  },
+  created() {
+    window.selectCompany = this.selectCompany
   },
   mounted() {
     this.initChart()
@@ -72,17 +73,59 @@ export default {
     this.chart = null
   },
   methods: {
+    selectCompany(e, name) {
+      const other = document.querySelectorAll('.map-comp-name.active')
+      if (other.length > 0) {
+        other[0].classList.remove('active')
+      }
+      e.target.classList.add('active')
+
+      console.log('name :>> ', name)
+      this.companyName = name
+      this.$emit('seletName', name)
+    },
     initChart() {
       // 初始化地图数据
+      const that = this
       this.chart = echarts.init(document.getElementById(this.id))
       const option = {
         // backgroundColor: '#363739',
         center: [110.712251, 23.040609],
         tooltip: {
-          triggerOn: 'mousemove',
-          backgroundColor: '#fff',
-          alwaysShowContent: false
-          // "formatter": "function formatter(params) {\n            var html = \"<div style=\\\"width:140px;height:80px;background-image:url(/UploadFile/ImgSource/ZH092468/a42d82bce9344df1825d70ef0210b9e4.png);background-size:100% 100%;background-repeat:no-repeat;background-position:center;padding-top:5px;padding-left:10px;box-sizing:border-box;\\\">\\n                      <div style=\\\"width:130px;height:20px;color:#f9f500\\\">\".concat(params.data[0], \"\\u5927\\u533A<div>\\n                      <div style=\\\"width:130px;height:10px;\\\">\\n                          <div style=\\\"width:120px;display:flex;justify-content:space-between;\\\">\\n                              <span style=\\\"color:#fff\\\">\\u8865\\u8D27\\u53EF\\u5F97\\u7387</span>\\n                              <span style=\\\"color:#0ae9ff\\\">\").concat(params.data[1], \"%</span>\\n                          </div>\\n                      <div>\\n                      <div style=\\\"width:100px;height:10px;\\\">\\n                          <div style=\\\"width:120px;display:flex;justify-content:space-between;\\\">\\n                              <span style=\\\"color:#fff\\\">\\u65E5\\u73AF\\u6BD4</span>\\n                              <span style=\\\"color:#0ae9ff\\\">\").concat(params.data[2], \"%</span>\\n                          </div>\\n                      <div>\\n                  </div>\");\n            return html;\n          }"
+          padding: 0,
+          enterable: true,
+          transitionDuration: 1,
+          // trigger: 'item',
+          backgroundColor: 'rgba(29, 29, 29, 0.8)',
+          padding: 0,
+          borderWidth: 0,
+          position: function (point, params, dom, rect, size) {
+            // 位于鼠标正上方正中间
+            const x = point[0] - dom.offsetWidth / 2
+            const y = point[1] - dom.offsetHeight - 20
+            return [x, y]
+          },
+
+          formatter: function (params) {
+            // console.log(params)
+            let html = ''
+            if (params.name === '云南') {
+              let str = ''
+              that.compList.forEach((v, i) => {
+                const isActive = v.name === that.companyName ? 'active' : ''
+                str += `<div class="map-comp-name ${isActive}" onclick="selectCompany(event,'${v.name}')">${v.name}</div>`
+              })
+              html = `<div class="map-tips">
+                 <div class="map-tips-title">云南分公司</div>
+                 <div class="map-comp-names">
+                   ${str}
+                 </div>
+                 <i class="el-icon-caret-bottom" />
+               </div>`
+            }
+
+            return html
+          }
         },
         visualMap: {
           min: 0,
@@ -109,17 +152,15 @@ export default {
             color: '#fff',
             fontSize: 10
           },
+
           emphasis: {
             label: {
               show: false,
               color: '#fff',
-              fontSize: 10
+              fontSize: 20
             }
           },
-          regions: {
-            name: '云南',
-            selected: true
-          },
+
           itemStyle: {
             normal: {
               borderColor: '#666',
@@ -167,6 +208,24 @@ export default {
               label: {
                 show: false
               }
+            },
+            {
+              name: '云南',
+              selected: true,
+              select: {
+                label: {
+                  show: false,
+                  color: '#fff'
+                },
+                itemStyle: {
+                  areaColor: 'rgba(24, 186, 215, .2)',
+                  borderColor: '#18BAD7'
+                }
+              }
+              // tooltip: {
+              //   show: true,
+              //   position: ['50%', '50%']
+              // }
             }
           ]
         },
@@ -205,32 +264,11 @@ export default {
             data: [
               {
                 selected: true,
-                name: '云南',
+                name: '昆明',
                 value: [102.712251, 23.040609],
 
                 visualMap: false
               }
-
-              // {
-              //   name: '天津',
-              //   value: [117.190182, 39.12559],
-              //   visualMap: false
-              // },
-              // {
-              //   name: '山西',
-              //   value: [112.549248, 37.857014],
-              //   visualMap: falses
-              // },
-              // {
-              //   name: '内蒙古',
-              //   value: [111.670801, 40.818311],
-              //   visualMap: false
-              // },视
-              // {
-              //   name: '辽宁',
-              //   value: [123.429096, 41.796767],
-              //   visualMap: false
-              // }
             ]
           }
         ]
@@ -238,71 +276,77 @@ export default {
 
       this.chart.setOption(option, true)
 
-      this.chart.on('click', function (params) {
-        if (params.componentType === 'geo') {
-          console.log(params)
+      // this.chart.on('click', function (params) {
+      //   if (params.componentType === 'geo') {
+      //     console.log('params :>> ', params)
+      //     // 点击的是省份区域
+      //     setTimeout(function () {
+      //       var h = document.documentElement.clientHeight
+      //       var x = params.event.offsetX
+      //       var y = params.event.offsetY
+      //       var prov = params.name
+      //       var flag = true // 此省份有无机场
+      //       // arr = groupBy(XAData, 'ProvinceCName')[prov] // 点击的省份机场
+      //       if (flag) {
+      //         // airportArrTips(arr, x, y, prov)
 
-          // 点击的是省份区域
-          setTimeout(function () {
-            var h = document.documentElement.clientHeight
-            var x = params.event.offsetX
-            var y = params.event.offsetY
-            var prov = params.name
-            var flag = true // 此省份有无机场
-            // arr = groupBy(XAData, 'ProvinceCName')[prov] // 点击的省份机场
-            if (flag) {
-              // airportArrTips(arr, x, y, prov)
+      //         // 渲染出来的tips位置如果底部超过浏览器底部,重新定位
+      //         var dom = document.querySelector('.map-tips')
+      //         var rect = dom.getBoundingClientRect()
+      //         var top = rect.top
+      //         var right = rect.right
+      //         var bottom = rect.bottom
+      //         var left = rect.left
+      //         var domHeight = dom.offsetHeight
+      //         var domWidth = dom.offsetWidth
+      //         var winHeight = document.documentElement.clientHeight
+      //         var winWidth = document.documentElement.clientWidth
+      //         dom.style.left = x - domWidth / 2 + 'px'
+      //         dom.style.top = y - domHeight - 15 + 'px'
+      //         if (bottom > winHeight) {
+      //           // 超出底部时重新定位
+      //           dom.style.top = y - domHeight + 'px'
+      //         }
+      //         if (right > winWidth) {
+      //           // 超出右边时重新定位
+      //           dom.style.left = x - domWidth + 'px'
+      //         }
+      //       } else {
+      //         // airportArrTips([], x, y, prov)
+      //       }
+      //     }, 0)
+      //   }
+      // })
+      // this.chart.dispatchAction({
+      //   type: 'highlight',
+      //   // // 可选，系列 index，可以是一个数组指定多个系列
+      //   seriesIndex: 0,
+      //   dataIndex: 0,
+      //   // // 可选，系列名称，可以是一个数组指定多个系列
+      //   // // seriesName: string|Array,
+      //   // // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
+      //   // // dataIndex: number,
+      //   // // 可选，数据名称，在有 dataIndex 的时候忽略
+      //   name: '云南'
+      // })
 
-              // 渲染出来的tips位置如果底部超过浏览器底部,重新定位
-              var dom = document.querySelector('.map-tips')
-              var rect = dom.getBoundingClientRect()
-              var top = rect.top
-              var right = rect.right
-              var bottom = rect.bottom
-              var left = rect.left
-              var domHeight = dom.offsetHeight
-              var domWidth = dom.offsetWidth
-              var winHeight = document.documentElement.clientHeight
-              var winWidth = document.documentElement.clientWidth
-              dom.style.left = x - domWidth / 2 + 'px'
-              dom.style.top = y - domHeight - 15 + 'px'
-              if (bottom > winHeight) {
-                // 超出底部时重新定位
-                dom.style.top = y - domHeight + 'px'
-              }
-              if (right > winWidth) {
-                // 超出右边时重新定位
-                dom.style.left = x - domWidth + 'px'
-              }
-            } else {
-              // airportArrTips([], x, y, prov)
-            }
-          }, 0)
-        }
-      })
       this.chart.dispatchAction({
-        type: 'mapSelect',
-        // 可选，系列 index，可以是一个数组指定多个系列
-        // seriesIndex: 0,
-        // 可选，系列名称，可以是一个数组指定多个系列
-        // seriesName: string|Array,
-        // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-        // dataIndex: number,
-        // 可选，数据名称，在有 dataIndex 的时候忽略
-        name: '云南'
+        type: 'showTip', // 默认显示江苏的提示框
+        seriesIndex: 0, // 这行不能省
+        dataIndex: 0
       })
     }
   }
 }
 </script>
-<style lang="scss" scoped>
+<style lang="scss" >
 .map-wrap {
   height: 100%;
 }
 .map-tips {
-  position: absolute;
+  // position: absolute;
   z-index: 100;
-  background: rgba(29, 29, 29, 0.8);
+  // background: rgba(29, 29, 29, 0.8);
   width: 310px;
   height: 156px;
   padding: 14px;
@@ -311,6 +355,10 @@ export default {
   // max-height: 400px;
   // overflow: auto;
   z-index: 300;
+  & + div {
+    // display: none;
+    background: rgba(0, 0, 0, 0);
+  }
   .map-tips-title {
     color: #fff;
     font-size: 16px;

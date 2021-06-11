@@ -16,7 +16,7 @@
         <div class="item left">
           <div class="chart-box">
             <div class="chart-box-tool">
-              <div class="chart-box-title tj">分区点位状态统计</div>
+              <div class="chart-box-title tj">{{ company }}分区点位状态统计</div>
               <bar-chart-row
                 v-for="(item,i) in list"
                 :id="'bar_row' + i"
@@ -32,7 +32,7 @@
 
         </div>
         <div class="item-map">
-          <map-chart />
+          <map-chart @seletName="selectCompany" />
 
         </div>
         <div class="item center">
@@ -95,6 +95,7 @@ export default {
 
   data() {
     return {
+      company: '',
       list: [
         {
           factory: '电解铝二厂',
@@ -170,7 +171,11 @@ export default {
     // screenSize(this.$refs.editor)
   },
   destroyed() {},
-  methods: {}
+  methods: {
+    selectCompany(name) {
+      this.company = name
+    }
+  }
 }
 </script>
 <style lang="scss" scoped>
