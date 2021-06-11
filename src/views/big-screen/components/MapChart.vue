@@ -60,10 +60,18 @@ export default {
     }
   },
   created() {
-    window.selectCompany = this.selectCompany
+    window.selectCompany = this.selectCompany // 为了vue中使用此方法
   },
   mounted() {
     this.initChart()
+    setTimeout(() => {
+      this.chart.dispatchAction({
+        type: 'geoselected',
+        // 系列 ID，可以在 option 中传入
+        seriesId: '001'
+        // 数据名称
+      })
+    }, 500)
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -92,10 +100,9 @@ export default {
         // backgroundColor: '#363739',
         center: [110.712251, 23.040609],
         tooltip: {
-          padding: 0,
           enterable: true,
           transitionDuration: 1,
-          // trigger: 'item',
+          trigger: 'item',
           backgroundColor: 'rgba(29, 29, 29, 0.8)',
           padding: 0,
           borderWidth: 0,
@@ -221,16 +228,16 @@ export default {
                   areaColor: 'rgba(24, 186, 215, .2)',
                   borderColor: '#18BAD7'
                 }
+              },
+              tooltip: {
+                show: true
               }
-              // tooltip: {
-              //   show: true,
-              //   position: ['50%', '50%']
-              // }
             }
           ]
         },
         series: [
           {
+            id: '001',
             type: 'effectScatter',
             coordinateSystem: 'geo',
             showEffectOn: 'render',
@@ -261,13 +268,27 @@ export default {
             },
             symbolSize: 8,
 
+            // data: [
+            //   {
+            //     name: '昆明',
+            //     value: [102.712251, 23.040609],
+
+            //     visualMap: false
+            //   }
+            // ]
             data: [
               {
-                selected: true,
-                name: '昆明',
-                value: [102.712251, 23.040609],
-
-                visualMap: false
+                // value: [8920,123,456],//如果有更多数据可以这样存放，然后用params.data.value[i]获取
+                value: 8920,
+                name: '江苏'
+              },
+              {
+                value: 8588,
+                name: '浙江'
+              },
+              {
+                value: 8215,
+                name: '四川'
               }
             ]
           }
@@ -330,11 +351,11 @@ export default {
       //   name: '云南'
       // })
 
-      this.chart.dispatchAction({
-        type: 'showTip', // 默认显示江苏的提示框
-        seriesIndex: 0, // 这行不能省
-        dataIndex: 0
-      })
+      // this.chart.dispatchAction({
+      //   type: 'showTip', // 默认显示江苏的提示框
+      //   seriesIndex: 0, // 这行不能省
+      //   dataIndex: 0
+      // })
     }
   }
 }
@@ -355,10 +376,7 @@ export default {
   // max-height: 400px;
   // overflow: auto;
   z-index: 300;
-  & + div {
-    // display: none;
-    background: rgba(0, 0, 0, 0);
-  }
+
   .map-tips-title {
     color: #fff;
     font-size: 16px;

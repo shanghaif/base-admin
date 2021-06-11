@@ -185,6 +185,7 @@ $top-Height: 10vh;
   // position: absolute;
   // left: 0;
   // top: 0;
+  position: relative;
   width: 100%;
   height: 100%;
   // .wrap {
@@ -200,6 +201,23 @@ $top-Height: 10vh;
   //   background-color: rgb(0, 0, 0);
   //   overflow: auto;
   // }
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    width: 400px;
+    height: 100%;
+    z-index: 100;
+  }
+  &::before {
+    left: 0;
+    background: linear-gradient(left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  }
+  &::after {
+    right: 0;
+    background: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+  }
   .top {
     position: absolute;
     top: 0;
