@@ -145,6 +145,86 @@ export const constantRoutes = [
         }
       }
     ]
+  },
+  {
+    path: '/z_device',
+    component: Layout,
+    redirect: '/z_device/gateway',
+    name: 'Z_device',
+    meta: {
+      title: '设备管理',
+      icon: 'table',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      {
+        path: '/z_device/gateway',
+        component: () => import('@/views/z_device/gateway'),
+        name: 'Gateway',
+        meta: { title: '网关管理', roles: ['admin', 'editor'] }
+      },
+      {
+        path: '/z_device/point',
+        component: () => import('@/views/z_device/point'),
+        name: 'Point',
+        meta: { title: '测温点位管理', roles: ['admin', 'editor'] }
+      }
+    ]
+  },
+  {
+    path: '/z_data',
+    component: Layout,
+    children: [
+      {
+        path: 'z_data',
+        component: () => import('@/views/z_data/index'),
+        name: 'Data',
+        meta: { title: '数据管理', icon: 'chart' }
+      }
+    ]
+  },
+  {
+    path: '/z_cell',
+    component: Layout,
+    children: [
+      {
+        path: 'z_cell',
+        component: () => import('@/views/z_cell/demo'),
+        name: 'Cell',
+        meta: { title: '电解槽', icon: 'chart' }
+      }
+    ]
+  },
+  {
+    path: '/z_alert',
+    component: Layout,
+    redirect: '/z_alert/info',
+    name: 'Z_alert',
+    meta: {
+      title: '告警管理',
+      icon: 'el-icon-message-solid',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      // {
+      //   path: '/z_alert/info',
+      //   component: () => import('@/views/z_device/gateway'),
+      //   name: 'Info',
+      //   meta: { title: '告警汇总', roles: ['admin', 'editor'] }
+      // },
+      {
+        path: '/z_alert/log',
+        component: () => import('@/views/z_alert/log'),
+        name: 'Log',
+        meta: { title: '告警日志', roles: ['admin', 'editor'] }
+      },
+      {
+        path: '/z_alert/push',
+        component: () => import('@/views/z_alert/push'),
+        name: 'Push',
+        meta: { title: '推送设置', roles: ['admin', 'editor'] }
+      }
+    ]
   }
    
 ]
