@@ -559,7 +559,7 @@ $top-Height: 10vh;
       left: 0;
       top: 0;
       width: 100%;
-      height: 68%;
+      height: calc(100% - 300px);
       @include flex(space-between, center);
       padding-top: 30px;
       .detail-item {
@@ -619,10 +619,12 @@ $top-Height: 10vh;
 
           .right-bar-box {
             width: 100%;
-            height: 484px;
+            // height: 484px;
+            flex: 1;
 
             background: rgba(255, 255, 255, 0.04);
             padding: 20px;
+            overflow: auto;
             .right-bar-items {
               .right-bar-item {
                 @include flex(space-between, flex-start);
@@ -630,9 +632,11 @@ $top-Height: 10vh;
                 padding: 15px;
                 margin-bottom: 10px;
                 background: rgba(255, 255, 255, 0.05);
-                height: 84px;
+                // height: 84px;
+                height: 16%;
                 &:first-child {
-                  height: 68px;
+                  // height: 68px;
+                  height: 14%;
                 }
                 &.hight {
                   .bar-item-content {

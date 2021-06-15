@@ -136,7 +136,7 @@ export default {
 <style lang="scss" scoped>
 .unusual-wrap {
   width: 100%;
-
+  height: 70%;
   .tabs {
     margin-top: 15px;
     margin-bottom: 10px;
@@ -158,7 +158,7 @@ export default {
     }
   }
   .unusual-list {
-    height: 45vh;
+    height: 50vh;
     .unusual-list-item {
       display: flex;
       justify-content: space-between;

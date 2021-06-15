@@ -41,10 +41,8 @@
         </div>
         <div class="item right">
           <unusual-list id="UnusualList" />
-          <single-line-chart
-            id="line_r"
-            style="margin-top:50px"
-          />
+
+          <single-line-chart id="line_r" />
 
         </div>
       </div>
@@ -212,12 +210,13 @@ $top-Height: 10vh;
   }
   &::before {
     left: 0;
-    background: linear-gradient(left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+    background: linear-gradient(to right, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
   }
   &::after {
     right: 0;
     background: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
   }
+
   .top {
     position: absolute;
     top: 0;
@@ -247,8 +246,10 @@ $top-Height: 10vh;
   .content {
     width: 92%;
     height: 100vh;
+    padding-bottom: 2vh;
     margin: 0 auto;
     position: relative;
+    overflow: hidden;
     .item-map {
       height: 100%;
     }
@@ -263,27 +264,31 @@ $top-Height: 10vh;
       z-index: 200;
       &.left {
         left: 0;
-        top: 60px;
+        top: 4%;
         width: 400px;
         // background: linear-gradient(
         //   0deg,
         //   rgba(0, 0, 0, 0.1),
         //   rgba(0, 0, 0, 0.5)
         // );
-        height: calc(100% - 60px);
+        height: 96%;
         .chart-box {
-          height: calc(100% - 300px);
+          height: 70%;
+          // overflow: auto;
+          .chart-box-tool {
+            height: 100%;
+          }
         }
         .line_l {
-          height: 250px;
+          height: 30%;
         }
       }
       &.right {
         right: 0;
-        top: 60px;
+        top: 4%;
 
         width: 400px;
-        height: calc(100% - 60px);
+        height: 96%;
       }
       &.center {
         height: 300px;

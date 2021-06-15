@@ -10,13 +10,13 @@
       </div>
       <div class="hart-box-describe-right">
         <div class="temperature cur-tem">
-          <span>测温槽总数</span>
+          <span>电解槽</span>
           <span class="tem-val num">{{ data.cells }}</span>
         </div>
       </div>
       <div class="hart-box-describe-right">
         <div class="temperature cur-tem">
-          <span>测温点位总数</span>
+          <span>点位</span>
           <span class="tem-val num">{{ data.cells }} x {{ data.point }}</span>
         </div>
       </div>
@@ -58,7 +58,7 @@ export default {
     },
     height: {
       type: String,
-      default: '140px'
+      default: '80%'
     }
   },
   data() {
@@ -249,6 +249,7 @@ export default {
 <style lang="scss" scoped>
 .row-bar {
   position: relative;
+  height: 28%;
   &::after {
     content: '';
     position: absolute;

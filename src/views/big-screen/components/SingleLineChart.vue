@@ -1,5 +1,5 @@
 <template>
-  <div class="chart-box">
+  <div class="wrap">
 
     <div class="chart-box-tool">
       <div class="chart-box-title">异常点位温度曲线</div>
@@ -52,7 +52,7 @@ export default {
     },
     height: {
       type: String,
-      default: '200px'
+      default: '70%'
     }
   },
   data() {
@@ -122,10 +122,10 @@ export default {
           }
         },
         grid: {
-          top: '20%',
+          top: '10%',
           left: '0%',
           right: '5%',
-          bottom: '10%',
+          bottom: '15%',
           containLabel: true
         },
         visualMap: [
@@ -296,4 +296,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.wrap {
+  height: 30%;
+}
 </style>
