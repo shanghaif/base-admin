@@ -119,11 +119,26 @@ export default {
     flex-wrap: wrap;
     margin-top: 40px;
     .cell {
+      position: relative;
       width: 25%;
       @include flex(center, flex-start);
       flex-direction: column;
 
       margin-bottom: 20px;
+      &:not(:nth-child(4n-3)) {
+        &::before {
+          position: absolute;
+          left: -25px;
+          top: 50%;
+          transform: translateY(-45%);
+          content: '';
+          height: 75%;
+          width: 1px;
+          background: $selfColor;
+          opacity: 0.3;
+        }
+      }
+
       .num {
         font-size: 44px;
         color: #fff;

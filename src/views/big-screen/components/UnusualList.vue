@@ -15,7 +15,14 @@
 
     </div>
     <el-scrollbar wrap-class="scrollbar-wrapper">
-      <div class="unusual-list">
+      <!-- <ul class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
+        <li v-for="i in count" class="infinite-list-item">{{ i }}</li>
+      </ul> -->
+      <div
+        v-infinite-scroll="load"
+        class="unusual-list"
+        :infinite-scroll-delay="200"
+      >
         <div
           v-for="(item,i) in list"
           :key="i + 'b'"
@@ -123,6 +130,10 @@ export default {
   watch: {},
 
   methods: {
+    load(val) {
+      // this.list.push({})
+      console.log('1 :>> ', 1)
+    },
     choose(val) {
       this.activeTab = val
     },

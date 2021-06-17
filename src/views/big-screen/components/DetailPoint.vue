@@ -146,9 +146,10 @@ export default {
   computed: {
     cellWidth() {
       const num = 100 / this.list[0].arr.length
+      const pct = num.toFixed(2) + '%'
       return {
-        '--width': `calc(100% / ${num})`
-        // '--width': `54px`
+        // '--width': `calc(100% / ${num})`
+        '--width': pct
       }
     }
   },

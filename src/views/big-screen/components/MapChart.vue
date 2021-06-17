@@ -232,6 +232,23 @@ export default {
               tooltip: {
                 show: true
               }
+            },
+            {
+              name: '湖北',
+              selected: true,
+              select: {
+                label: {
+                  show: false,
+                  color: '#fff'
+                },
+                itemStyle: {
+                  areaColor: 'rgba(24, 186, 215, .2)',
+                  borderColor: '#18BAD7'
+                }
+              },
+              tooltip: {
+                show: true
+              }
             }
           ]
         },
@@ -268,27 +285,12 @@ export default {
             },
             symbolSize: 8,
 
-            // data: [
-            //   {
-            //     name: '昆明',
-            //     value: [102.712251, 23.040609],
-
-            //     visualMap: false
-            //   }
-            // ]
             data: [
               {
-                // value: [8920,123,456],//如果有更多数据可以这样存放，然后用params.data.value[i]获取
-                value: 8920,
-                name: '江苏'
-              },
-              {
-                value: 8588,
-                name: '浙江'
-              },
-              {
-                value: 8215,
-                name: '四川'
+                name: '昆明',
+                value: [102.712251, 23.040609],
+
+                visualMap: false
               }
             ]
           }
