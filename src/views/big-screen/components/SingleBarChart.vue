@@ -108,7 +108,7 @@ export default {
               textStyle: {
                 fontSize: 12
               },
-              formatter: function(val) {
+              formatter: function (val) {
                 let arr
                 let str = ''
                 if (val) {
@@ -166,7 +166,6 @@ export default {
             data: [40, 100, 40, 40, 90, 120, 40, 120],
             barWidth: '14px',
             // itemStyle: {
-            //   normal: {
             //     color: function(params) {
             //       // const colorArr = params.value > 0 ? ['#FF9A22', '#FFD56E'] : ['#FFD56E', '#FF9A22']
             //       const colorArr = params.value > 0 ? ['#f53012', '#d6560b'] : ['#f53012', '#d6560b']
@@ -179,26 +178,21 @@ export default {
             //       }], true)
             //     },
             //     barBorderRadius: [30, 30, 0, 0]
-            //   }
             // },
             itemStyle: {
-              normal: {
-                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                  { offset: 0, color: '#f53012' }, // 柱图渐变色
-                  // {offset: 0.5, color: '#44C0C1'},                 //柱图渐变色
-                  { offset: 1, color: '#d6560b' } // 柱图渐变色
-                ]),
-                barBorderRadius: [30, 30, 0, 0]
-              }
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#f53012' }, // 柱图渐变色
+                // {offset: 0.5, color: '#44C0C1'},                 //柱图渐变色
+                { offset: 1, color: '#d6560b' } // 柱图渐变色
+              ]),
+              barBorderRadius: [30, 30, 0, 0]
             },
             label: {
-              normal: {
-                show: true,
-                fontSize: 12,
-                fontWeight: 'bold',
-                color: '#f53012',
-                position: 'top'
-              }
+              show: true,
+              fontSize: 12,
+              fontWeight: 'bold',
+              color: '#f53012',
+              position: 'top'
             }
           },
           {

@@ -117,9 +117,7 @@ export default {
         {
           name: '南海诸岛',
           itemStyle: {
-            normal: {
-              opacity: 0
-            }
+            opacity: 0
           },
           label: {
             show: false
@@ -239,12 +237,11 @@ export default {
           },
 
           itemStyle: {
-            normal: {
-              borderColor: '#666',
-              borderWidth: 0.5,
-              color: 'rgba(0,0,0,0)',
-              areaColor: '#363739',
-              /*   "areaColor": {
+            borderColor: '#666',
+            borderWidth: 0.5,
+            color: 'rgba(0,0,0,0)',
+            areaColor: '#363739',
+            /*   "areaColor": {
           "type": "radial",
           "x": 0.5,
           "y": 0.5,
@@ -261,11 +258,10 @@ export default {
           ],
           "global": false
         }, */
-              // "shadowColor": "rgba(19,198,249,1)",
-              shadowOffsetX: 0,
-              shadowOffsetY: 0
-              // "shadowBlur": 10
-            },
+            // "shadowColor": "rgba(19,198,249,1)",
+            shadowOffsetX: 0,
+            shadowOffsetY: 0,
+            // "shadowBlur": 10
             emphasis: {
               areaColor: 'rgba(24, 186, 215, .2)',
               borderColor: '#18BAD7'
@@ -293,20 +289,16 @@ export default {
             },
             hoverAnimation: true,
             label: {
-              normal: {
-                formatter: '{b}',
-                position: 'bottom',
-                offset: [0, 10],
-                color: '#fff',
-                show: true
-              }
+              formatter: '{b}',
+              position: 'bottom',
+              offset: [0, 10],
+              color: '#fff',
+              show: true
             },
             itemStyle: {
-              normal: {
-                color: '#18BAD7',
-                shadowBlur: 10,
-                shadowColor: '#333'
-              }
+              color: '#18BAD7',
+              shadowBlur: 10,
+              shadowColor: '#333'
             },
             symbolSize: 8,
 

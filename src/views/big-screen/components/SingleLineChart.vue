@@ -140,9 +140,7 @@ export default {
         ],
         calculable: true,
         lineStyle: {
-          normal: {
-            width: 1
-          }
+          width: 1
         },
 
         xAxis: {
@@ -202,27 +200,25 @@ export default {
               opacity: 0
             },
             areaStyle: {
-              normal: {
-                color: new echarts.graphic.LinearGradient(
-                  0,
-                  0,
-                  0,
-                  1,
-                  [
-                    {
-                      offset: 0,
-                      color: 'rgba(6, 125, 194, 0.2)'
-                    },
-                    {
-                      offset: 0.8,
-                      color: 'rgba(24, 186, 215, 0.2)'
-                    }
-                  ],
-                  false
-                ),
-                shadowColor: 'rgba(0, 0, 0, 0.1)',
-                shadowBlur: 10
-              }
+              color: new echarts.graphic.LinearGradient(
+                0,
+                0,
+                0,
+                1,
+                [
+                  {
+                    offset: 0,
+                    color: 'rgba(6, 125, 194, 0.2)'
+                  },
+                  {
+                    offset: 0.8,
+                    color: 'rgba(24, 186, 215, 0.2)'
+                  }
+                ],
+                false
+              ),
+              shadowColor: 'rgba(0, 0, 0, 0.1)',
+              shadowBlur: 10
             },
             data: this.xData,
             smooth: true,
@@ -230,7 +226,7 @@ export default {
             markLine: {
               symbol: 'none',
               silent: true,
-              lineStyle: { normal: { type: 'solid' } },
+              lineStyle: { type: 'solid' },
               label: { position: 'start' },
               data: [
                 {
