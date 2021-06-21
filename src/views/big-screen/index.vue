@@ -16,13 +16,14 @@
         <div class="item left">
           <div class="chart-box">
             <div class="chart-box-tool">
-              <div class="chart-box-title tj">{{ company }}分区点位状态统计</div>
+              <div class="chart-box-title tj">{{ currentFactory.s_name }}分区点位状态统计</div>
               <bar-chart-row
                 v-for="(item,i) in list"
                 :id="'bar_row' + i"
-                :key="i + 'bar_row'"
+                :key="i + 'bar_row' + rowKey"
                 :data="item"
               />
+              <!-- <bar-chart-row :list="list" /> -->
             </div>
           </div>
           <div class="line_l">
@@ -32,7 +33,11 @@
 
         </div>
         <div class="item-map">
-          <map-chart @seletName="selectCompany" />
+          <map-chart
+            :company-list="companyList"
+            :factory-list="factoryList"
+            @seletName="selectFactory"
+          />
 
         </div>
         <div class="item center">
@@ -52,6 +57,7 @@
 
  
 <script>
+import { mapState, mapActions, mapMutations } from 'vuex'
 import MapChart from './components/MapChart'
 import SingleBarChart from './components/SingleBarChart'
 import SingleLineChart from './components/SingleLineChart'
@@ -60,6 +66,7 @@ import SheetMain from './components/SheetMain'
 import UnusualList from './components/UnusualList'
 import Header from './components/Header'
 import { screenSize } from '@/utils'
+import { company, factory, area, cell, device } from '@/api/station'
 
 function createData(len) {
   const arr = []
@@ -94,6 +101,12 @@ export default {
   data() {
     return {
       company: '',
+      rowKey: 0,
+      companyList: [],
+      factoryList: [],
+      areaList: [],
+      cellList: [],
+      deviceList: [],
       list: [
         {
           factory: '电解铝二厂',
@@ -135,43 +148,148 @@ export default {
     }
   },
   computed: {
-    legendData() {
-      const arr = []
-      this.list[0].child.forEach((v) => {
-        arr.push(v.name)
-      })
-      return arr
-    },
-    data1() {
-      const arr = []
-      this.list[0].child.forEach((v) => {
-        arr.push(v.num)
-      })
-      return arr
-    },
-    data2() {
-      const arr = []
-      this.list[1].child.forEach((v) => {
-        arr.push(v.num)
-      })
-      return arr
-    },
-    data3() {
-      const arr = []
-      this.list[2].child.forEach((v) => {
-        arr.push(v.num)
-      })
-      return arr
-    }
+    ...mapState({
+      currentFactory: (state) => state.station.currentFactory
+    })
   },
-  created() {},
+  created() {
+    this.init()
+  },
   mounted() {
     // screenSize(this.$refs.editor)
   },
   destroyed() {},
   methods: {
-    selectCompany(name) {
-      this.company = name
+    // ...mapActions({
+    //   getCompany: 'station/getCompany',
+    //   getFactory: 'station/getFactory',
+    //   getArea: 'station/getArea',
+    //   getDevice: 'station/getDevice'
+    // }),
+    ...mapMutations({
+      SET_FACTORY: 'station/SET_FACTORY'
+    }),
+    init() {
+      this.query()
+    },
+    // 公司查询
+    async query() {
+      // 分公司
+      const companyResult = await company()
+      this.companyList = companyResult.data.result.stations
+      // 工厂
+      const id_company = this.companyList[0].uid
+      const factoryResult = await factory(id_company)
+      this.factoryList = factoryResult.data.result.stations
+
+      this.SET_FACTORY(this.factoryList[0])
+      // 分区
+      const id_factory = this.currentFactory.uid
+      const areaResult = await area(id_factory)
+      this.areaList = areaResult.data.result.stations
+      // 电解槽
+      const id_area = this.factoryList[0].uid
+      const cellResult = await cell(id_area)
+      this.cellList = cellResult.data.result.stations
+      // 设备
+      const id_cell = this.factoryList[0].uid
+      const deviceResult = await device(id_cell)
+      this.deviceList = deviceResult.data.result.stations
+    },
+
+    selectFactory(item) {
+      this.company = item.s_name
+      this.SET_FACTORY(item)
+
+      if (item.s_name === '电解铝二厂') {
+        this.list = [
+          {
+            factory: '电解铝二厂',
+            area: '2分区',
+            cells: 55,
+            point: 168,
+            child: [
+              { name: '异常点位', num: 111 },
+              { name: '趋势告警', num: 7 },
+              { name: '温度告警', num: 32 },
+              { name: '离线点位', num: 412 }
+            ]
+          },
+          {
+            factory: '电解铝二厂',
+            area: '2分区',
+            cells: 48,
+            point: 168,
+            child: [
+              { name: '异常点位', num: 3 },
+              { name: '趋势告警', num: 9 },
+              { name: '温度告警', num: 28 },
+              { name: '离线点位', num: 273 }
+            ]
+          },
+          {
+            factory: '电解铝二厂',
+            area: '2分区',
+            cells: 50,
+            point: 168,
+            child: [
+              { name: '异常点位', num: 10 },
+              { name: '趋势告警', num: 6 },
+              { name: '温度告警', num: 45 },
+              { name: '离线点位', num: 23 }
+            ]
+          }
+        ]
+      } else if (item.s_name === '电解铝一厂') {
+        this.list = [
+          {
+            factory: '电解铝二厂',
+            area: '1分区',
+            cells: 55,
+            point: 168,
+            child: [
+              { name: '异常点位', num: 222 },
+              { name: '趋势告警', num: 7 },
+              { name: '温度告警', num: 32 },
+              { name: '离线点位', num: 412 }
+            ]
+          },
+          {
+            factory: '电解铝二厂',
+            area: '2分区',
+            cells: 48,
+            point: 168,
+            child: [
+              { name: '异常点位', num: 3 },
+              { name: '趋势告警', num: 9 },
+              { name: '温度告警', num: 28 },
+              { name: '离线点位', num: 273 }
+            ]
+          },
+          {
+            factory: '电解铝二厂',
+            area: '3分区',
+            cells: 50,
+            point: 168,
+            child: [
+              { name: '异常点位', num: 10 },
+              { name: '趋势告警', num: 6 },
+              { name: '温度告警', num: 45 },
+              { name: '离线点位', num: 23 }
+            ]
+          }
+        ]
+      }
+      this.rowKey++
+    },
+    createBarList() {
+      const arr = []
+      this.factoryList.forEach((v, i) => {
+        const obj = {}
+        obj.factory = this.currentFactory.s_name
+
+        this.areaList.forEach((v, i) => {})
+      })
     }
   }
 }

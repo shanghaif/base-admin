@@ -10,6 +10,8 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapMutations } from 'vuex'
+
 import * as echarts from 'echarts/core'
 import resize from './mixins/resize'
 import '@/assets/china'
@@ -43,14 +45,27 @@ export default {
     height: {
       type: String,
       default: '100%'
+    },
+    companyList: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
+    factoryList: {
+      type: Array,
+      default() {
+        return []
+      }
     }
   },
   data() {
     return {
       chart: null,
-      companyName: '电解铝一厂',
+      // factoryName: '电解铝一厂',
 
       geoCoordMap: {},
+      getRegions: [],
       compList: [
         { name: '电解铝一厂' },
         { name: '电解铝二厂' },
@@ -59,19 +74,34 @@ export default {
       ]
     }
   },
+  computed: {
+    // ...mapState({
+    //   companyList: (state) => state.station.companyList
+    // })
+    // companyList() {
+    //   return this.companyList
+    // }
+    ...mapState({
+      currentFactory: (state) => state.station.currentFactory
+    }),
+    factoryName() {
+      return this.currentFactory.s_name
+    }
+  },
+  watch: {
+    companyList: {
+      handler(newName, oldName) {
+        this.initChart()
+      },
+      immediate: false,
+      deep: true
+    }
+  },
   created() {
-    window.selectCompany = this.selectCompany // 为了vue中使用此方法
+    window.selectFactory = this.selectFactory // 为了vue中使用此方法
   },
   mounted() {
-    this.initChart()
-    setTimeout(() => {
-      this.chart.dispatchAction({
-        type: 'geoselected',
-        // 系列 ID，可以在 option 中传入
-        seriesId: '001'
-        // 数据名称
-      })
-    }, 500)
+    this.companyList.length > 0 && this.initChart()
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -80,22 +110,62 @@ export default {
     this.chart.dispose()
     this.chart = null
   },
+
   methods: {
-    selectCompany(e, name) {
+    createRegions(list) {
+      const arr = [
+        {
+          name: '南海诸岛',
+          itemStyle: {
+            normal: {
+              opacity: 0
+            }
+          },
+          label: {
+            show: false
+          }
+        }
+      ]
+      list.forEach((v, i) => {
+        // const name = v.s_name
+        const name = '云南'
+        const obj = {
+          name,
+          selected: true,
+          select: {
+            label: {
+              show: false,
+              color: '#fff'
+            },
+            itemStyle: {
+              areaColor: 'rgba(24, 186, 215, .2)',
+              borderColor: '#18BAD7'
+            }
+          },
+          tooltip: {
+            show: true
+          }
+        }
+        arr.push(obj)
+      })
+      return arr
+    },
+    selectFactory(e, uid) {
       const other = document.querySelectorAll('.map-comp-name.active')
       if (other.length > 0) {
         other[0].classList.remove('active')
       }
       e.target.classList.add('active')
-
-      console.log('name :>> ', name)
-      this.companyName = name
-      this.$emit('seletName', name)
+      // 由于传入对象时出现bug,入参改为传入id,通过id匹配选中的工厂
+      const currentFactory = this.factoryList.find((v) => v.uid === uid)
+      // this.factoryName = currentFactory.s_name
+      this.$emit('seletName', currentFactory)
     },
     initChart() {
       // 初始化地图数据
       const that = this
       this.chart = echarts.init(document.getElementById(this.id))
+      const regions = this.createRegions(this.companyList)
       const option = {
         // backgroundColor: '#363739',
         center: [110.712251, 23.040609],
@@ -118,9 +188,9 @@ export default {
             let html = ''
             if (params.name === '云南') {
               let str = ''
-              that.compList.forEach((v, i) => {
-                const isActive = v.name === that.companyName ? 'active' : ''
-                str += `<div class="map-comp-name ${isActive}" onclick="selectCompany(event,'${v.name}')">${v.name}</div>`
+              that.factoryList.forEach((v, i) => {
+                const isActive = v.s_name === that.factoryName ? 'active' : ''
+                str += `<div class="map-comp-name ${isActive}" onclick="selectFactory(event,'${v.uid}')">${v.s_name}</div>`
               })
               html = `<div class="map-tips">
                  <div class="map-tips-title">云南分公司</div>
@@ -204,53 +274,8 @@ export default {
               // "borderWidth": 0
             }
           },
-          regions: [
-            {
-              name: '南海诸岛',
-              itemStyle: {
-                normal: {
-                  opacity: 0
-                }
-              },
-              label: {
-                show: false
-              }
-            },
-            {
-              name: '云南',
-              selected: true,
-              select: {
-                label: {
-                  show: false,
-                  color: '#fff'
-                },
-                itemStyle: {
-                  areaColor: 'rgba(24, 186, 215, .2)',
-                  borderColor: '#18BAD7'
-                }
-              },
-              tooltip: {
-                show: true
-              }
-            },
-            {
-              name: '湖北',
-              selected: true,
-              select: {
-                label: {
-                  show: false,
-                  color: '#fff'
-                },
-                itemStyle: {
-                  areaColor: 'rgba(24, 186, 215, .2)',
-                  borderColor: '#18BAD7'
-                }
-              },
-              tooltip: {
-                show: true
-              }
-            }
-          ]
+
+          regions
         },
         series: [
           {
@@ -296,68 +321,13 @@ export default {
           }
         ]
       }
-
       this.chart.setOption(option, true)
 
-      // this.chart.on('click', function (params) {
-      //   if (params.componentType === 'geo') {
-      //     console.log('params :>> ', params)
-      //     // 点击的是省份区域
-      //     setTimeout(function () {
-      //       var h = document.documentElement.clientHeight
-      //       var x = params.event.offsetX
-      //       var y = params.event.offsetY
-      //       var prov = params.name
-      //       var flag = true // 此省份有无机场
-      //       // arr = groupBy(XAData, 'ProvinceCName')[prov] // 点击的省份机场
-      //       if (flag) {
-      //         // airportArrTips(arr, x, y, prov)
-
-      //         // 渲染出来的tips位置如果底部超过浏览器底部,重新定位
-      //         var dom = document.querySelector('.map-tips')
-      //         var rect = dom.getBoundingClientRect()
-      //         var top = rect.top
-      //         var right = rect.right
-      //         var bottom = rect.bottom
-      //         var left = rect.left
-      //         var domHeight = dom.offsetHeight
-      //         var domWidth = dom.offsetWidth
-      //         var winHeight = document.documentElement.clientHeight
-      //         var winWidth = document.documentElement.clientWidth
-      //         dom.style.left = x - domWidth / 2 + 'px'
-      //         dom.style.top = y - domHeight - 15 + 'px'
-      //         if (bottom > winHeight) {
-      //           // 超出底部时重新定位
-      //           dom.style.top = y - domHeight + 'px'
-      //         }
-      //         if (right > winWidth) {
-      //           // 超出右边时重新定位
-      //           dom.style.left = x - domWidth + 'px'
-      //         }
-      //       } else {
-      //         // airportArrTips([], x, y, prov)
-      //       }
-      //     }, 0)
-      //   }
-      // })
-      // this.chart.dispatchAction({
-      //   type: 'highlight',
-      //   // // 可选，系列 index，可以是一个数组指定多个系列
-      //   seriesIndex: 0,
-      //   dataIndex: 0,
-      //   // // 可选，系列名称，可以是一个数组指定多个系列
-      //   // // seriesName: string|Array,
-      //   // // 数据的 index，如果不指定也可以通过 name 属性根据名称指定数据
-      //   // // dataIndex: number,
-      //   // // 可选，数据名称，在有 dataIndex 的时候忽略
-      //   name: '云南'
-      // })
-
-      // this.chart.dispatchAction({
-      //   type: 'showTip', // 默认显示江苏的提示框
-      //   seriesIndex: 0, // 这行不能省
-      //   dataIndex: 0
-      // })
+      this.chart.dispatchAction({
+        type: 'showTip', // 默认显示江苏的提示框
+        seriesIndex: 0, // 这行不能省
+        dataIndex: 0
+      })
     }
   }
 }

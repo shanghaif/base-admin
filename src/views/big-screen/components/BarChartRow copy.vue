@@ -30,8 +30,6 @@
   <!-- </div> -->
 </template>
 <script>
-import { mapState, mapActions, mapMutations } from 'vuex'
-
 import * as echarts from 'echarts/core'
 import resize from './mixins/resize'
 import groupBy from 'lodash/groupBy'
@@ -212,12 +210,14 @@ export default {
             barWidth: '10px',
 
             itemStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#f53012' }, // 柱图渐变色
-                // {offset: 0.5, color: '#44C0C1'},                 //柱图渐变色
-                { offset: 1, color: '#d6560b' } // 柱图渐变色
-              ]),
-              barBorderRadius: [30, 30, 30, 30]
+              normal: {
+                color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                  { offset: 0, color: '#f53012' }, // 柱图渐变色
+                  // {offset: 0.5, color: '#44C0C1'},                 //柱图渐变色
+                  { offset: 1, color: '#d6560b' } // 柱图渐变色
+                ]),
+                barBorderRadius: [30, 30, 30, 30]
+              }
             },
             emphasis: {
               itemStyle: {
@@ -229,11 +229,13 @@ export default {
               }
             },
             label: {
-              show: true,
-              fontSize: 12,
-              fontWeight: 'bold',
-              color: '#fff',
-              position: 'right'
+              normal: {
+                show: true,
+                fontSize: 12,
+                fontWeight: 'bold',
+                color: '#fff',
+                position: 'right'
+              }
             }
           }
         ]

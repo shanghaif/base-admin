@@ -1,6 +1,6 @@
 <template>
   <div class="sheet-main">
-    <div class="chart-box-title big">重庆分公司 电解铝二厂</div>
+    <div class="chart-box-title big">重庆分公司 {{ currentFactory.s_name }}</div>
     <div class="tip">
       <span class="time">告警信息汇总 2021年5月19日</span>
       <span class="link">告警信息日志 <i class="el-icon-arrow-right go-link" /></span>
@@ -22,6 +22,8 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapMutations } from 'vuex'
+
 export default {
   name: 'SheetMain',
   props: {
@@ -85,6 +87,9 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      currentFactory: (state) => state.station.currentFactory
+    }),
     totalPoint() {
       const sum = this.list3.reduce((pre, cur) => {
         return cur.cells * cur.point + pre

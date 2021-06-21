@@ -12,7 +12,10 @@
       </div>
       <div class="right-btns">
         <div class="btn"><i class="el-icon-refresh-right" /> 刷新</div>
-        <div class="btn"><i class="el-icon-upload" /> 导出</div>
+        <div
+          class="btn"
+          @click="exportChart"
+        ><i class="el-icon-upload" /> 导出</div>
       </div>
     </div>
     <div class="detail-chart-box">
@@ -31,6 +34,69 @@
         :style="{height:height,width:width}"
       />
     </div>
+    <el-dialog
+      title="导出"
+      :visible.sync="exportDialogVisible"
+      width="38%"
+      center
+    >
+      <div class="export-filter">
+        <div class="filter-items">
+          <div class="filter-item">
+            <div class="filter-item-label">
+              导出点位
+            </div>
+            <div class="filter-item-content">
+              <div class="content-crumbs">
+                <div class="content-crumb">xx分公司</div>
+                <div class="content-crumb">电解铝二厂</div>
+                <div class="content-crumb">一分区</div>
+                <div class="content-crumb">电解槽2008</div>
+                <div class="content-crumb">A17_RIGHT</div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-item">
+            <div class="filter-item-label">
+              时间范围
+            </div>
+            <div class="filter-item-content">
+              a
+            </div>
+          </div>
+          <div class="filter-item">
+            <div class="filter-item-label">
+              温度数据
+            </div>
+            <div class="filter-item-content">
+              <!-- <el-checkbox-group
+                v-model="checkedTemp"
+                @change="handleCheckedTempChange"
+              >
+                <el-checkbox
+                  v-for="city in Temps"
+                  :key="i + 'a'"
+                  :label="name"
+                >{{ city }}</el-checkbox>
+              </el-checkbox-group> -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          class="detail-ok-btn"
+          @click="exportDialogVisible = false"
+        >导出</el-button>
+        <el-button
+          class="detail-cancel-btn"
+          @click="exportDialogVisible = false"
+        >取消</el-button>
+      </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -41,6 +107,7 @@ import resize from './mixins/resize'
 
 export default {
   name: 'DetailLineChart',
+  components: {},
   mixins: [resize],
   props: {
     className: {
@@ -63,6 +130,8 @@ export default {
   data() {
     return {
       chart: null,
+      exportDialogVisible: false,
+
       option: null,
       timer: null,
       xData: [],
@@ -86,6 +155,9 @@ export default {
   },
   methods: {
     // 生成从minNum到maxNum的随机数
+    exportChart(Min, Max) {
+      this.exportDialogVisible = true
+    },
     randomNum(Min, Max) {
       var Range = Max - Min
       var Rand = Math.random()
@@ -302,6 +374,28 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.export-filter {
+  .filter-items {
+    .filter-item {
+      @include flex(flex-start, flex-start);
+      width: 100%;
+      .filter-item-label {
+        font-size: 16px;
+        line-height: 32px;
+        color: #fff;
+        width: 70px;
+      }
+      .filter-item-content {
+        flex: 1;
+        line-height: 32px;
+        margin-left: 25px;
+        .content-crumbs {
+          color: #525252;
+        }
+      }
+    }
+  }
+}
 .detail-chart {
   height: 80%;
   width: 100%;

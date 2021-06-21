@@ -1,11 +1,14 @@
 import request from '@/utils/request'
+// import { request } from '@/utils/request1'
 
 export function login(data) {
   return request({
-    url: '/login',
+    url: 'api/su/login',
     method: 'post',
     data
   })
+
+  // return request('su/login', 'post', data)
 }
 
 export function getInfo(token) {
@@ -22,3 +25,4 @@ export function logout() {
     method: 'post'
   })
 }
+ 

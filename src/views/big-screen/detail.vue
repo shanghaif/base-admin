@@ -217,6 +217,7 @@
         >取消</el-button>
       </span>
     </el-dialog>
+
   </div>
 </template>
 
@@ -281,7 +282,7 @@ export default {
 
   data() {
     return {
-      centerDialogVisible: true,
+      centerDialogVisible: false,
       baseTemperature: 1500,
       basePct: 50,
       currentCell: {},
