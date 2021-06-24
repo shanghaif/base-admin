@@ -69,16 +69,17 @@
               温度数据
             </div>
             <div class="filter-item-content">
-              <!-- <el-checkbox-group
+              <el-checkbox-group
                 v-model="checkedTemp"
                 @change="handleCheckedTempChange"
               >
                 <el-checkbox
-                  v-for="city in Temps"
-                  :key="i + 'a'"
-                  :label="name"
-                >{{ city }}</el-checkbox>
-              </el-checkbox-group> -->
+                  v-for="temp in Temps"
+                  :key="temp"
+                  :label="temp"
+                >{{ temp }}</el-checkbox>
+              </el-checkbox-group>
+
             </div>
           </div>
         </div>
@@ -135,6 +136,8 @@ export default {
       option: null,
       timer: null,
       xData: [],
+      checkedTemp: [],
+      Temps: ['原始温度数据', '最高温度', '最低温度', '平均温度'],
       now: 0,
       date: '',
       value: Math.random() * 100,
@@ -154,6 +157,7 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
+    handleCheckedTempChange(val) {},
     // 生成从minNum到maxNum的随机数
     exportChart(Min, Max) {
       this.exportDialogVisible = true

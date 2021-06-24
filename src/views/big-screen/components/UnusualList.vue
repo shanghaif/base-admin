@@ -14,51 +14,86 @@
       </div>
 
     </div>
-    <el-scrollbar wrap-class="scrollbar-wrapper">
+    <div class="unusual-list-box">
       <!-- <ul class="infinite-list" v-infinite-scroll="load" style="overflow:auto">
         <li v-for="i in count" class="infinite-list-item">{{ i }}</li>
       </ul> -->
       <div
         v-infinite-scroll="load"
         class="unusual-list"
-        :infinite-scroll-delay="200"
+        :infinite-scroll-delay="500"
+        :infinite-scroll-distance="0"
       >
         <div
           v-for="(item,i) in list"
           :key="i + 'b'"
           class="unusual-list-item"
-          :class="item.type"
-          @click="detail(item.id)"
+          :class="styleStatus(item.alarm_id)"
         >
           <div class="left">
-            <div>{{ item.area }} / {{ item.name }}</div>
-            <div class="reason">{{ item.reason }}</div>
+            <!-- <div>{{ item.area }} / {{ item.name }}</div> -->
+            <div>一分区 / 电解槽2000</div>
+            <div class="reason">{{ item.thing_name }}：{{ item.alarm_id | t_type }}</div>
           </div>
-          <div class="right">
-            {{ item.time }}
+          <div
+            class="right"
+            @click="detail(item.t_id)"
+          >
+            {{ $dayjs(item.time * 1000).format('YYYY.MM.DD HH:mm:ss') }}
             <i class="el-icon-arrow-right" />
           </div>
         </div>
 
       </div>
-    </el-scrollbar>
+      <div
+        v-show="loading"
+        class="b-text"
+      >加载中...</div>
+      <div
+        v-show="noMore"
+        class="b-text"
+      >没有更多了</div>
+    </div>
   </div>
 </template>
 
 <script>
+import { warningAll } from '@/api/station'
+
 export default {
   name: 'UnusualList',
-  props: {},
+  filters: {
+    t_type(val) {
+      let res = ''
+      if (val === 'temperature_high') {
+        res = '温度告警'
+      }
+      return res
+    }
+  },
+  props: {
+    // list: {
+    //   type: Array,
+    //   default() {
+    //     return []
+    //   }
+    // }
+  },
   data() {
     return {
       activeTab: 'now',
+      loading: false,
+      page: 1,
+      size: 8,
+      list: [],
+      noMoreList: [],
       tabList: [
         { text: '当前', type: 'now' },
         { text: '当日', type: 'day' },
         { text: '一周', type: 'week' },
         { text: '30天', type: 'month' }
       ],
-      list: [
+      list1: [
         {
           id: '10000',
           type: 'error',
@@ -126,19 +161,44 @@ export default {
       ]
     }
   },
-  computed: {},
+  computed: {
+    noMore() {
+      return this.noMoreList.length < this.size
+    }
+  },
   watch: {},
+  created() {
+    this.queryWarning()
+  },
 
   methods: {
     load(val) {
-      // this.list.push({})
-      console.log('1 :>> ', 1)
+      if (!this.noMore) {
+        // this.list.push({})
+        this.page++
+        console.log('1 :>> ', 1)
+        this.queryWarning()
+      }
+    },
+    styleStatus(val) {
+      const obj = {}
+      obj.hot = val === 'temperature_high'
+      obj.error = val === 'a'
+      obj.warning = val === 'b'
+      return obj
     },
     choose(val) {
       this.activeTab = val
     },
     detail(id) {
       this.$router.push({ path: '/big-screen/detail', query: { cell_id: id } })
+    },
+    async queryWarning() {
+      this.loading = true
+      const res = await warningAll(this.page)
+      this.noMoreList = res.data.result
+      this.list = [...this.list, ...this.noMoreList]
+      this.loading = false
     }
   }
 }
@@ -168,8 +228,17 @@ export default {
       }
     }
   }
+  .b-text {
+    color: #999;
+    text-align: center;
+    padding: 10px 0;
+  }
+  .unusual-list-box {
+    height: 45vh;
+    overflow: auto;
+    padding-bottom: 3px;
+  }
   .unusual-list {
-    height: 50vh;
     .unusual-list-item {
       display: flex;
       justify-content: space-between;
@@ -186,6 +255,9 @@ export default {
       );
       // cursor: pointer;
       cursor: default;
+      &:last-child {
+        margin-bottom: 0;
+      }
       &.error,
       &.hot {
         background: linear-gradient(

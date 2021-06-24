@@ -158,6 +158,12 @@ export const constantRoutes = [
     },
     children: [
       {
+        path: '/z_device/add-things',
+        component: () => import('@/views/add-things/index'),
+        name: 'AddThings',
+        meta: { title: '新建物模型', roles: ['admin', 'editor'] }
+      },
+      {
         path: '/z_device/gateway',
         component: () => import('@/views/z_device/gateway'),
         name: 'Gateway',
@@ -183,18 +189,7 @@ export const constantRoutes = [
       }
     ]
   },
-  {
-    path: '/z_cell',
-    component: Layout,
-    children: [
-      {
-        path: 'z_cell',
-        component: () => import('@/views/z_cell/demo'),
-        name: 'Cell',
-        meta: { title: '电解槽', icon: 'chart' }
-      }
-    ]
-  },
+  
   {
     path: '/z_alert',
     component: Layout,

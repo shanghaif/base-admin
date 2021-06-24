@@ -216,11 +216,12 @@ export default {
         },
         geo: {
           map: 'china',
-          roam: true,
+          // roam: true,
           scaleLimit: {
             min: 1,
             max: 2
           },
+
           zoom: 1.5,
           label: {
             show: false,
@@ -314,12 +315,6 @@ export default {
         ]
       }
       this.chart.setOption(option, true)
-
-      this.chart.dispatchAction({
-        type: 'showTip', // 默认显示江苏的提示框
-        seriesIndex: 0, // 这行不能省
-        dataIndex: 0
-      })
     }
   }
 }

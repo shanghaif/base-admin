@@ -67,6 +67,7 @@ import UnusualList from './components/UnusualList'
 import Header from './components/Header'
 import { screenSize } from '@/utils'
 import { company, factory, area, cell, device } from '@/api/station'
+import { getCell, setCell, removeCell } from '@/utils/auth'
 
 function createData(len) {
   const arr = []
@@ -107,6 +108,7 @@ export default {
       areaList: [],
       cellList: [],
       deviceList: [],
+      warningList: [],
       list: [
         {
           factory: '电解铝二厂',
@@ -167,34 +169,70 @@ export default {
     //   getDevice: 'station/getDevice'
     // }),
     ...mapMutations({
-      SET_FACTORY: 'station/SET_FACTORY'
+      SET_FACTORY: 'station/SET_FACTORY',
+      SET_CELL: 'station/SET_CELL'
     }),
     init() {
       this.query()
     },
+    getWarning() {
+      // this.warnScrollNum++
+      // this.queryWarning()
+    },
     // 公司查询
     async query() {
-      // 分公司
-      const companyResult = await company()
-      this.companyList = companyResult.data.result.stations
-      // 工厂
-      const id_company = this.companyList[0].uid
-      const factoryResult = await factory(id_company)
-      this.factoryList = factoryResult.data.result.stations
-
-      this.SET_FACTORY(this.factoryList[0])
-      // 分区
-      const id_factory = this.currentFactory.uid
-      const areaResult = await area(id_factory)
-      this.areaList = areaResult.data.result.stations
-      // 电解槽
-      const id_area = this.factoryList[0].uid
-      const cellResult = await cell(id_area)
-      this.cellList = cellResult.data.result.stations
-      // 设备
-      const id_cell = this.factoryList[0].uid
-      const deviceResult = await device(id_cell)
-      this.deviceList = deviceResult.data.result.stations
+      try {
+        // 分公司
+        const companyResult = await company()
+        this.companyList = companyResult.data.result.stations
+      } catch (err) {
+        alert('分公司错误')
+      }
+      if (this.companyList.length > 0) {
+        try {
+          // 工厂
+          const id_company = this.companyList.find(
+            (v) => v.s_name === '云南分公司'
+          ).uid
+          const factoryResult = await factory(id_company)
+          this.factoryList = factoryResult.data.result.stations
+          this.SET_FACTORY(this.factoryList[0])
+        } catch (err) {
+          alert('工厂错误')
+        }
+      }
+      if (this.factoryList.length > 0) {
+        try {
+          // 分区
+          const id_factory = this.currentFactory.uid
+          const areaResult = await area(id_factory)
+          this.areaList = areaResult.data.result.stations
+        } catch (err) {
+          alert('分区错误')
+        }
+      }
+      if (this.areaList.length > 0) {
+        try {
+          // 电解槽
+          const id_area = this.areaList[0].uid
+          const cellResult = await cell(id_area)
+          this.cellList = cellResult.data.result.stations
+        } catch (err) {
+          alert('电解槽错误')
+        }
+      }
+      if (this.cellList.length > 0) {
+        try {
+          // 设备
+          const id_cell = this.cellList[1].uid
+          const deviceResult = await device(id_cell)
+          this.deviceList = deviceResult.data.result.stations
+          this.SET_CELL(this.cellList[1])
+          setCell(this.cellList[1])
+        } catch (err) {
+          alert('设备错误')
+        }
+      }
     },
 
     selectFactory(item) {

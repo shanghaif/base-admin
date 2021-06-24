@@ -73,7 +73,7 @@
 
               <div class="chart-box-title">测温点详情</div>
               <div class="content-crumbs">
-                <div class="content-crumb">{{ currentCell.name }}</div>
+                <div class="content-crumb">{{ currentCell.tid }}</div>
                 <div class="content-crumb">A12_LEFT</div>
               </div>
             </div>
@@ -223,8 +223,6 @@
 
  
 <script>
-import { mapGetters } from 'vuex'
-
 import Electrolyzer from './components/Electrolyzer'
 import DetailLineChart from './components/DetailLineChart'
 import Header from './components/Header'
@@ -232,6 +230,7 @@ import DetailPoint from './components/DetailPoint'
 
 import _map from 'lodash/map'
 import { devicePoint } from '@/api/station'
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 
 function createData(len) {
   const arr = []
@@ -286,7 +285,6 @@ export default {
       centerDialogVisible: false,
       baseTemperature: 1500,
       basePct: 50,
-      currentCell: {},
 
       updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
       pointList: [{ arr: createCellList(39) }, { arr: createCellList(30) }],
@@ -392,6 +390,9 @@ export default {
   },
   computed: {
     ...mapGetters(['warningVal', 'unusualVal']),
+    ...mapState({
+      currentCell: (state) => state.station.currentCell
+    }),
     averageTemperature() {
       let sum = 0
       for (const key in this.temperatureObj) {
@@ -419,24 +420,33 @@ export default {
       return obj
     }
   },
-  created() {},
+  created() {
+    this.query()
+  },
   mounted() {
     this.cacheList = this.list
     this.searchOptions = _map(this.list, 'name').map((item) => {
       return { value: `${item}`, label: `${item}` }
     })
-    const obj = this.list.filter((v) => {
-      return v.id === this.$route.query.cell_id
-    })
-    this.currentCell = Object.assign({}, obj)
   },
   destroyed() {},
   methods: {
+    ...mapMutations({
+      SET_CELL: 'station/SET_CELL'
+    }),
     clickCell(item) {
       console.log(item)
       this.currentCell = Object.assign({}, item)
     },
-
+    async query() {
+      try {
+        const res = await devicePoint(this.currentCell.uid)
+        const { data } = res.data.result
+        debugger
+      } catch (err) {
+        alert('设备请求错误')
+      }
+    },
     customColorMethod(percentage) {
       console.log(percentage)
       if (percentage > 50) {

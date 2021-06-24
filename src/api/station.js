@@ -41,3 +41,19 @@ export function device(id) { // 获取设备
     params: { bath: true, children: true, page: 1, size: 10 }
   })
 }
+export function devicePoint(id) { // 获取设备   
+  return request({
+    url: `api/data/real/station/${id}`,
+    
+    method: 'get'
+  })
+}
+export function warningAll(page) { // 获取告警   
+  return request({
+    url: `api/alarm/active`,
+    
+    method: 'get',
+    params: { tid: 'all', page, size: 8 }
+  })
+}
+

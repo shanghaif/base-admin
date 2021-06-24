@@ -7,6 +7,8 @@ export default {
     rolePermission: '角色权限',
     pagePermission: '页面权限',
     directivePermission: '指令权限',
+    deviceManage: '设备管理',
+    AddThings: '新建物模型',
     icons: '图标',
     components: '组件',
     tinymce: '富文本编辑器',

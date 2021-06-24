@@ -1,12 +1,12 @@
 // import { company, factory, area, device } from '@/api/station'
 import { companyData, factoryData, areaData, deviceData } from '@/api/data'
+import { getCell, setCell, removeCell } from '@/utils/auth'
 
 
 const state = {
   currentCompany: {},
-  currentFactory: {}
-   
-  
+  currentFactory: {},
+  currentCell: getCell()
 }
 
 const mutations = {
@@ -18,6 +18,10 @@ const mutations = {
   },
   SET_AREA: (state, areaData) => {
     state.areaData = areaData
+    setCell(areaData)
+  },
+  SET_CELL: (state, currentCell) => {
+    state.currentCell = currentCell
   },
   SET_DEVICE: (state, deviceData) => {
     state.deviceData = deviceData
