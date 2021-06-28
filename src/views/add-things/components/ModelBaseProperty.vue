@@ -61,13 +61,12 @@
           placeholder="请选择"
         >
           <el-option
-            label="煤炭"
-            value="shanghai"
+            v-for="(item,i) in options"
+            :key="item +i"
+            :label="item.label"
+            :value="item.value"
           />
-          <el-option
-            label="养猪"
-            value="beijing"
-          />
+
         </el-select>
       </el-form-item>
       <el-form-item
@@ -104,7 +103,11 @@ export default {
     return {
       dialogVisible: false,
       formLabelWidth: '120px',
-
+      options: [
+        { label: 'COMMON', value: 'COMMON' },
+        { label: '养猪', value: '养猪' },
+        { label: '煤炭', value: '煤炭' }
+      ],
       rules: {
         s_name: [
           { required: true, message: '请输入名称', trigger: 'blur' },

@@ -53,6 +53,8 @@
 
 <script>
 import ModelBaseProperty from './ModelBaseProperty'
+import { mapState, mapActions, mapMutations } from 'vuex'
+
 import { nanoid } from 'nanoid'
 export default {
   name: 'ZModelDlg',
@@ -88,18 +90,34 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
-    show() {
+    ...mapActions({
+      refreshModel: 'zmodel/refreshModel',
+      getModel: 'zmodel/getModel'
+    }),
+    show(item) {
       this.dialogVisible = true
-      this.isNew = true
-      this.activeModel = {
-        s_name: '新增',
-        uid: 'm_' + nanoid(),
-        catalog_id: 'COMMON',
-        body: '{}'
+
+      if (item) {
+        this.activeModel = { ...item }
+      } else {
+        this.isNew = true
+        this.activeModel = {
+          s_name: '新增',
+          uid: 'm_' + nanoid(),
+          catalog_id: 'COMMON',
+          body: '{}'
+        }
       }
     },
     save() {
-      console.log('111 :>> ', 111)
+      this.refreshModel(this.activeModel).then((res) => {
+        if (res.status === 200 && res.data.result) {
+          this.dialogVisible = false
+          this.getModel()
+        } else {
+          console.log('111 :>> ', 111)
+        }
+      })
     },
     handleClick() {
       console.log('111 :>> ', 111)
