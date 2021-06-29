@@ -59,6 +59,42 @@ export function area(id, flag) { // 获取分区
     params
   })
 }
+export function areaPage(id) { // 获取分区   
+  // let params = {}
+  // if (flag) {
+  //   params = {
+  //     area: true, new: true 
+  //   }
+  // } else {
+  //   params = {
+  //     area: true
+  //   }
+  // }
+  return request({
+    url: `api/data/status`,
+    
+    method: 'get',
+    params: {factory_id: id}
+  })
+}
+export function handelAlarm(id) { // 告警处理
+  // let params = {}
+  // if (flag) {
+  //   params = {
+  //     area: true, new: true 
+  //   }
+  // } else {
+  //   params = {
+  //     area: true
+  //   }
+  // }
+  return request({
+    url: `api/alarm/statistic`,
+    
+    method: 'get',
+    params: {factory_id: id}
+  })
+}
 export function cell(id, flag) { // 获取电解槽   
   let params = {}
   if (flag) {
@@ -102,12 +138,12 @@ export function devicePoint(id) { // 获取设备
     method: 'get'
   })
 }
-export function warningAll(page) { // 获取告警   
+export function warningAll(obj) { // 获取告警   
+  const params = {...{factory: true, alarm_id: 'all'}, ...obj}
   return request({
-    url: `api/alarm/active`,
-    
+    url: `api/alarm/history`,
     method: 'get',
-    params: { tid: 'all', page, size: 8 }
+    params
   })
 }
 export function deviceStatus(id) { // 

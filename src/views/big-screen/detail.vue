@@ -10,9 +10,9 @@
             ><i class="el-icon-arrow-left" />返回首页</div>
             <div class="chart-box-title">电解槽总览</div>
             <div class="content-crumbs">
-              <div class="content-crumb">xx分公司</div>
-              <div class="content-crumb">电解铝二厂</div>
-              <div class="content-crumb">一分区</div>
+              <div class="content-crumb">{{ alarmItem.Company }}</div>
+              <div class="content-crumb">{{ alarmItem.Factory }}</div>
+              <div class="content-crumb">{{ alarmItem.Area }}</div>
             </div>
             <div class="content-filter">
               <div class="content-select">
@@ -223,7 +223,7 @@
 
  
 <script>
-import { mapGetters } from 'vuex'
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 
 import Electrolyzer from './components/Electrolyzer'
 import DetailLineChart from './components/DetailLineChart'
@@ -231,7 +231,15 @@ import Header from './components/Header'
 import DetailPoint from './components/DetailPoint'
 
 import _map from 'lodash/map'
-import { devicePoint } from '@/api/station'
+import {
+  company,
+  factory,
+  areaPage,
+  cell,
+  device,
+  handelAlarm,
+  deviceStatus
+} from '@/api/station'
 
 function createData(len) {
   const arr = []
@@ -392,6 +400,9 @@ export default {
   },
   computed: {
     ...mapGetters(['warningVal', 'unusualVal']),
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem
+    }),
     averageTemperature() {
       let sum = 0
       for (const key in this.temperatureObj) {
@@ -419,7 +430,9 @@ export default {
       return obj
     }
   },
-  created() {},
+  created() {
+    this.getCells()
+  },
   mounted() {
     this.cacheList = this.list
     this.searchOptions = _map(this.list, 'name').map((item) => {
@@ -432,6 +445,30 @@ export default {
   },
   destroyed() {},
   methods: {
+    async getCells() {
+      try {
+        // 电解槽
+        const cellResult = await cell(this.alarmItem.AreaID, 1)
+        debugger
+        const list = cellResult.data.result.stations
+        this.list = list.map((v) => {
+          return {
+            ...v,
+            ...{
+              id: v.uid,
+              name: v.s_name,
+              type: 'yellow',
+              dot: 168,
+              temperatureDot: 0,
+              trendDot: 0,
+              unusualDot: 1
+            }
+          }
+        })
+      } catch (err) {
+        alert('电解槽错误')
+      }
+    },
     clickCell(item) {
       console.log(item)
       this.currentCell = Object.assign({}, item)

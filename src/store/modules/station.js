@@ -6,6 +6,7 @@ import { getCell, setCell, removeCell } from '@/utils/auth'
 const state = {
   currentCompany: {},
   currentFactory: {},
+  alarmItem: {},
   currentCell: getCell()
 }
 
@@ -25,6 +26,9 @@ const mutations = {
   },
   SET_DEVICE: (state, deviceData) => {
     state.deviceData = deviceData
+  },
+  SET_ALARMITEM: (state, alarmItem) => {
+    state.alarmItem = alarmItem
   }
 }
 

@@ -16,19 +16,29 @@
         <div class="item left">
           <div class="chart-box">
             <div class="chart-box-tool">
-              <div class="chart-box-title tj">{{ currentFactory.s_name }}分区点位状态统计</div>
-              <bar-chart-row
-                v-for="(item,i) in list"
-                :id="'bar_row' + i"
-                :key="i + 'bar_row' + rowKey"
-                :data="item"
-              />
+              <div class="chart-box-title tj">分区点位状态统计</div>
+              <div
+                class="bar-chart-row-box"
+                :class="{'no-data':leftList.length < 1}"
+              >
+
+                <bar-chart-row
+                  v-for="(item,i) in leftList"
+                  :id="'bar_row' + i"
+                  :key="i + 'bar_row' + rowKey"
+                  :data="item"
+                />
+
+              </div>
               <!-- <bar-chart-row :list="list" /> -->
             </div>
           </div>
           <div class="line_l">
 
-            <single-bar-chart id="line_l" />
+            <single-bar-chart
+              id="line_l"
+              :data="alarmData"
+            />
           </div>
 
         </div>
@@ -41,11 +51,11 @@
 
         </div>
         <div class="item center">
-          <sheet-main />
+          <sheet-main :list="leftList" />
 
         </div>
         <div class="item right">
-          <unusual-list id="UnusualList" />
+          <unusual-list ref="UnusualList" />
 
           <single-line-chart id="line_r" />
 
@@ -69,9 +79,10 @@ import { screenSize } from '@/utils'
 import {
   company,
   factory,
-  area,
+  areaPage,
   cell,
   device,
+  handelAlarm,
   deviceStatus
 } from '@/api/station'
 import { getCell, setCell, removeCell } from '@/utils/auth'
@@ -117,6 +128,7 @@ export default {
       deviceList: [],
       warningList: [],
       statusList: [],
+      alarmData: {},
       list: [
         {
           factory: '电解铝二厂',
@@ -160,7 +172,29 @@ export default {
   computed: {
     ...mapState({
       currentFactory: (state) => state.station.currentFactory
-    })
+    }),
+    factoryId() {
+      return this.currentFactory.uid
+    },
+    leftList() {
+      return this.areaList.map((v) => {
+        return {
+          ...v,
+          ...{
+            factory: this.currentFactory.s_name,
+            area: v.area_name,
+            cells: v.bath_all,
+            point: v.point_all,
+            child: [
+              { name: '异常点位', num: v.point_offline_alarm },
+              { name: '趋势告警', num: v.point_trend_alarm },
+              { name: '温度告警', num: v.point_temperature_high_alarm },
+              { name: '离线点位', num: v.point_offline_alarm }
+            ]
+          }
+        }
+      })
+    }
   },
   created() {
     this.init()
@@ -180,30 +214,59 @@ export default {
       SET_FACTORY: 'station/SET_FACTORY',
       SET_CELL: 'station/SET_CELL'
     }),
-    init() {
-      this.query()
+    async handelAlarmQuery() {
+      if (this.factoryList.length > 0) {
+        try {
+          // 分区
+
+          const res = await handelAlarm(this.factoryId)
+          this.alarmData = res.data.result
+        } catch (err) {
+          alert('处理告警查询错误')
+        }
+      }
     },
-    getWarning() {
-      // this.warnScrollNum++
-      // this.queryWarning()
+
+    init() {
+      company(1)
+        .then((res) => {
+          this.companyList = res.data.result.stations || []
+
+          this.query()
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    async refresh() {
+      try {
+        // 分区
+
+        const areaResult = await areaPage(this.factoryId)
+        this.areaList = areaResult.data.result || []
+        this.getStatus(this.factoryId)
+        this.handelAlarmQuery()
+      } catch (err) {
+        alert('分区错误')
+      }
     },
     // 公司查询
     async query() {
-      try {
-        // 分公司
-        const companyResult = await company()
-        this.companyList = companyResult.data.result.stations
-      } catch (err) {
-        alert('分公司错误')
-      }
+      // try {
+      //   // 分公司
+      //   const companyResult = await company(1)
+      //   this.companyList = companyResult.data.result.stations || []
+      // } catch (err) {
+      //   alert('分公司错误')
+      // }
       if (this.companyList.length > 0) {
         try {
           // 工厂
           const id_company = this.companyList.find(
             (v) => v.s_name === '云南分公司'
           ).uid
-          const factoryResult = await factory(id_company)
-          this.factoryList = factoryResult.data.result.stations
+          const factoryResult = await factory(id_company, 1)
+          this.factoryList = factoryResult.data.result.stations || []
           this.SET_FACTORY(this.factoryList[0])
         } catch (err) {
           alert('工厂错误')
@@ -212,39 +275,40 @@ export default {
       if (this.factoryList.length > 0) {
         try {
           // 分区
-          const id_factory = this.currentFactory.uid
-          const areaResult = await area(id_factory)
-          this.areaList = areaResult.data.result.stations
-          this.getStatus(id_factory)
+
+          const areaResult = await areaPage(this.factoryId)
+          this.areaList = areaResult.data.result || []
+          this.getStatus(this.factoryId)
         } catch (err) {
           alert('分区错误')
         }
       }
-      if (this.areaList.length > 0) {
-        try {
-          // 电解槽
-          const id_area = this.areaList[0].uid
-          const cellResult = await cell(id_area)
-          this.cellList = cellResult.data.result.stations
-        } catch (err) {
-          alert('电解槽错误')
-        }
-      }
-      if (this.cellList.length > 0) {
-        try {
-          // 设备
-          const id_cell = this.cellList[1].uid
-          const deviceResult = await device(id_cell)
-          this.deviceList = deviceResult.data.result.stations
-          this.SET_CELL(this.cellList[1])
-          setCell(this.cellList[1])
-        } catch (err) {
-          alert('设备错误')
-        }
-      }
+      // if (this.areaList.length > 0) {
+      //   try {
+      //     // 电解槽
+      //     const id_area = this.areaList[0].uid
+      //     const cellResult = await cell(id_area,1)
+      //     this.cellList = cellResult.data.result.stations
+      //   } catch (err) {
+      //     alert('电解槽错误')
+      //   }
+      // }
+      // if (this.cellList.length > 0) {
+      //   try {
+      //     // 设备
+      //     const id_cell = this.cellList[1].uid
+      //     const deviceResult = await device(id_cell)
+      //     this.deviceList = deviceResult.data.result.stations
+      //     this.SET_CELL(this.cellList[1])
+      //     setCell(this.cellList[1])
+      //   } catch (err) {
+      //     alert('设备错误')
+      //   }
+      // }
+      this.handelAlarmQuery()
     },
     async getStatus() {
-      const res = await deviceStatus(this.currentFactory.uid)
+      const res = await deviceStatus(this.factoryId)
       try {
         this.statusList = res.data.result.infoMap
       } catch (err) {
@@ -254,86 +318,7 @@ export default {
     selectFactory(item) {
       this.company = item.s_name
       this.SET_FACTORY(item)
-
-      if (item.s_name === '电解铝二厂') {
-        this.list = [
-          {
-            factory: '电解铝二厂',
-            area: '2分区',
-            cells: 55,
-            point: 168,
-            child: [
-              { name: '异常点位', num: 111 },
-              { name: '趋势告警', num: 7 },
-              { name: '温度告警', num: 32 },
-              { name: '离线点位', num: 412 }
-            ]
-          },
-          {
-            factory: '电解铝二厂',
-            area: '2分区',
-            cells: 48,
-            point: 168,
-            child: [
-              { name: '异常点位', num: 3 },
-              { name: '趋势告警', num: 9 },
-              { name: '温度告警', num: 28 },
-              { name: '离线点位', num: 273 }
-            ]
-          },
-          {
-            factory: '电解铝二厂',
-            area: '2分区',
-            cells: 50,
-            point: 168,
-            child: [
-              { name: '异常点位', num: 10 },
-              { name: '趋势告警', num: 6 },
-              { name: '温度告警', num: 45 },
-              { name: '离线点位', num: 23 }
-            ]
-          }
-        ]
-      } else if (item.s_name === '电解铝一厂') {
-        this.list = [
-          {
-            factory: '电解铝二厂',
-            area: '1分区',
-            cells: 55,
-            point: 168,
-            child: [
-              { name: '异常点位', num: 222 },
-              { name: '趋势告警', num: 7 },
-              { name: '温度告警', num: 32 },
-              { name: '离线点位', num: 412 }
-            ]
-          },
-          {
-            factory: '电解铝二厂',
-            area: '2分区',
-            cells: 48,
-            point: 168,
-            child: [
-              { name: '异常点位', num: 3 },
-              { name: '趋势告警', num: 9 },
-              { name: '温度告警', num: 28 },
-              { name: '离线点位', num: 273 }
-            ]
-          },
-          {
-            factory: '电解铝二厂',
-            area: '3分区',
-            cells: 50,
-            point: 168,
-            child: [
-              { name: '异常点位', num: 10 },
-              { name: '趋势告警', num: 6 },
-              { name: '温度告警', num: 45 },
-              { name: '离线点位', num: 23 }
-            ]
-          }
-        ]
-      }
+      this.refresh()
       this.rowKey++
     },
     createBarList() {
@@ -472,6 +457,22 @@ $top-Height: 10vh;
       }
       .tj {
         margin-bottom: 20px;
+      }
+    }
+  }
+  .bar-chart-row-box {
+    height: 84%;
+    &.no-data {
+      position: relative;
+      &::before {
+        content: '暂无数据';
+        position: absolute;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        @include flex();
+        background: rgba(255, 255, 255, 0.1);
+        color: #ccc;
       }
     }
   }

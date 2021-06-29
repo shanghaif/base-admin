@@ -32,14 +32,14 @@
         >
           <div class="left">
             <!-- <div>{{ item.area }} / {{ item.name }}</div> -->
-            <div>一分区 / 电解槽2000</div>
+            <div>{{ item.Area }} / {{ item.Bath }}</div>
             <div class="reason">{{ item.thing_name }}：{{ item.alarm_id | t_type }}</div>
           </div>
           <div
             class="right"
-            @click="detail(item.t_id)"
+            @click="detail(item)"
           >
-            {{ $dayjs(item.time * 1000).format('YYYY.MM.DD HH:mm:ss') }}
+            {{ $dayjs(item.AlarmTime).format('YYYY.MM.DD HH:mm:ss') }}
             <i class="el-icon-arrow-right" />
           </div>
         </div>
@@ -53,12 +53,17 @@
         v-show="noMore"
         class="b-text"
       >没有更多了</div>
+      <div
+        v-show="isEmpty"
+        class="b-text"
+      >暂无数据</div>
     </div>
   </div>
 </template>
 
 <script>
 import { warningAll } from '@/api/station'
+import { mapState, mapActions, mapMutations } from 'vuex'
 
 export default {
   name: 'UnusualList',
@@ -67,6 +72,8 @@ export default {
       let res = ''
       if (val === 'temperature_high') {
         res = '温度告警'
+      } else if (val === 'offline') {
+        res = '离线'
       }
       return res
     }
@@ -83,8 +90,10 @@ export default {
     return {
       activeTab: 'now',
       loading: false,
+      isEmpty: false,
       page: 1,
       size: 8,
+      chooseDate: {},
       list: [],
       noMoreList: [],
       tabList: [
@@ -162,21 +171,57 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      currentFactory: (state) => state.station.currentFactory
+    }),
     noMore() {
-      return this.noMoreList.length < this.size
+      return this.noMoreList.length < this.size && this.noMoreList.length !== 0
     }
   },
-  watch: {},
-  created() {
-    this.queryWarning()
+  watch: {
+    currentFactory: {
+      handler(newName, oldName) {
+        this.choose('now')
+      },
+      deep: true
+    }
   },
-
+  created() {},
+  mounted() {},
   methods: {
+    ...mapMutations({
+      SET_ALARMITEM: 'station/SET_ALARMITEM'
+    }),
+    getDate(type) {
+      let begin_time, end_time
+      const obj = {}
+      if (type === 'now') {
+        begin_time = this.$dayjs()
+          .subtract(600, 'second')
+          .format('YYYY-MM-DD HH:mm')
+        end_time = this.$dayjs().format('YYYY-MM-DD HH:mm')
+      } else if (type === 'day') {
+        begin_time = this.$dayjs().format('YYYY-MM-DD') + ' 00:00'
+        end_time = this.$dayjs().format('YYYY-MM-DD') + ' 23:59'
+      } else if (type === 'week') {
+        begin_time =
+          this.$dayjs().subtract(7, 'day').format('YYYY-MM-DD') + ' 00:00'
+        end_time = this.$dayjs().format('YYYY-MM-DD') + ' 23:59'
+      } else if (type === 'month') {
+        begin_time =
+          this.$dayjs().subtract(30, 'day').format('YYYY-MM-DD') + ' 00:00'
+        end_time = this.$dayjs().format('YYYY-MM-DD') + ' 23:59'
+      }
+      obj.end_time = end_time
+      obj.begin_time = begin_time
+      // obj.begin_time = '2021-06-01 15:48'
+      // obj.end_time = '2021-06-25 16:48'
+      this.chooseDate = obj
+    },
     load(val) {
       if (!this.noMore) {
         // this.list.push({})
         this.page++
-        console.log('1 :>> ', 1)
         this.queryWarning()
       }
     },
@@ -189,15 +234,30 @@ export default {
     },
     choose(val) {
       this.activeTab = val
+      this.list = []
+      this.getDate(val)
+      this.queryWarning()
     },
-    detail(id) {
-      this.$router.push({ path: '/big-screen/detail', query: { cell_id: id } })
+    detail(item) {
+      this.$router.push({ path: '/big-screen/detail' })
+      this.SET_ALARMITEM(item)
     },
     async queryWarning() {
       this.loading = true
-      const res = await warningAll(this.page)
-      this.noMoreList = res.data.result
+      this.isEmpty = false
+      // {factory: true, tid, page, size: 8, begin_time, begin_time, alarm_id: 'all' }
+      const obj = {
+        begin_time: '',
+        t_id: this.currentFactory.uid,
+        page: this.page,
+        size: this.size
+      }
+      const res = await warningAll({ ...obj, ...this.chooseDate })
+      this.noMoreList = res.data.result.alarms
       this.list = [...this.list, ...this.noMoreList]
+      if (this.list.length === 0) {
+        this.isEmpty = true
+      }
       this.loading = false
     }
   }

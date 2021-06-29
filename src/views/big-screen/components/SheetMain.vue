@@ -1,12 +1,12 @@
 <template>
   <div class="sheet-main">
-    <div class="chart-box-title big">重庆分公司 {{ currentFactory.s_name }}</div>
+    <div class="chart-box-title big">云南分公司 {{ currentFactory.s_name }}</div>
     <div class="tip">
-      <span class="time">告警信息汇总 2021年5月19日</span>
+      <span class="time">告警信息汇总 {{ newDtate }}</span>
       <span class="link">告警信息日志 <i class="el-icon-arrow-right go-link" /></span>
     </div>
     <div class="cells">
-      <div
+      <!-- <div
         v-for="(item, i) in list1"
         :key="i + 'a'"
         class="cell"
@@ -16,6 +16,38 @@
           :class="item.class"
         >{{ item.num }}</span>
         <span class="text">{{ item.text }}</span>
+      </div> -->
+      <div class="cell">
+        <span class="num">{{ totalCells }}</span>
+        <span class="text">总电解槽</span>
+      </div>
+      <div class="cell">
+        <span class="num blue">{{ totalCells }}</span>
+        <span class="text">已部署电解槽</span>
+      </div>
+      <div class="cell">
+        <span class="num red">{{ totalWarningCell }}</span>
+        <span class="text">告警电解槽</span>
+      </div>
+      <div class="cell">
+        <span class="num yellow">{{ totalUnnormalCell }}</span>
+        <span class="text">异常电解槽</span>
+      </div>
+      <div class="cell">
+        <span class="num">{{ totalPoint }}</span>
+        <span class="text">总测温点位</span>
+      </div>
+      <div class="cell">
+        <span class="num">{{ totalPoint }}</span>
+        <span class="text blue">已部署点位</span>
+      </div>
+      <div class="cell">
+        <span class="num red">{{ totalWarningPoint }}</span>
+        <span class="text">告警点位</span>
+      </div>
+      <div class="cell">
+        <span class="num yellow">{{ totalUnnormalPoint }}</span>
+        <span class="text">异常点位</span>
       </div>
     </div>
   </div>
@@ -90,9 +122,48 @@ export default {
     ...mapState({
       currentFactory: (state) => state.station.currentFactory
     }),
+    newDtate() {
+      return this.$dayjs().format('YYYY年MM月DD日')
+    },
+    totalCells() {
+      // 总电解槽
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.bath_all + pre
+      }, 0)
+      return sum
+    },
+    totalUnnormalCell() {
+      // 异常电解槽
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.bath_abnormal + pre
+      }, 0)
+      return sum
+    },
+    totalWarningCell() {
+      // 告警电解槽
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.bath_alarm + pre
+      }, 0)
+      return sum
+    },
     totalPoint() {
-      const sum = this.list3.reduce((pre, cur) => {
-        return cur.cells * cur.point + pre
+      // 总点位
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.point_all + pre
+      }, 0)
+      return sum
+    },
+    totalUnnormalPoint() {
+      // 异常点位
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.point_offline_alarm + pre
+      }, 0)
+      return sum
+    },
+    totalWarningPoint() {
+      // 告警点位
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.point_trend_alarm + cur.point_temperature_high_alarm + pre
       }, 0)
       return sum
     }

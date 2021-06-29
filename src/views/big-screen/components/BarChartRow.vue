@@ -17,7 +17,8 @@
       <div class="hart-box-describe-right">
         <div class="temperature cur-tem">
           <span>点位</span>
-          <span class="tem-val num">{{ data.cells }} x {{ data.point }}</span>
+          <!-- <span class="tem-val num">{{ data.cells }} x {{ data.point }}</span> -->
+          <span class="tem-val num"> {{ data.point }}</span>
         </div>
       </div>
     </div>
@@ -98,7 +99,7 @@ export default {
   watch: {
     data: {
       handler(newVal) {
-        console.log(newVal)
+        // console.log(newVal)
       },
       immediate: true,
       deep: true // 表示开启深度监听
@@ -108,7 +109,7 @@ export default {
     setTimeout(() => {
       this.initChart()
     }, 0)
-    console.log('object :>> ', groupBy)
+    // console.log('object :>> ', groupBy)
   },
   beforeDestroy() {
     if (!this.chart) {

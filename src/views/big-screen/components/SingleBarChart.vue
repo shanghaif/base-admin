@@ -20,6 +20,12 @@ export default {
   name: 'SingleBarChart',
   mixins: [resize],
   props: {
+    data: {
+      type: Object,
+      default() {
+        return {}
+      }
+    },
     className: {
       type: String,
       default: 'chart'
@@ -40,12 +46,22 @@ export default {
   data() {
     return {
       chart: null,
-      option: null
+      option: null,
+      dateList: [],
+      dataBar: [],
+      dataLine: []
     }
   },
-  mounted() {
-    this.initChart()
+  computed: {},
+  watch: {
+    data: {
+      handler(newName, oldName) {
+        this.init()
+      },
+      deep: true
+    }
   },
+  mounted() {},
   beforeDestroy() {
     if (!this.chart) {
       return
@@ -54,6 +70,66 @@ export default {
     this.chart = null
   },
   methods: {
+    init() {
+      this.getDate()
+      this.getSeriesLineData()
+      this.getSeriesBarData()
+      this.initChart()
+    },
+    getSeriesLineData() {
+      let i = 7
+      const arr = []
+      const obj = this.data.processed
+      while (i--) {
+        let n
+        i > 0 ? (n = `-${i}`) : (n = i)
+        arr[i] = obj[n]
+      }
+      this.dataLine = arr
+    },
+    getSeriesBarData() {
+      // 告警数
+      let i = 7
+      const arr = []
+      const obj = this.data.added
+      while (i--) {
+        let n
+        // debugger
+        i > 0 ? (n = `-${i}`) : (n = '0')
+        arr[i] = obj[n]
+      }
+
+      this.dataBar = arr
+    },
+    getDate() {
+      const n = 7
+      const arr = []
+      const today = this.$dayjs().format('YYYY.MM.DD')
+      const today_1 = this.$dayjs().subtract(1, 'day').format('YYYY.MM.DD')
+      const today_2 = this.$dayjs().subtract(2, 'day').format('YYYY.MM.DD')
+      const today_3 = this.$dayjs().subtract(3, 'day').format('YYYY.MM.DD')
+      const today_4 = this.$dayjs().subtract(4, 'day').format('YYYY.MM.DD')
+      const today_5 = this.$dayjs().subtract(5, 'day').format('YYYY.MM.DD')
+      const today_6 = this.$dayjs().subtract(6, 'day').format('YYYY.MM.DD')
+      arr.unshift(today)
+      arr.unshift(today_1)
+      arr.unshift(today_2)
+      arr.unshift(today_3)
+      arr.unshift(today_4)
+      arr.unshift(today_5)
+      arr.unshift(today_6)
+      // return {
+      //   0: today,
+      //   '-1': today_1,
+      //   '-2': today_2,
+      //   '-3': today_3,
+      //   '-4': today_4,
+      //   '-5': today_5,
+      //   '-6': today_6
+      // }
+
+      this.dateList = arr
+    },
     initChart() {
       this.chart = echarts.init(document.getElementById(this.id))
       const that = this
@@ -94,15 +170,8 @@ export default {
           {
             type: 'category',
             color: '#59588D',
-            data: [
-              '2021-05-01',
-              '2021-05-02',
-              '2021-05-03',
-              '2021-05-04',
-              '2021-05-05',
-              '2021-05-06',
-              '2021-05-07'
-            ],
+            // data: ['1', '2', '3', '4', '5', '6', '7'],
+            data: that.dateList,
             axisLabel: {
               color: '#999',
               textStyle: {
@@ -112,8 +181,8 @@ export default {
                 let arr
                 let str = ''
                 if (val) {
-                  arr = val.split('-')
-                  str = `${arr[0]}\n${arr[1]}-${arr[2]}`
+                  arr = val.split('.')
+                  str = `${arr[0]}\n${arr[1]}.${arr[2]}`
                 }
                 return str
               }
@@ -163,7 +232,7 @@ export default {
             type: 'bar',
             name: '告警数',
 
-            data: [40, 100, 40, 40, 90, 120, 40, 120],
+            data: that.dataBar,
             barWidth: '14px',
             // itemStyle: {
             //     color: function(params) {
@@ -196,7 +265,8 @@ export default {
             }
           },
           {
-            data: [40, 80, 20, 16, 70, 90, 20, 100],
+            // data: [40, 80, 20, 16, 70, 90, 20, 100],
+            data: that.dataLine,
             type: 'line',
             smooth: false,
             name: '处理数',

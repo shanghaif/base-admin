@@ -146,6 +146,8 @@ export default {
         xAxis: {
           type: 'time',
           // name: '年-月-日',
+          color: '#59588D',
+
           boundaryGap: false,
           splitNumber: 5,
           axisLabel: {

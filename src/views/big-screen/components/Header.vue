@@ -35,7 +35,7 @@ export default {
   props: {},
   data() {
     return {
-      updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
+      updateTime: this.$dayjs().format('YYYY/MM/DD HH:mm:ss'),
 
       selectFreshTime: '',
       cellFreshTimeOptions: [
