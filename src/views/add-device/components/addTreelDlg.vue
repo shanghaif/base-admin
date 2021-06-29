@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog
-      :title="typeText + '设备'"
+      title="typeText + '设备'"
       :visible.sync="dialogVisible"
       :close-on-click-modal="false"
       width="40%"
@@ -57,7 +57,7 @@
 <script>
 import { editThings } from '@/api/station'
 export default {
-  name: 'DevicelDlg',
+  name: 'AddTreelDlg',
   components: {},
 
   props: {

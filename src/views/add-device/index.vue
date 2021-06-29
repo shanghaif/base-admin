@@ -2,7 +2,7 @@
   <el-card class="device-wrap">
 
     <div class="left">
-      <el-button-group class="btns-wrap">
+      <!-- <el-button-group class="btns-wrap">
         <el-button
           type="primary"
           icon="el-icon-plus"
@@ -17,7 +17,7 @@
           type="danger"
           icon="el-icon-delete"
         />
-      </el-button-group>
+      </el-button-group> -->
 
       <el-tree
         ref="tree"
@@ -53,17 +53,35 @@
         :stripe="true"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column
+        <!-- <el-table-column
           type="selection"
           width="55"
+        /> -->
+
+        <el-table-column
+          sortable
+          prop="company"
+          label="公司"
+          show-overflow-tooltip
         />
-        <!-- <el-table-column
-          label="日期"
-          width="120"
-        >
-          <template slot-scope="scope">{{ scope.row.date }}</template>
-          <el-link type="primary">主要链接</el-link>
-        </el-table-column> -->
+        <el-table-column
+          sortable
+          prop="factory"
+          label="厂区"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          sortable
+          prop="area"
+          label="分区"
+          show-overflow-tooltip
+        />
+        <el-table-column
+          sortable
+          prop="bath"
+          label="电解槽"
+          show-overflow-tooltip
+        />
         <el-table-column
           prop="s_name"
           label="名称"
@@ -81,26 +99,36 @@
           sortable
           prop="uid"
           label="id"
-          show-overflow-tooltip
         />
 
         <el-table-column
-          prop="desc"
-          label="说明"
+          prop="status_used"
+          label="状态"
           show-overflow-tooltip
-        />
-        <el-table-column
-          prop="catalog_name"
-          label="分类"
-          show-overflow-tooltip
-        />
+        >
+          <template slot-scope="scope">
+
+            <!-- <el-link
+              type="primary"
+              @click="editDevice(scope.row)"
+            >{{ scope.row.s_name }}</el-link> -->
+            <el-tag
+              :type="typeFunc(scope.row.status_used)"
+              plain
+            >{{ scope.row.status_used | statusFilter }}</el-tag>
+          </template>
+        </el-table-column>
+
         <el-table-column label="操作">
           <template slot-scope="scope">
             <el-button
               size="mini"
               type="primary"
               @click="editDevice(scope.row,scope.$index)"
-            ><i class="el-icon-edit" />编辑</el-button>
+            >
+              <!-- <i class="el-icon-edit" /> -->
+              编辑
+            </el-button>
             <el-popconfirm
               title="确定删除该物模型吗？"
               @confirm="delDevice(scope.row,scope.$index)"
@@ -110,26 +138,30 @@
                 size="mini"
                 type="danger"
               >
-                <i class="el-icon-delete" />删除
+                <!-- <i class="el-icon-delete" /> -->
+                删除
 
               </el-button>
             </el-popconfirm>
           </template>
         </el-table-column>
       </el-table>
+      <div class="pagination-wrap">
 
-      <el-pagination
-        :hide-on-single-page="total < 10"
-        background
-        layout="prev, pager, next"
-        :total="total"
-        @current-change="changePage"
-      />
+        <el-pagination
+          :hide-on-single-page="total < 10"
+          background
+          layout="total, prev, pager, next"
+          :total="total"
+          @current-change="changePage"
+        />
+      </div>
     </div>
     <devicel-dlg
       ref="DevicelDlg"
       :params="dlgData"
       :is-new="isNew"
+      @refresh="refreshDevice"
     />
   </el-card>
 </template>
@@ -150,7 +182,19 @@ import DevicelDlg from './components/DevicelDlg'
 export default {
   name: 'AddDevice',
   components: { DevicelDlg },
-
+  filters: {
+    statusFilter(type) {
+      let res = ''
+      if (type === 1) {
+        res = '启用'
+      } else if (type === 0) {
+        res = '停用'
+      } else if (type === -1) {
+        res = '进行中'
+      }
+      return res
+    }
+  },
   data() {
     return {
       total: 0,
@@ -220,6 +264,17 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    typeFunc(type) {
+      let res = ''
+      if (type === 1) {
+        res = 'success'
+      } else if (type === 0) {
+        res = 'info'
+      } else if (type === -1) {
+        res = 'warning'
+      }
+      return res
+    },
     changePage(page) {
       const id = this.currentNode.uid
       device(id, 1, page).then((res) => {
@@ -250,8 +305,11 @@ export default {
       }
     },
 
-    refreshDevice(node) {
-      console.log('111 :>> ', 111)
+    refreshDevice() {
+      device(this.dlgData.bath_id, 1).then((res) => {
+        this.tableData = res.data.result.devices || []
+        this.total = res.data.result.devices_count
+      })
     },
     refresh(node) {
       console.log('111 :>> ', 111)
@@ -316,6 +374,7 @@ export default {
     // 编辑设备弹窗
 
     editDevice(item) {
+      console.log('item :>> ', item)
       this.multipleSelection = item
       this.dlgData = item
       this.isNew = false
@@ -344,6 +403,9 @@ export default {
   min-height: calc(100vh - 84px);
   .btns-wrap {
     margin-bottom: 20px;
+  }
+  .pagination-wrap {
+    margin-top: 30px;
   }
 }
 .left {

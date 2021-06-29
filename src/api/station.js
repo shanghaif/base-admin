@@ -122,7 +122,7 @@ export function editThings(data) { // 编辑设备
   return request({
     url: `api/cfg/thing`,
     method: 'PUT',
-    params: data
+    data: data
   })
 }
 export function deleteThings(id) { // 编辑设备
@@ -131,4 +131,5 @@ export function deleteThings(id) { // 编辑设备
     method: 'delete'
   })
 }
+
 
