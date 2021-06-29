@@ -111,6 +111,13 @@ export default {
     },
     save() {
       this.refreshModel(this.activeModel).then((res) => {
+        this.activeModel.body = {
+          properties: this.properties,
+          events: this.events,
+          services: this.services,
+          rules: this.rules,
+          params: this.params
+        }
         if (res.status === 200 && res.data.result) {
           this.dialogVisible = false
           this.getModel()

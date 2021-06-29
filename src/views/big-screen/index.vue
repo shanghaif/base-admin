@@ -66,7 +66,14 @@ import SheetMain from './components/SheetMain'
 import UnusualList from './components/UnusualList'
 import Header from './components/Header'
 import { screenSize } from '@/utils'
-import { company, factory, area, cell, device } from '@/api/station'
+import {
+  company,
+  factory,
+  area,
+  cell,
+  device,
+  deviceStatus
+} from '@/api/station'
 import { getCell, setCell, removeCell } from '@/utils/auth'
 
 function createData(len) {
@@ -109,6 +116,7 @@ export default {
       cellList: [],
       deviceList: [],
       warningList: [],
+      statusList: [],
       list: [
         {
           factory: '电解铝二厂',
@@ -207,6 +215,7 @@ export default {
           const id_factory = this.currentFactory.uid
           const areaResult = await area(id_factory)
           this.areaList = areaResult.data.result.stations
+          this.getStatus(id_factory)
         } catch (err) {
           alert('分区错误')
         }
@@ -234,7 +243,14 @@ export default {
         }
       }
     },
-
+    async getStatus() {
+      const res = await deviceStatus(this.currentFactory.uid)
+      try {
+        this.statusList = res.data.result.infoMap
+      } catch (err) {
+        alert('状态错误')
+      }
+    },
     selectFactory(item) {
       this.company = item.s_name
       this.SET_FACTORY(item)
