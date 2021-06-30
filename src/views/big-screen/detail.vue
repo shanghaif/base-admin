@@ -65,7 +65,10 @@
           <div class="detail-item detail-item-center">
             <Header />
 
-            <detail-line-chart id="detail_line_r" />
+            <detail-line-chart
+              ref="DetailLineChart"
+              :list="piontHistoryList"
+            />
 
           </div>
           <div class="detail-item detail-item-right">
@@ -73,9 +76,11 @@
 
               <div class="chart-box-title">测温点详情</div>
               <div class="content-crumbs">
-                <div class="content-crumb">{{ currentCell.name }}</div>
-                <div class="content-crumb">A12_LEFT</div>
+
+                <div class="content-crumb">{{ alarmItem.Bath }}</div>
+                <div class="content-crumb">{{ alarmItem.t_id }}</div>
               </div>
+
             </div>
             <div class="right-bar-box">
               <div class="right-bar-items">
@@ -105,7 +110,16 @@
                       :percentage="nowPct"
                       :stroke-width="16"
                     />
-                    <div class="num">{{ temperatureObj.now }}℃</div>
+                    <div class="num low">
+                      <count-to
+                        :start-val="0"
+                        :end-val="temperatureObj.now"
+                        :duration="2000"
+                        :decimals="1"
+                        suffix="℃"
+                        class="card-panel-num"
+                      />
+                    </div>
                   </div>
 
                 </div>
@@ -119,7 +133,16 @@
                       :percentage="averagePct"
                       :stroke-width="16"
                     />
-                    <div class="num low">{{ averageTemperature }}℃</div>
+                    <div class="num low">
+                      <count-to
+                        :start-val="0"
+                        :end-val="averageTemp || 0"
+                        :duration="2000"
+                        :decimals="1"
+                        suffix="℃"
+                        class="card-panel-num"
+                      />
+                    </div>
                   </div>
 
                 </div>
@@ -133,7 +156,17 @@
                       :percentage="hightPct"
                       :stroke-width="16"
                     />
-                    <div class="num">{{ temperatureObj.hight }}℃</div>
+
+                    <div class="num low">
+                      <count-to
+                        :start-val="0"
+                        :end-val="heigthTemp || 0"
+                        :duration="2000"
+                        :decimals="1"
+                        suffix="℃"
+                        class="card-panel-num"
+                      />
+                    </div>
                   </div>
 
                 </div>
@@ -147,7 +180,17 @@
                       :percentage="lowPct"
                       :stroke-width="16"
                     />
-                    <div class="num low">{{ temperatureObj.low }}℃</div>
+                    <div class="num low">
+                      <count-to
+                        :start-val="0"
+                        :end-val="lowTemp || 0"
+                        :duration="2000"
+                        :decimals="1"
+                        suffix="℃"
+                        class="card-panel-num"
+                      />
+                    </div>
+
                   </div>
 
                 </div>
@@ -161,10 +204,10 @@
             <div class="chart-box-title">电解槽详情</div>
 
             <div class="content-crumbs">
-              <div class="content-crumb">云南分公司</div>
-              <div class="content-crumb">电解铝二厂</div>
-              <div class="content-crumb">一分区</div>
-              <div class="content-crumb">电解槽2021</div>
+              <div class="content-crumb">{{ alarmItem.Company }}</div>
+              <div class="content-crumb">{{ alarmItem.Factory }}</div>
+              <div class="content-crumb">{{ alarmItem.Area }}</div>
+              <div class="content-crumb">{{ alarmItem.Bath }}</div>
             </div>
           </div>
           <div class="point-wrap">
@@ -224,6 +267,7 @@
  
 <script>
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
+import CountTo from 'vue-count-to'
 
 import Electrolyzer from './components/Electrolyzer'
 import DetailLineChart from './components/DetailLineChart'
@@ -231,73 +275,41 @@ import Header from './components/Header'
 import DetailPoint from './components/DetailPoint'
 
 import _map from 'lodash/map'
+import sortBy from 'lodash/sortBy'
+
 import {
   company,
   factory,
   areaPage,
   cell,
-  device,
+  devicePoint,
+  deviceHistory,
   handelAlarm,
   deviceStatus
 } from '@/api/station'
 
-function createData(len) {
-  const arr = []
-  while (len--) {
-    let type = 'warning'
-    if (len % 2 === 0) {
-      type = 'error'
-    }
-    const obj = {
-      id: len,
-      name: `电解槽${len}`,
-      type,
-      dot: 168,
-      temperatureDot: 1,
-      trendDot: 0,
-      unusualDot: 0
-    }
-    arr.push(obj)
-  }
-  return arr
-}
-function createCellList(len) {
-  const arr = []
-  const obj = {}
-  const i = 3
-  while (len--) {
-    const innerArr = []
-    const num = len
-    for (let i = 0; i < 3; i++) {
-      const innerObj = {}
-      innerObj.id = `${len}_${i}LEFT`
-      innerObj.name = `${len}_${i}LEFT`
-      innerObj.value = i * 110
-      innerArr.push(innerObj)
-    }
-    obj.pointList = innerArr
-    arr.push(obj)
-  }
-  return arr
-}
 export default {
   name: 'Detail',
   components: {
     Electrolyzer,
     Header,
     DetailPoint,
+    CountTo,
     DetailLineChart
   },
 
   data() {
     return {
+      step: (10 / 60) * 60 * 1000, //  60 * 1000 // 1分钟
+
       centerDialogVisible: false,
       baseTemperature: 1500,
       basePct: 50,
+      piontUnit: 0,
       currentCell: {},
 
       updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
-      pointList: [{ arr: createCellList(39) }, { arr: createCellList(30) }],
+      pointList: [],
 
       cellTypeOptions: [
         { value: 'defual', label: '温度告警' },
@@ -394,8 +406,14 @@ export default {
       selectTime: '',
       searchCell: '',
       loading: false,
-      cacheList: []
-      // list: createData(10)
+      cacheList: [],
+      allPointList: [],
+      piontHistoryList: [],
+      queryParams: {
+        sTime: '',
+        eTime: '',
+        id: ''
+      }
     }
   },
   computed: {
@@ -410,17 +428,18 @@ export default {
       }
       return sum / 3
     },
+
     averagePct() {
-      return (this.averageTemperature * 100) / this.baseTemperature
+      return (this.averageTemp * 100) / this.baseTemperature
     },
     nowPct() {
       return (this.temperatureObj.now * 100) / this.baseTemperature
     },
     hightPct() {
-      return (this.temperatureObj.hight * 100) / this.baseTemperature
+      return (this.heigthTemp * 100) / this.baseTemperature
     },
     lowPct() {
-      return (this.temperatureObj.low * 100) / this.baseTemperature
+      return (this.lowTemp * 100) / this.baseTemperature
     },
     temperatureObj() {
       const obj = {}
@@ -428,12 +447,27 @@ export default {
       obj.low = 300
       obj.now = 800
       return obj
+    },
+    heigthTemp() {
+      return Math.max(...this.piontHistoryList.map((v) => v.fv), 0)
+    },
+    nowTemp() {
+      return this.piontHistoryList[0].fv
+    },
+    lowTemp() {
+      return Math.min(...this.piontHistoryList.map((v) => v.fv), 9000)
+    },
+    averageTemp() {
+      const sum = this.piontHistoryList.reduce((pre, cur) => {
+        return cur.fv + pre
+      }, 0)
+      const res = (sum / this.piontHistoryList.length).toFixed(1)
+      return res
     }
   },
-  created() {
-    this.getCells()
-  },
+  created() {},
   mounted() {
+    this.init()
     this.cacheList = this.list
     this.searchOptions = _map(this.list, 'name').map((item) => {
       return { value: `${item}`, label: `${item}` }
@@ -445,11 +479,67 @@ export default {
   },
   destroyed() {},
   methods: {
-    async getCells() {
+    init() {
+      this.queryParams.id = this.alarmItem.t_id
+      this.queryParams.sTime =
+        this.$dayjs().subtract(30, 'day').format('YYYY-MM-DD') + ' 00:00'
+      this.queryParams.eTime = this.$dayjs().format('YYYY-MM-DD') + ' 23:59'
+
+      this.queryCell()
+      this.queryPiont()
+      this.queryPiontHistory()
+
+      setInterval(() => {
+        this.queryPiontHistory()
+      }, this.step)
+    },
+    splitArr(data) {
+      const result = []
+      for (var i = 0; i < data.length; i += 3) {
+        result.push(data.slice(i, i + 3))
+      }
+      return result
+    },
+    /* 点位数据结构 */
+    setFuncOfpoint() {
+      // let groupNum = 20,row = 1 // 电解槽一排多少组 每3个为一组
+      const arr = this.allPointList
+      const newArr = this.splitArr(arr)
+
+      const pointListItem = newArr.map((v, i) => {
+        return { pointList: v }
+      })
+      // if(isSingle){
+
+      // }
+      // debugger
+      this.pointList = [{ arr: pointListItem }]
+    },
+    async queryPiont() {
+      devicePoint(this.alarmItem.BathID)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.allPointList = arr
+          this.setFuncOfpoint()
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    async queryPiontHistory() {
+      deviceHistory(this.queryParams)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.piontHistoryList = sortBy(arr, (v) => v.pick_time)
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    async queryCell() {
       try {
         // 电解槽
         const cellResult = await cell(this.alarmItem.AreaID, 1)
-        debugger
         const list = cellResult.data.result.stations
         this.list = list.map((v) => {
           return {
@@ -458,7 +548,7 @@ export default {
               id: v.uid,
               name: v.s_name,
               type: 'yellow',
-              dot: 168,
+              dot: 88888,
               temperatureDot: 0,
               trendDot: 0,
               unusualDot: 1

@@ -1,12 +1,12 @@
 // import { company, factory, area, device } from '@/api/station'
-import { companyData, factoryData, areaData, deviceData } from '@/api/data'
-import { getCell, setCell, removeCell } from '@/utils/auth'
+// import { companyData, factoryData, areaData, deviceData } from '@/api/data'
+import { getCell, setCell, getAlarmItem, setAlarmItem } from '@/utils/auth'
 
 
 const state = {
   currentCompany: {},
   currentFactory: {},
-  alarmItem: {},
+  alarmItem: getAlarmItem(),
   currentCell: getCell()
 }
 
@@ -29,6 +29,7 @@ const mutations = {
   },
   SET_ALARMITEM: (state, alarmItem) => {
     state.alarmItem = alarmItem
+    setAlarmItem(alarmItem)
   }
 }
 

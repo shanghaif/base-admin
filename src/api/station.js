@@ -138,6 +138,23 @@ export function devicePoint(id) { // 获取设备
     method: 'get'
   })
 }
+export function deviceHistory(obj) { // 获取设备   
+  const params = {
+    begin_time: obj.sTime,
+    end_time: obj.eTime,
+    tid: obj.id,
+    pid: 'temperature',
+    is_page: true,
+    page: 1,
+    size: 100
+  }
+  return request({
+    url: `api/data/history`,
+    
+    method: 'get',
+    params
+  })
+}
 export function warningAll(obj) { // 获取告警   
   const params = {...{factory: true, alarm_id: 'all'}, ...obj}
   return request({

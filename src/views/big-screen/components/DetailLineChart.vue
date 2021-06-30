@@ -5,8 +5,8 @@
 
         <div class="chart-box-title">测温点温度曲线</div>
         <div class="content-crumbs">
-          <div class="content-crumb">电解槽2021</div>
-          <div class="content-crumb">A12_LEFT</div>
+          <div class="content-crumb">{{ alarmItem.Bath }}</div>
+          <div class="content-crumb">{{ alarmItem.t_id }}</div>
 
         </div>
       </div>
@@ -47,12 +47,13 @@
               导出点位
             </div>
             <div class="filter-item-content">
+
               <div class="content-crumbs">
-                <div class="content-crumb">xx分公司</div>
-                <div class="content-crumb">电解铝二厂</div>
-                <div class="content-crumb">一分区</div>
-                <div class="content-crumb">电解槽2008</div>
-                <div class="content-crumb">A17_RIGHT</div>
+                <div class="content-crumb">{{ alarmItem.Company }}</div>
+                <div class="content-crumb">{{ alarmItem.Factory }}</div>
+                <div class="content-crumb">{{ alarmItem.Area }}</div>
+                <div class="content-crumb">{{ alarmItem.Bath }}</div>
+                <div class="content-crumb">{{ alarmItem.t_id }}</div>
               </div>
             </div>
           </div>
@@ -105,19 +106,27 @@
 <script>
 import * as echarts from 'echarts'
 import resize from './mixins/resize'
-
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
+import { color } from 'echarts'
+const alarmColor = '#ff2f14'
 export default {
   name: 'DetailLineChart',
   components: {},
   mixins: [resize],
   props: {
+    list: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
     className: {
       type: String,
       default: 'chart'
     },
     id: {
       type: String,
-      default: 'chart'
+      default: 'DetailLineChart'
     },
     width: {
       type: String,
@@ -128,6 +137,7 @@ export default {
       default: '90%'
     }
   },
+
   data() {
     return {
       chart: null,
@@ -135,7 +145,9 @@ export default {
 
       option: null,
       timer: null,
+      alarmTemp: 250,
       xData: [],
+      newList: [],
       checkedTemp: [],
       Temps: ['原始温度数据', '最高温度', '最低温度', '平均温度'],
       now: 0,
@@ -145,9 +157,25 @@ export default {
       step: (10 / 60) * 60 * 1000
     }
   },
-  mounted() {
-    this.initChart()
+  computed: {
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem
+    })
   },
+  watch: {
+    list: {
+      handler(newName, oldName) {
+        this.newList = [...newName]
+        // this.xData = newName.map((v) => {
+        //   const time = this.$dayjs(v.pick_time).indexOf()
+        //   return { value: [time, v.fv] }
+        // })
+        this.initChart()
+      },
+      deep: true
+    }
+  },
+  mounted() {},
   beforeDestroy() {
     if (!this.chart) {
       return
@@ -162,6 +190,7 @@ export default {
     exportChart(Min, Max) {
       this.exportDialogVisible = true
     },
+
     randomNum(Min, Max) {
       var Range = Max - Min
       var Rand = Math.random()
@@ -178,13 +207,19 @@ export default {
         value: [this.now, Math.round(this.value)]
       }
     },
+
     initChart() {
+      const that = this
       this.chart = echarts.init(document.getElementById(this.id))
       this.now = this.$dayjs().valueOf()
-      for (let i = 0; i < 100; i++) {
-        this.xData.push(this.randomData())
-      }
-      const that = this
+      // for (let i = 0; i < 100; i++) {
+      //   this.xData.push(this.randomData())
+      // }
+      console.log('this.newList :>> ', this.newList)
+      this.xData = this.newList.map((v) => {
+        const time = that.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
+        return { value: [time, v.fv] }
+      })
       this.option = {
         color: ['#18BAD7'],
 
@@ -211,7 +246,7 @@ export default {
           {
             show: false,
             dimension: 1,
-            pieces: [{ gte: 80, lte: 5000, color: 'red' }], // pieces的值由动态数据决定
+            pieces: [{ gte: that.alarmTemp, lte: 5000, color: alarmColor }], // pieces的值由动态数据决定
             outOfRange: {
               color: '#18BAD7'
             }
@@ -229,10 +264,11 @@ export default {
           splitNumber: 5,
           axisLabel: {
             formatter(value) {
-              // let time = that.$dayjs(value).format('HH:mm:ss')
-              const time = that.$dayjs(value).format('mm:ss')
+              // const time = that.$dayjs(value).format('HH:mm:ss')
+              const time = that.$dayjs(value).format('HH:mm')
               return time
-            }
+            },
+            color: '#999'
           },
           axisTick: {
             show: false
@@ -250,9 +286,13 @@ export default {
         yAxis: {
           type: 'value',
           scale: true,
+
           // name: '温度',
           min: 0,
           boundaryGap: false,
+          axisLabel: {
+            color: '#999'
+          },
           axisTick: {
             show: false
           },
@@ -273,11 +313,19 @@ export default {
           {
             name: '实时温度',
             type: 'line',
+            symbol: 'none',
             xAxisIndex: 0,
             yAxisIndex: 0,
             itemStyle: {
-              opacity: 0
+              opacity: 0,
+              normal: {
+                // color: '#6cb041',
+                lineStyle: {
+                  width: 3 // 设置线条粗细
+                }
+              }
             },
+
             areaStyle: {
               color: new echarts.graphic.LinearGradient(
                 0,
@@ -309,8 +357,8 @@ export default {
               label: { position: 'start' },
               data: [
                 {
-                  yAxis: 80,
-                  lineStyle: { width: 1.656, color: 'red' },
+                  yAxis: that.alarmTemp,
+                  lineStyle: { width: 1, color: alarmColor },
                   label: { show: false }
                 }
                 // { type: 'average', name: '平均值' }
@@ -324,17 +372,18 @@ export default {
               label: { fontSize: 33.12 },
               data: [
                 {
-                  yAxis: 80,
+                  yAxis: that.alarmTemp,
                   x: '0%',
                   symbolSize: 0.1,
                   label: {
-                    textStyle: { color: 'red' },
+                    textStyle: { color: alarmColor },
                     // padding: [3.312, 8.28],
-                    fontSize: 14,
+                    fontSize: 22,
+                    fontWeight: 'bold',
                     // borderRadius: 13.248,
                     // backgroundColor: 'rgba(255, 72, 74, 0.5)',
                     position: 'right',
-                    formatter: '80℃'
+                    formatter: `${that.alarmTemp}℃`
                   }
                 }
                 // {
@@ -361,14 +410,14 @@ export default {
 
       this.chart.setOption(this.option, true)
 
-      this.timer = setInterval(() => {
-        for (let i = 0; i < 5; i++) {
-          this.xData.shift()
-          this.xData.push(this.randomData())
-        }
+      // this.timer = setInterval(() => {
+      //   for (let i = 0; i < 5; i++) {
+      //     this.xData.shift()
+      //     this.xData.push(this.randomData())
+      //   }
 
-        this.chart.setOption(this.option, true)
-      }, this.step)
+      //   this.chart.setOption(this.option, true)
+      // }, this.step)
     }
   }
 }

@@ -76,13 +76,13 @@ module.exports = {
     proxy: {
       '/api': { // 此处要与 /services/api.js 中的 API_PROXY_PREFIX 值保持一致
         // target: process.env.VUE_APP_TYPE === 'edge' ? "http://127.0.0.1:16666" : "http://127.0.0.1:18866",
-        target: 'http://10.53.31.150:18866',
+        target: 'http://10.53.31.114:18866',
         changeOrigin: true,
         ws: true
       },
       '/ws': {
         // target: process.env.VUE_APP_TYPE === 'edge' ? "ws://127.0.0.1:16666" : "ws://127.0.0.1:18866",
-        target: 'ws://10.53.31.150:18866',
+        target: 'ws://10.53.31.114:18866',
         changeOrigin: true,
         ws: true
       }

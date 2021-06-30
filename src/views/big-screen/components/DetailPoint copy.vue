@@ -19,9 +19,9 @@
               v-for="(point, k) of group.pointList"
               :key="'point' + k"
               placement="top-start"
-              :title="point.tid"
+              :title="point.name"
+              width="200"
               trigger="hover"
-              width="250"
               :close-delay="50"
             >
 
@@ -54,7 +54,7 @@
               v-for="(point, k) of group.pointList"
               :key="'point' + k"
               placement="top-start"
-              :title="point.tid"
+              :title="point.name"
               width="200"
               trigger="hover"
               :close-delay="50"
@@ -101,8 +101,7 @@ import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 export default {
   name: 'DetailPoint',
   filters: {
-    formatNum(i) {
-      const n = i + 1
+    formatNum(n) {
       let str = ''
       if (n < 10) {
         str = `0${n}`
