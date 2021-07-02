@@ -4,70 +4,36 @@
       <div class="content">
         <div class="content-top">
           <div class="detail-item detail-item-left">
-            <div
-              class="content-back"
-              @click="goBack"
-            ><i class="el-icon-arrow-left" />返回首页</div>
-            <div class="chart-box-title">电解槽总览</div>
-            <div class="content-crumbs">
-              <div class="content-crumb">{{ alarmItem.Company }}</div>
-              <div class="content-crumb">{{ alarmItem.Factory }}</div>
-              <div class="content-crumb">{{ alarmItem.Area }}</div>
-            </div>
-            <div class="content-filter">
-              <div class="content-select">
-                <el-select
-                  v-model="selectType"
-                  placeholder="请选择"
-                  class="screen-select"
-                  @change="getType"
-                >
-                  <el-option
-                    v-for="item in cellTypeOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
-              </div>
-              <div class="content-search">
-                <el-select
-                  v-model="searchCell"
-                  filterable
-                  remote
-                  reserve-keyword
-                  clearable
-                  placeholder="请输入关键词"
-                  :remote-method="remoteMethod"
-                  :loading="loading"
-                  class="screen-select"
-                  @change="getSearch"
-                >
-                  <el-option
-                    v-for="item in searchOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value"
-                  />
-                </el-select>
+            <div>
+
+              <div
+                class="content-back"
+                @click="goBack"
+              ><i class="el-icon-arrow-left" />返回首页</div>
+              <div class="chart-box-title">电解槽总览</div>
+              <div class="content-crumbs">
+                <div class="content-crumb">{{ alarmItem.Company }}</div>
+                <div class="content-crumb">{{ alarmItem.Factory }}</div>
+                <div class="content-crumb">{{ alarmItem.Area }}</div>
               </div>
             </div>
-            <div class="detail-cells">
-              <el-scrollbar wrap-class="detail-cells">
-                <electrolyzer
-                  :list="list"
-                  @result="clickCell"
-                />
-              </el-scrollbar>
-            </div>
+
+            <electrolyzer
+              :list="list"
+              @clickPoint="clickPoint"
+            />
 
           </div>
           <div class="detail-item detail-item-center">
-            <Header />
+            <Header @change="updateRate" />
 
             <detail-line-chart
               ref="DetailLineChart"
+              :alarm-temp="warningVal"
               :list="piontHistoryList"
+              @refresh="refresh"
+              @changeDate="changeDateQuery"
+              @exportPoint="exportPoint"
             />
 
           </div>
@@ -89,12 +55,16 @@
 
                     <div>
                       <span>告警信息：
-                        <span class="err">温度过高</span>
+                        <span
+                          v-if="nowTemp > warningVal"
+                          class="err"
+                        >温度过高</span>
+                        <span v-else>无</span>
                       </span>
                     </div>
                     <div>
                       <span>运行状态:
-                        <span class="success">正常</span>
+                        <span class="success">{{ alarmItem.alarm_id | t_type }}</span>
                       </span>
                     </div>
                   </div>
@@ -102,7 +72,7 @@
                 </div>
                 <div
                   class="right-bar-item"
-                  :class="{hight:nowPct > basePct } "
+                  :class="{hight:nowTemp > warningVal } "
                 >
                   <div>当前温度</div>
                   <div class="bar-item-content">
@@ -113,7 +83,7 @@
                     <div class="num low">
                       <count-to
                         :start-val="0"
-                        :end-val="temperatureObj.now"
+                        :end-val="nowTemp"
                         :duration="2000"
                         :decimals="1"
                         suffix="℃"
@@ -125,7 +95,7 @@
                 </div>
                 <div
                   class="right-bar-item"
-                  :class="{hight:averagePct > basePct } "
+                  :class="{hight:averageTemp > warningVal } "
                 >
                   <div>平均温度</div>
                   <div class="bar-item-content">
@@ -148,7 +118,7 @@
                 </div>
                 <div
                   class="right-bar-item"
-                  :class="{hight:hightPct > basePct } "
+                  :class="{hight:heigthTemp > warningVal } "
                 >
                   <div>最高温度</div>
                   <div class="bar-item-content">
@@ -172,7 +142,7 @@
                 </div>
                 <div
                   class="right-bar-item"
-                  :class="{hight:lowPct > basePct } "
+                  :class="{hight:lowTemp > warningVal } "
                 >
                   <div>最低温度</div>
                   <div class="bar-item-content">
@@ -212,10 +182,11 @@
           </div>
           <div class="point-wrap">
 
-            <detail-point
+            <DetailPoint
               :list="pointList"
               :min="unusualVal"
               :max="warningVal"
+              @pointClick="pointClick"
             />
           </div>
 
@@ -285,9 +256,26 @@ import {
   devicePoint,
   deviceHistory,
   handelAlarm,
+  deviceInfo,
+  exportPointInfo,
   deviceStatus
 } from '@/api/station'
 
+function createCellList(len) {
+  const n = len
+  const arr = []
+  let obj = {}
+  while (len--) {
+    obj = {
+      index: len,
+      empty: true,
+      tid: n - len,
+      value: '无数据'
+    }
+    arr.push(obj)
+  }
+  return arr
+}
 export default {
   name: 'Detail',
   components: {
@@ -297,25 +285,25 @@ export default {
     CountTo,
     DetailLineChart
   },
-
+  filters: {
+    t_type(val) {
+      let res = ''
+      if (val === 'offline') {
+        res = '离线'
+      } else {
+        res = '正常'
+      }
+      return res
+    }
+  },
   data() {
     return {
-      step: (10 / 60) * 60 * 1000, //  60 * 1000 // 1分钟
-
+      step: (30 / 60) * 60 * 1000, //  60 * 1000 // 1分钟
       centerDialogVisible: false,
-      baseTemperature: 1500,
-      basePct: 50,
-      piontUnit: 0,
-      currentCell: {},
 
       updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
       pointList: [],
 
-      cellTypeOptions: [
-        { value: 'defual', label: '温度告警' },
-        { value: 'warning', label: '趋势告警' },
-        { value: 'yellow', label: '异常点位' }
-      ],
       cellFreshTimeOptions: [
         { value: '10秒', label: '10秒' },
         { value: '30秒', label: '30秒' },
@@ -324,7 +312,6 @@ export default {
         { value: '10分钟', label: '10分钟' }
       ],
 
-      searchOptions: [],
       list1: [
         {
           id: '10000',
@@ -406,9 +393,24 @@ export default {
       selectTime: '',
       searchCell: '',
       loading: false,
+      timer: null,
       cacheList: [],
-      allPointList: [],
-      piontHistoryList: [],
+      allPointList: [
+        {
+          tid: '',
+          value: 0
+        }
+      ],
+      allPointListFake: createCellList(168),
+
+      piontHistoryList: [
+        {
+          fv: 0,
+          pick_time: '',
+          pid: '',
+          tid: ''
+        }
+      ],
       queryParams: {
         sTime: '',
         eTime: '',
@@ -430,16 +432,18 @@ export default {
     },
 
     averagePct() {
-      return (this.averageTemp * 100) / this.baseTemperature
+      return this.averageTemp > 0
+        ? (this.averageTemp * 100) / this.heigthTemp
+        : 0
     },
     nowPct() {
-      return (this.temperatureObj.now * 100) / this.baseTemperature
+      return this.nowTemp > 0 ? (this.nowTemp * 100) / this.heigthTemp : 0
     },
     hightPct() {
-      return (this.heigthTemp * 100) / this.baseTemperature
+      return this.heigthTemp > 0 ? (this.heigthTemp * 100) / this.heigthTemp : 0
     },
     lowPct() {
-      return (this.lowTemp * 100) / this.baseTemperature
+      return this.lowTemp > 0 ? (this.lowTemp * 100) / this.heigthTemp : 0
     },
     temperatureObj() {
       const obj = {}
@@ -452,46 +456,135 @@ export default {
       return Math.max(...this.piontHistoryList.map((v) => v.fv), 0)
     },
     nowTemp() {
-      return this.piontHistoryList[0].fv
+      const obj = this.allPointList.find((v) => v.tid === this.alarmItem.t_id)
+      return obj ? obj.value : 0
     },
     lowTemp() {
-      return Math.min(...this.piontHistoryList.map((v) => v.fv), 9000)
+      return this.piontHistoryList.length > 0
+        ? Math.min(...this.piontHistoryList.map((v) => v.fv), 9000)
+        : 0
     },
     averageTemp() {
       const sum = this.piontHistoryList.reduce((pre, cur) => {
         return cur.fv + pre
       }, 0)
-      const res = (sum / this.piontHistoryList.length).toFixed(1)
-      return res
+      const res = sum ? (sum / this.piontHistoryList.length).toFixed(1) : 0
+      return Number(res)
     }
   },
   created() {},
   mounted() {
     this.init()
-    this.cacheList = this.list
-    this.searchOptions = _map(this.list, 'name').map((item) => {
-      return { value: `${item}`, label: `${item}` }
-    })
-    const obj = this.list.filter((v) => {
-      return v.id === this.$route.query.cell_id
-    })
-    this.currentCell = Object.assign({}, obj)
   },
   destroyed() {},
+  beforeDestroy() {
+    clearInterval(this.timer)
+  },
   methods: {
-    init() {
-      this.queryParams.id = this.alarmItem.t_id
-      this.queryParams.sTime =
-        this.$dayjs().subtract(30, 'day').format('YYYY-MM-DD') + ' 00:00'
-      this.queryParams.eTime = this.$dayjs().format('YYYY-MM-DD') + ' 23:59'
+    ...mapMutations({
+      SET_ALARMITEM: 'station/SET_ALARMITEM'
+    }),
+    clickPoint(item) {
+      const obj = { ...this.alarmItem }
+      obj.BathID = item.bath_id
+      this.SET_ALARMITEM(obj)
+      devicePoint(this.alarmItem.BathID)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.allPointList = arr
+          this.setFuncOfpoint()
+          obj.t_id =
+            this.allPointList.length > 0 ? this.allPointList[0].tid : ''
+          this.SET_ALARMITEM(obj)
+          this.queryPiontHistory()
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    isExcel(res) {
+      let fileName = ''
+      const data = res.data
+      const disposition = res.headers['content-disposition']
+      if (disposition) {
+        fileName = window
+          .decodeURI(disposition.split('=')[1], 'UTF-8')
+          .replace(/"/g, '')
+      }
+      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        const blob = new Blob([data])
+        window.navigator.msSaveOrOpenBlob(blob, fileName)
+      } else {
+        /* 火狐谷歌的文件下载方式 */
+        var blob = new Blob([data])
+        var downloadElement = document.createElement('a')
+        var href = window.URL.createObjectURL(blob)
+        downloadElement.href = href
+        downloadElement.download = fileName
+        document.body.appendChild(downloadElement)
+        downloadElement.click()
+        document.body.removeChild(downloadElement)
+        window.URL.revokeObjectURL(href)
+      }
+    },
+    exportPoint(arr) {
+      const obj = {
+        id: this.alarmItem.t_id,
+        sTime: arr[0],
+        eTime: arr[1]
+      }
+      // var l =
+      //   'http://10.53.31.114:9527/api/data/export?tid=temperature@run-50.exe&begin_time=2021-06-01%2015:48&end_time=2021-06-21%2016:48'
+      // console.log('111111111')
+      // window.location.href = l
+      exportPointInfo(obj)
+        .then((res) => {
+          this.isExcel(res)
+          // type 为需要导出的文件类型，此处为xls表格类型
 
-      this.queryCell()
+          this.$refs.DetailLineChart.hideExport()
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    refresh() {
+      this.queryPiontHistory()
+    },
+    changeDateQuery(date) {
+      this.queryParams.sTime = date + ' 00:00'
+      this.queryParams.eTime = date + ' 23:59'
+      this.queryPiontHistory(date)
+    },
+    pointClick(val) {
+      const obj = { ...this.alarmItem }
+      obj.t_id = val
+      this.SET_ALARMITEM(obj)
+      this.queryPiontHistory()
+      // deviceInfo(val).then((res) => {})
+    },
+    updateRate(val) {
+      this.step = val * 1000
+      this.init()
+    },
+    init() {
+      // 第一次进入页面默认查询时间
+      // this.queryParams.sTime =
+      //   this.$dayjs().subtract(30, 'day').format('YYYY-MM-DD') + ' 00:00'
+      // this.queryParams.eTime = this.$dayjs().format('YYYY-MM-DD') + ' 23:59'
+      this.queryParams.sTime =
+        this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 00:00'
+      this.queryParams.eTime =
+        this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 23:59'
+      // this.queryCell()
       this.queryPiont()
       this.queryPiontHistory()
 
-      setInterval(() => {
-        this.queryPiontHistory()
-      }, this.step)
+      // clearInterval(this.timer)
+
+      // this.timer = setInterval(() => {
+      //   this.queryPiontHistory()
+      // }, this.step)
     },
     splitArr(data) {
       const result = []
@@ -502,20 +595,32 @@ export default {
     },
     /* 点位数据结构 */
     setFuncOfpoint() {
+      this.allPointListFake = createCellList(168)
       // let groupNum = 20,row = 1 // 电解槽一排多少组 每3个为一组
+      const len = this.allPointListFake.length // 默认168个点位
       const arr = this.allPointList
-      const newArr = this.splitArr(arr)
 
-      const pointListItem = newArr.map((v, i) => {
+      arr.forEach((v, i) => {
+        this.allPointListFake[i] = v
+      })
+      const arrFake1 = this.allPointListFake.slice(0, len / 2)
+      const arrFake2 = this.allPointListFake.slice(len / 2, len)
+      const newArr1 = this.splitArr(arrFake1)
+      const newArr2 = this.splitArr(arrFake2)
+
+      const pointListItem1 = newArr1.map((v, i) => {
+        return { pointList: v }
+      })
+      const pointListItem2 = newArr2.map((v, i) => {
         return { pointList: v }
       })
       // if(isSingle){
 
       // }
       // debugger
-      this.pointList = [{ arr: pointListItem }]
+      this.pointList = [{ arr: pointListItem1 }, { arr: pointListItem2 }]
     },
-    async queryPiont() {
+    queryPiont() {
       devicePoint(this.alarmItem.BathID)
         .then((res) => {
           const arr = res.data.result || []
@@ -526,7 +631,8 @@ export default {
           alert(err)
         })
     },
-    async queryPiontHistory() {
+    queryPiontHistory(date) {
+      this.queryParams.id = this.alarmItem.t_id
       deviceHistory(this.queryParams)
         .then((res) => {
           const arr = res.data.result || []
@@ -536,33 +642,29 @@ export default {
           alert(err)
         })
     },
-    async queryCell() {
-      try {
-        // 电解槽
-        const cellResult = await cell(this.alarmItem.AreaID, 1)
-        const list = cellResult.data.result.stations
-        this.list = list.map((v) => {
-          return {
-            ...v,
-            ...{
-              id: v.uid,
-              name: v.s_name,
-              type: 'yellow',
-              dot: 88888,
-              temperatureDot: 0,
-              trendDot: 0,
-              unusualDot: 1
-            }
-          }
-        })
-      } catch (err) {
-        alert('电解槽错误')
-      }
-    },
-    clickCell(item) {
-      console.log(item)
-      this.currentCell = Object.assign({}, item)
-    },
+    // async queryCell() {
+    //   try {
+    //     // 电解槽
+    //     const cellResult = await cellInfo(this.alarmItem.AreaID, 1)
+    //     const list = cellResult.data.result.stations
+    //     this.list = list.map((v) => {
+    //       return {
+    //         ...v,
+    //         ...{
+    //           id: v.uid,
+    //           name: v.s_name,
+    //           type: 'yellow',
+    //           dot: 88888,
+    //           temperatureDot: 0,
+    //           trendDot: 0,
+    //           unusualDot: 1
+    //         }
+    //       }
+    //     })
+    //   } catch (err) {
+    //     alert('电解槽错误')
+    //   }
+    // },
 
     customColorMethod(percentage) {
       console.log(percentage)
@@ -572,34 +674,7 @@ export default {
         return '#18BAD7'
       }
     },
-    remoteMethod(query) {
-      if (query !== '') {
-        this.loading = true
-        setTimeout(() => {
-          this.loading = false
-          this.searchOptions = this.searchOptions.filter((item) => {
-            return item.label.toLowerCase().indexOf(query.toLowerCase()) > -1
-          })
-        }, 200)
-      } else {
-        this.options = []
-      }
-    },
-    getType(type) {
-      console.log('type :>> ', type)
-      this.list = this.cacheList.filter((v) => {
-        return v.type === type
-      })
-    },
-    getSearch(val) {
-      if (!val) {
-        this.list = this.cacheList
-      } else {
-        this.list = this.cacheList.filter((v) => {
-          return v.name === val
-        })
-      }
-    },
+
     goBack() {
       this.$router.push({ path: '/big-screen' })
     }
@@ -724,13 +799,6 @@ $top-Height: 10vh;
               text-decoration: underline;
               color: $selfColor;
             }
-          }
-
-          .detail-cells {
-            width: 100%;
-            height: 70%;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.04);
           }
         }
         &.detail-item-center {

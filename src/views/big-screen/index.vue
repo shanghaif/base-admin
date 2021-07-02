@@ -57,7 +57,7 @@
         <div class="item right">
           <unusual-list ref="UnusualList" />
 
-          <single-line-chart id="line_r" />
+          <AlarmChart id="line_r" />
 
         </div>
       </div>
@@ -70,7 +70,8 @@
 import { mapState, mapActions, mapMutations } from 'vuex'
 import MapChart from './components/MapChart'
 import SingleBarChart from './components/SingleBarChart'
-import SingleLineChart from './components/SingleLineChart'
+// import SingleLineChart from './components/SingleLineChart'
+import AlarmChart from './components/AlarmChart'
 import BarChartRow from './components/BarChartRow'
 import SheetMain from './components/SheetMain'
 import UnusualList from './components/UnusualList'
@@ -109,10 +110,11 @@ export default {
   name: 'BigScreen',
   components: {
     MapChart,
-    SingleLineChart,
+    // SingleLineChart,
     BarChartRow,
     SheetMain,
     UnusualList,
+    AlarmChart,
     Header,
     SingleBarChart
   },

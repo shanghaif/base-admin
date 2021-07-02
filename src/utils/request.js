@@ -12,7 +12,7 @@ const service = axios.create({
   xsrfHeaderName: xsrfHeaderName, 
   xsrfCookieName: xsrfHeaderName, 
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json;charset=utf-8'
   }
 })
 

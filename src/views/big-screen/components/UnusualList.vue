@@ -253,8 +253,9 @@ export default {
         size: this.size
       }
       const res = await warningAll({ ...obj, ...this.chooseDate })
-      this.noMoreList = res.data.result.alarms
+      this.noMoreList = (res.data.result && res.data.result.alarms) || []
       this.list = [...this.list, ...this.noMoreList]
+
       if (this.list.length === 0) {
         this.isEmpty = true
       }

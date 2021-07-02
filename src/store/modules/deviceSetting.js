@@ -1,6 +1,6 @@
 const state = {
-  warningVal: 120, // 告警温度
-  unusualVal: 100 // 异常温度
+  warningVal: 250, // 告警温度
+  unusualVal: 200 // 异常温度
   
 }
 

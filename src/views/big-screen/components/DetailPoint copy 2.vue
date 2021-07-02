@@ -19,7 +19,7 @@
               v-for="(point, k) of group.pointList"
               :key="'point' + k"
               placement="top-start"
-              :title="point.tid + ' '"
+              :title="point.tid"
               trigger="hover"
               width="250"
               :close-delay="50"
@@ -28,21 +28,16 @@
               <div
                 class="cell-tips-box"
                 :class="statusClass(point.value,k)"
-              >当前温度：
-                <span class="cur-num">{{ point.value }}</span>
-                <span
-                  v-if="point.value > 0"
-                  class="cur-num"
-                >℃</span>
-
-              </div>
+              >当前温度：<span class="cur-num">{{ point.value }}℃</span></div>
               <div
                 slot="reference"
+                :ref="`top${i}${j}${k}`"
                 class="point"
-                :class="{'point-small':k === 1,red: point.value > max,yellow:point.value > min&& point.value <max,active:clickActive === point.tid,hover:hoverActive=== point.tid}"
-                @click="selectPoint(point)"
-                @mouseenter="pointStatus(point,1)"
-                @mouseleave="pointStatus(point)"
+                :data-id="point.tid"
+                :class="{'point-small':k === 1,red: point.value > max,yellow:point.value > min&& point.value <max,active:bigActive === point.tid,hover:hoverActive=== point.tid}"
+                @click="selectPoint(point,i,j,k)"
+                @mouseenter="pointStatus(point,i,j,k,1)"
+                @mouseleave="pointStatus(point,i,j,k)"
               />
             </el-popover>
 
@@ -60,7 +55,7 @@
               v-for="(point, k) of group.pointList"
               :key="'point' + k"
               placement="top-start"
-              :title="point.tid + ' '"
+              :title="point.tid"
               width="200"
               trigger="hover"
               :close-delay="50"
@@ -69,21 +64,17 @@
               <div
                 class="cell-tips-box"
                 :class="statusClass(point.value,k)"
-              >当前温度：<span class="cur-num">{{ point.value }}</span>
-                <span
-                  v-if="point.value > 0"
-                  class="cur-num"
-                >℃</span>
-              </div>
+              >当前温度：<span class="cur-num">{{ point.value }}℃</span></div>
               <div
                 slot="reference"
+                :ref="`bottom${i}${j}${k}`"
                 class="point"
-                :class="{'point-small':k === 1,red: point.value > max,yellow:point.value > min&& point.value <max,active:clickActive === point.tid,hover:hoverActive=== point.tid}"
-                @click="selectPoint(point)"
-                @mouseenter="pointStatus(point,1)"
-                @mouseleave="pointStatus(point)"
+                :data-id="point.tid"
+                :class="{'point-small':k === 1,red: point.value > max,yellow:point.value > min&& point.value <max,active:bigActive === point.tid,hover:hoverActive=== point.tid}"
+                @click="selectPoint(point,i,j,k)"
+                @mouseenter="pointStatus(i,j,k,1)"
+                @mouseleave="pointStatus(i,j,k)"
               />
-
             </el-popover>
 
           </div>
@@ -153,7 +144,9 @@ export default {
   data() {
     return {
       classStr: '',
-      clickActive: '',
+      pointActive: false,
+      bigActive: '',
+      minActive: '',
       hoverActive: '',
       pointIndex: -1,
       cellIndex: -1
@@ -165,7 +158,6 @@ export default {
     ...mapState({
       alarmItem: (state) => state.station.alarmItem
     }),
-
     cellWidth() {
       const num = 100 / this.list[0].arr.length
       const pct = num.toFixed(2) + '%'
@@ -175,21 +167,22 @@ export default {
       }
     }
   },
-  watch: {
-    list: {
-      handler(newName, oldName) {
-        this.clickActive = this.alarmItem.t_id
-      },
-      deep: true
-    }
-  },
   methods: {
-    selectPoint(point) {
+    selectPoint(point, i, j, k) {
       if (point.empty) {
         return
       }
       const id = point.tid
-      this.clickActive = id
+      this.bigActive = id
+      // const str1 = `top${i}${j}${k}`
+      // const str2 = `bottom${i}${j}${k}`
+      // const otherDom = document.querySelectorAll('.point.active') // 存在高亮时
+      // if (otherDom.length > 0) {
+      //   otherDom[0].classList.remove('active')
+      //   otherDom[1].classList.remove('active')
+      // }
+      // this.$refs[str1][0].classList.add('active')
+      // this.$refs[str2][0].classList.add('active')
       this.$emit('pointClick', id)
     },
     // tips
@@ -206,16 +199,22 @@ export default {
       }
       return result
     },
-    pointStatus(point, flag) {
+    pointStatus(point, i, j, k, flag) {
       // flag ture鼠标进入
-      // if (point.empty) {
-      //   return
-      // }
       const id = point.tid
+
+      // const str1 = `top${i}${j}${k}`
+      // const str2 = `bottom${i}${j}${k}`
       if (flag) {
         this.hoverActive = id
+
+        // this.$refs[str1][0].classList.add('hover')
+        // this.$refs[str2][0].classList.add('hover')
       } else {
         this.hoverActive = ''
+
+        // this.$refs[str1][0].classList.remove('hover')
+        // this.$refs[str2][0].classList.remove('hover')
       }
     }
   }

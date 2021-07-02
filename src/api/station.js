@@ -113,6 +113,18 @@ export function cell(id, flag) { // 获取电解槽
     params
   })
 }
+export function cellInfo(id, page) { // 详情页获取电解槽   
+  const params = {
+    bath: true, new: true, info: true, size: 300, page: page || 1
+  }
+ 
+  return request({
+    url: `${baseUrl}/${id}`,
+    
+    method: 'get',
+    params
+  })
+}
 export function device(id, flag, page) { // 获取设备   
   let params = {}
   if (flag) {
@@ -155,6 +167,13 @@ export function deviceHistory(obj) { // 获取设备
     params
   })
 }
+export function deviceInfo(id) { // 获取单个设备信息
+  return request({
+    url: `api/data/view/${id}`,
+    
+    method: 'get'
+  })
+}
 export function warningAll(obj) { // 获取告警   
   const params = {...{factory: true, alarm_id: 'all'}, ...obj}
   return request({
@@ -182,6 +201,22 @@ export function deleteThings(id) { // 编辑设备
   return request({
     url: `api/cfg/thing/${id}`,
     method: 'delete'
+  })
+}
+
+
+export function exportPointInfo(obj) { // 获取设备   
+  const params = {
+    begin_time: obj.sTime,
+    end_time: obj.eTime,
+    tid: obj.id
+  }
+  return request({
+    url: `api/data/export`,
+    method: 'get',
+    // responseType: 'arraybuffer',
+    responseType: 'blob',
+    params
   })
 }
 

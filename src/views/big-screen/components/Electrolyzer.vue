@@ -1,69 +1,114 @@
 <template>
-  <div>
-    <div
-      v-for="(source,i) in list"
-      :key="(i + 'a')"
-      class="electrolyzer-wrap"
-      :class="className(source) + (curCell === source.id ? ' active' : '')"
-      @click="checkCell(source)"
-    >
-      <!-- <div
-      class="electrolyzer-wrap"
-      :class="className(source) + (curCell === source.id ? ' active' : '')"
-      @click="checkCell(source)"
-    > -->
-      <div class="left">
-        <img
-          :src="imgObj[className(source)]"
-          class="electrolyzer-img"
-          alt="图片"
+  <div class="ele-wrap">
+    <div class="content-filter">
+      <div class="content-select">
+        <el-select
+          v-model="selectType"
+          placeholder="所有状态"
+          class="screen-select"
+          @change="getType"
         >
+          <el-option
+            v-for="item in cellTypeOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
       </div>
-      <div class="right">
-        <div class="cell-name">{{ source.name }}</div>
-        <div class="cell-types">
-          <div class="cell-type">
-            <div class="num def">{{ source.dot }}</div>
-            <div class="num-text">总点位数</div>
-          </div>
-          <div class="cell-type">
-            <div
-              class="num"
-              :class="{ red: source.trendDot > 0 }"
-            >
-              {{ source.temperatureDot }}
+      <div class="content-search">
+        <el-select
+          v-model="searchCell"
+          filterable
+          remote
+          reserve-keyword
+          clearable
+          placeholder="请输入关键词"
+          class="screen-select"
+          :remote-method="remoteMethod"
+          @change="getSearch"
+        >
+          <el-option
+            v-for="item in searchOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </div>
+    </div>
+    <div
+      class="detail-cells"
+      :class="{'no-data':list.length < 1}"
+    >
+
+      <!-- <el-scrollbar wrap-class="detail-cells"> -->
+
+      <div
+        v-for="(source,i) in list"
+        :key="(i + 'a')"
+        class="electrolyzer-wrap"
+        :class="className(source) + (curCell === source.id ? ' active' : '')"
+        @click="checkCell(source)"
+      >
+
+        <div class="left">
+          <img
+            :src="imgObj[className(source)]"
+            class="electrolyzer-img"
+            alt="图片"
+          >
+        </div>
+        <div class="right">
+          <div class="cell-name">{{ source.name }}</div>
+          <div class="cell-types">
+            <div class="cell-type">
+              <div class="num def">{{ source.dot }}</div>
+              <div class="num-text">总点位数</div>
             </div>
-            <div class="num-text">温度告警</div>
-          </div>
-          <div class="cell-type">
-            <div
-              class="num"
-              :class="{ red: source.trendDot > 0 }"
-            >
-              {{ source.trendDot }}
+            <div class="cell-type">
+              <div
+                class="num"
+                :class="{ red: source.trendDot > 0 }"
+              >
+                {{ source.temperatureDot }}
+              </div>
+              <div class="num-text">温度告警</div>
             </div>
-            <div class="num-text">趋势告警</div>
-          </div>
-          <div class="cell-type">
-            <div
-              class="num"
-              :class="{ yellow: source.unusualDot > 0 }"
-            >
-              {{ source.unusualDot }}
+            <div class="cell-type">
+              <div
+                class="num"
+                :class="{ red: source.trendDot > 0 }"
+              >
+                {{ source.trendDot }}
+              </div>
+              <div class="num-text">趋势告警</div>
             </div>
-            <div class="num-text">异常点位</div>
+            <div class="cell-type">
+              <div
+                class="num"
+                :class="{ yellow: source.unusualDot > 0 }"
+              >
+                {{ source.unusualDot }}
+              </div>
+              <div class="num-text">异常点位</div>
+            </div>
           </div>
         </div>
       </div>
+      <!-- </el-scrollbar> -->
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import grayImg from '@/assets/images/cell.png'
 import activeImg from '@/assets/images/cell_selected.png'
 import redImg from '@/assets/images/cell_warning.png'
 import yellowImg from '@/assets/images/cell_yellow.png'
+import { cellInfo } from '@/api/station'
+// import _map from 'lodash/map'
 
 function createData(len) {
   const arr = []
@@ -86,26 +131,35 @@ export default {
   name: 'Electrolyzer',
 
   props: {
-    // source: {
-    //   type: Object,
+    // list: {
+    //   type: Array,
     //   default() {
-    //     return {}
+    //     return []
     //   }
-    // },
-    list: {
-      type: Array,
-      default() {
-        return []
-      }
-    }
+    // }
   },
   data() {
     return {
+      list: [],
+      searchOptions: [],
+
       imgObj: {
         yellow: yellowImg,
         warning: redImg,
         def: grayImg
       },
+      selectType: 'all',
+      selectFreshTime: '',
+      selectTime: '',
+      searchCell: '',
+      loading: false,
+      cellTypeOptions: [
+        { value: 'all', label: '所有状态' },
+        { value: 't', label: '温度告警' },
+        { value: 'r', label: '趋势告警' },
+        { value: 'u', label: '异常点位' }
+      ],
+      cacheList: [],
       imgUrl: null,
       grayImg,
       activeImg,
@@ -120,10 +174,79 @@ export default {
       }
     }
   },
-  computed: {},
+  computed: {
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem
+    })
+  },
   watch: {},
+  mounted() {
+    this.queryCell()
+  },
 
   methods: {
+    async queryCell() {
+      try {
+        // 电解槽
+        const cellResult = await cellInfo(this.alarmItem.AreaID, 1)
+        const list = cellResult.data.result || []
+
+        this.list = list.map((v) => {
+          return {
+            ...v,
+            ...{
+              id: v.bath_id,
+              name: v.bath_name,
+              type: 'yellow',
+              dot: v.point_all,
+              temperatureDot: v.point_temperature,
+              trendDot: v.point_rate,
+              unusualDot: v.point_offline
+            }
+          }
+        })
+        this.cacheList = this.list
+        this.searchOptions = this.list.map((item) => {
+          return { value: `${item.name}`, label: `${item.name}` }
+        })
+      } catch (err) {
+        alert('电解槽错误')
+      }
+    },
+    remoteMethod(query) {
+      if (query !== '') {
+        this.loading = true
+        setTimeout(() => {
+          this.loading = false
+          this.searchOptions = this.searchOptions.filter((item) => {
+            return item.label.toLowerCase().indexOf(query.toLowerCase()) > -1
+          })
+        }, 200)
+      } else {
+        this.options = []
+      }
+    },
+    // 根据状态过滤
+    getType(type) {
+      if (type === 't') {
+        this.list = this.cacheList.filter((v) => v.temperatureDot > 0)
+      } else if (type === 'r') {
+        this.list = this.cacheList.filter((v) => v.trendDot > 0)
+      } else if (type === 'u') {
+        this.list = this.cacheList.filter((v) => v.unusualDot > 0)
+      } else {
+        this.list = this.cacheList
+      }
+    },
+    getSearch(val) {
+      if (!val) {
+        this.list = this.cacheList
+      } else {
+        this.list = this.cacheList.filter((v) => {
+          return v.name === val
+        })
+      }
+    },
     className(item) {
       let classname = ''
 
@@ -140,12 +263,72 @@ export default {
     },
     checkCell(item) {
       this.curCell = item.id
+      this.$emit('clickPoint', item)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+.ele-wrap {
+  height: calc(100% - 120px);
+}
+.content-filter {
+  @include flex(flex-start, center);
+  width: 100%;
+  margin-bottom: 15px;
+  .content-select {
+    width: 140px;
+  }
+  .content-search {
+    margin-left: 20px;
+  }
+}
+.detail-item-left {
+  width: 390px;
+  @include flex(space-between, flex-start);
+  flex-direction: column;
+  ::v-deep .el-scrollbar {
+    height: 100%;
+  }
+  ::v-deep .el-scrollbar__wrap {
+    overflow: auto;
+  }
+  .content-back {
+    height: 44px;
+    line-height: 44px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    &:hover {
+      text-decoration: underline;
+      color: $selfColor;
+    }
+  }
+
+  .detail-cells {
+    width: 100%;
+    height: calc(100% - 40px);
+    // padding-top: 15px;
+    // padding: 15px;
+    background: rgba(255, 255, 255, 0.04);
+    overflow: auto;
+    &.no-data {
+      position: relative;
+      &::before {
+        content: '暂无数据';
+        position: absolute;
+        // top: -15px;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        @include flex();
+        background: rgba(255, 255, 255, 0.1);
+        color: #ccc;
+      }
+    }
+  }
+}
 .electrolyzer-wrap {
   color: #fff;
 
@@ -154,6 +337,12 @@ export default {
   height: 80px;
   padding: 8px 10px;
   margin-bottom: 10px;
+  width: calc(100% - 30px);
+  margin-left: auto;
+  margin-right: auto;
+  &:first-child {
+    margin-top: 15px;
+  }
   &:last-child {
     margin-bottom: 0;
   }

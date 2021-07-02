@@ -1,115 +1,15 @@
 <template>
   <div class="detail-chart">
-    <div class="chart-tool">
-      <div class="left-text">
 
-        <div class="chart-box-title">测温点温度曲线</div>
-        <div class="content-crumbs">
-          <div class="content-crumb">{{ alarmItem.Bath }}</div>
-          <div class="content-crumb">{{ alarmItem.t_id }}</div>
-
-        </div>
-      </div>
-      <div class="right-btns">
-        <div
-          class="btn"
-          @click="refresh"
-        ><i class="el-icon-refresh-right" /> 刷新</div>
-        <div
-          class="btn"
-          @click="exportChart"
-        ><i class="el-icon-upload" /> 导出</div>
-      </div>
-    </div>
     <div class="detail-chart-box">
-      <div class="select-date">
-        <span class="select-date-text">数据日期：</span>
-        <el-date-picker
-          v-model="date"
-          type="date"
-          placeholder="选择日期"
-          class="screen-select"
-          @change="changeDate"
-        />
-      </div>
+
       <div
         :id="id"
         :class="className"
         :style="{height:height,width:width}"
       />
     </div>
-    <el-dialog
-      title="导出"
-      :visible.sync="exportDialogVisible"
-      width="40%"
-      center
-    >
-      <div class="export-filter">
-        <div class="filter-items">
-          <div class="filter-item">
-            <div class="filter-item-label">
-              导出点位
-            </div>
-            <div class="filter-item-content">
 
-              <div class="content-crumbs">
-                <div class="content-crumb">{{ alarmItem.Company }}</div>
-                <div class="content-crumb">{{ alarmItem.Factory }}</div>
-                <div class="content-crumb">{{ alarmItem.Area }}</div>
-                <div class="content-crumb">{{ alarmItem.Bath }}</div>
-                <div class="content-crumb">{{ alarmItem.t_id }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="filter-item">
-            <div class="filter-item-label">
-              时间范围
-            </div>
-            <div class="filter-item-content">
-              <el-date-picker
-                v-model="exportDate"
-                type="datetimerange"
-                range-separator="至"
-                placeholder="选择日期"
-                class="screen-select"
-                @change="changeExportDate"
-              />
-            </div>
-          </div>
-          <!-- <div class="filter-item">
-            <div class="filter-item-label">
-              温度数据
-            </div>
-            <div class="filter-item-content">
-              <el-checkbox-group
-                v-model="checkedTemp"
-                @change="handleCheckedTempChange"
-              >
-                <el-checkbox
-                  v-for="temp in Temps"
-                  :key="temp"
-                  :label="temp"
-                >{{ temp }}</el-checkbox>
-              </el-checkbox-group>
-
-            </div>
-          </div> -->
-        </div>
-      </div>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <el-button
-          class="detail-ok-btn"
-          @click="exportPoint"
-        >导出</el-button>
-        <el-button
-          class="detail-cancel-btn"
-          @click="exportDialogVisible = false"
-        >取消</el-button>
-      </span>
-    </el-dialog>
   </div>
 
 </template>
@@ -122,7 +22,7 @@ import { color } from 'echarts'
 
 const alarmColor = '#ff2f14'
 export default {
-  name: 'DetailLineChart',
+  name: 'AlarmChart',
   components: {},
   mixins: [resize],
   props: {
@@ -142,7 +42,7 @@ export default {
     },
     id: {
       type: String,
-      default: 'DetailLineChart'
+      default: 'AlarmChart'
     },
     width: {
       type: String,
@@ -183,10 +83,7 @@ export default {
     list: {
       handler(newName, oldName) {
         this.newList = [...newName]
-        // this.xData = newName.map((v) => {
-        //   const time = this.$dayjs(v.pick_time).indexOf()
-        //   return { value: [time, v.fv] }
-        // })
+
         this.initChart()
       },
       deep: true
@@ -204,33 +101,6 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
-    exportPoint() {
-      if (this.exportDate.length < 1) {
-        this.$message.error('请先选择日期')
-        return
-      }
-      this.$emit('exportPoint', this.exportDate)
-    },
-    changeDate(date) {
-      const formatDate = this.$dayjs(date).format('YYYY-MM-DD')
-      this.$emit('changeDate', formatDate)
-    },
-    changeExportDate(arr) {
-      this.exportDate[0] = this.$dayjs(arr[0]).format('YYYY-MM-DD')
-      this.exportDate[1] = this.$dayjs(arr[1]).format('YYYY-MM-DD')
-    },
-    refresh(val) {
-      this.$emit('refresh', val)
-    },
-    hideExport(val) {
-      this.exportDialogVisible = false
-    },
-    handleCheckedTempChange(val) {},
-    // 生成从minNum到maxNum的随机数
-    exportChart(Min, Max) {
-      this.exportDialogVisible = true
-    },
-
     randomNum(Min, Max) {
       var Range = Max - Min
       var Rand = Math.random()
