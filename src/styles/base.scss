@@ -24,7 +24,13 @@
 ::-webkit-scrollbar-thumb:active {
   background: rgba(255, 255, 255, 0.4);
 }
-
+.el-dialog {
+  -webkit-box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  box-shadow: 0 0px 6px rgb(0 0 0 / 30%);
+}
+.el-dialog__body {
+  padding: 20px 20px;
+}
 .screen-select.el-select {
   .el-input {
     .el-input__inner {

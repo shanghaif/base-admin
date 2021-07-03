@@ -163,6 +163,11 @@
       :is-new="isNew"
       @refresh="refreshDevice"
     />
+    <AddDeviceDlg
+      ref="AddDeviceDlg"
+      :is-new="false"
+      @confirmm="addDeviceConfirmm"
+    />
   </el-card>
 </template>
 
@@ -178,10 +183,11 @@ import {
   deviceStatus
 } from '@/api/station'
 import DevicelDlg from './components/DevicelDlg'
+import AddDeviceDlg from './components/AddDeviceDlg'
 
 export default {
   name: 'AddDevice',
-  components: { DevicelDlg },
+  components: { DevicelDlg, AddDeviceDlg },
   filters: {
     statusFilter(type) {
       let res = ''
@@ -264,6 +270,9 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    addDeviceConfirmm() {
+      console.log('123 :>> ', 123)
+    },
     typeFunc(type) {
       let res = ''
       if (type === 1) {
@@ -311,9 +320,7 @@ export default {
         this.total = res.data.result.devices_count
       })
     },
-    refresh(node) {
-      console.log('111 :>> ', 111)
-    },
+
     // 当前点击的节点
     clickNode(node) {
       this.currentNode = node
@@ -328,9 +335,10 @@ export default {
         })
       }
     },
-
+    // 点击树结构
     loadNode(node, resolve) {
       if (node.level === 0) {
+        // 第一次加载
         company(1).then((res) => {
           this.companyList = res.data.result.stations
           resolve(this.companyList)
@@ -382,9 +390,8 @@ export default {
     },
     // 新增设备弹窗
     addNewDevice() {
-      this.dlgData = {}
       this.isNew = true
-      this.$refs.DevicelDlg.show()
+      this.$refs.AddDeviceDlg.show()
     }
   }
 }
