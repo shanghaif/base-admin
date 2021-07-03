@@ -80,8 +80,12 @@ service.interceptors.response.use(
     }
   },
   error => {
-    console.log('err' + error) // for debug
-   
+    console.log(error) // for debug
+    if (error.toString().indexOf('401') !== -1) { // 权限超时
+      store.dispatch('user/resetToken').then(() => {
+        location.reload()
+      })
+    }
     Message({
       message: error.message,
       type: 'error',

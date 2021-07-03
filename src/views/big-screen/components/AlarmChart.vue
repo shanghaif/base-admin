@@ -1,13 +1,66 @@
 <template>
-  <div class="detail-chart">
-
-    <div class="detail-chart-box">
+  <div class="alarm-chart">
+    <div class="chart-box-title">异常点位温度曲线</div>
+    <div
+      class="alarm-chart-content"
+      :class="{'no-data':!hasAlarm}"
+    >
 
       <div
-        :id="id"
-        :class="className"
-        :style="{height:height,width:width}"
-      />
+        v-if="list.length>0"
+        class="chart-box-tool"
+      >
+        <div class="hart-box-describe">
+          <div class="hart-box-describe-left">
+            <div
+              v-if="currentAlarmObj"
+              class="chart-dt"
+            >{{ currentAlarmObj.Area }}/{{ currentAlarmObj.Bath }}</div>
+            <div
+              v-if="currentAlarmObj"
+              class="err-text"
+            >{{ currentAlarmObj.t_id }}: {{ currentAlarmObj.alarm_name }}</div>
+          </div>
+          <div class="hart-box-describe-right">
+            <div class="temperature cur-tem">
+              <span>当前温度：</span>
+              <span
+                class="tem-val "
+                :class="{err:nowTemp>warningVal}"
+              >{{ nowTemp }}℃</span>
+
+            </div>
+            <div class="temperature average-tem">
+              <span>平均温度：</span>
+              <span class="tem-val">{{ averageTemp }}℃</span>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="detail-chart-box">
+
+        <div
+          :id="id"
+          :class="className"
+          :style="{height:height,width:width}"
+        />
+        <div
+          v-show="alarmListIndex !== 0 && hasAlarm"
+          class="arrow left"
+          @click="clickArrow(0)"
+        >
+          <i class="icon el-icon-arrow-left" />
+        </div>
+        <div
+          v-show="alarmListIndex !== alarmList.length - 1 && hasAlarm"
+          class="arrow right"
+          @click="clickArrow(1)"
+        >
+          <i class="icon el-icon-arrow-right" />
+        </div>
+      </div>
+
     </div>
 
   </div>
@@ -19,23 +72,16 @@ import * as echarts from 'echarts'
 import resize from './mixins/resize'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import { color } from 'echarts'
+import { deviceHistory, devicePoint } from '@/api/station'
+import sortBy from 'lodash/sortBy'
 
 const alarmColor = '#ff2f14'
+// 通过arrow点击索引来改变当前的报警对象,在init请求数据更新
 export default {
   name: 'AlarmChart',
   components: {},
   mixins: [resize],
   props: {
-    list: {
-      type: Array,
-      default() {
-        return []
-      }
-    },
-    alarmTemp: {
-      type: Number,
-      default: 0
-    },
     className: {
       type: String,
       default: 'chart'
@@ -50,47 +96,108 @@ export default {
     },
     height: {
       type: String,
-      default: '90%'
+      default: '100%'
     }
   },
 
   data() {
     return {
       chart: null,
+      alarmListIndex: 0,
       exportDialogVisible: false,
 
+      value: Math.random() * 100,
+      // step:  60 * 1000 // 1分钟
+      step: (10 / 60) * 60 * 1000,
       option: null,
       timer: null,
-      // alarmTemp: 250,
-      xData: [],
+      // warningVal: 250,
+      // xData: [],
       newList: [],
       checkedTemp: [],
       Temps: ['原始温度数据', '最高温度', '最低温度', '平均温度'],
       now: 0,
       date: '',
       exportDate: [],
-      value: Math.random() * 100,
-      // step:  60 * 1000 // 1分钟
-      step: (10 / 60) * 60 * 1000
+      allPointList: [
+        {
+          tid: '',
+          value: 0
+        }
+      ],
+      list: [
+        // {
+        //   fv: 0,
+        //   pick_time: '',
+        //   pid: '',
+        //   tid: ''
+        // }
+      ],
+
+      queryParams: {
+        sTime: '',
+        eTime: '',
+        id: ''
+      }
     }
   },
   computed: {
     ...mapState({
-      alarmItem: (state) => state.station.alarmItem
-    })
+      alarmList: (state) => state.station.alarmList
+    }),
+    ...mapGetters(['warningVal', 'unusualVal']),
+
+    currentAlarmObj: {
+      get() {
+        return this.alarmList[this.alarmListIndex]
+      },
+      set(v) {}
+    },
+
+    hasAlarm() {
+      return this.alarmList.length > 0
+    },
+    xData() {
+      return this.list.map((v) => {
+        const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
+        return { value: [time, v.fv] }
+      })
+    },
+    nowTemp() {
+      const obj = this.allPointList.find(
+        (v) => v.tid === this.currentAlarmObj.t_id
+      )
+      return obj ? obj.value : 0
+    },
+    averageTemp() {
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.fv + pre
+      }, 0)
+      const res = sum ? (sum / this.list.length).toFixed(1) : 0
+      return Number(res)
+    }
   },
   watch: {
-    list: {
+    alarmList: {
       handler(newName, oldName) {
-        this.newList = [...newName]
+        clearInterval(this.timer)
 
-        this.initChart()
+        // this.newList = [...newName]
+        if (newName.length > 0) {
+          this.init()
+          this.timer = setInterval(() => {
+            this.loop()
+          }, 6000)
+        } else {
+          this.list = []
+          this.initChart()
+        }
       },
       deep: true
     }
   },
   mounted() {
-    this.date = this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD')
+    // this.date = this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD')
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -101,21 +208,60 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
-    randomNum(Min, Max) {
-      var Range = Max - Min
-      var Rand = Math.random()
-      var num = Min + Math.round(Rand * Range) // 四舍五入
-      return num
-    },
+    init() {
+      // this.currentAlarmObj = this.alarmList[0]
+      this.queryParams.sTime =
+        this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
+        ' 00:00'
+      this.queryParams.eTime =
+        this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
+        ' 23:59'
 
-    randomData() {
-      this.now += this.step
-      this.value = this.randomNum(50, 150)
-      return {
-        name: this.now.toString(),
-        // name: '小明',
-        value: [this.now, Math.round(this.value)]
+      this.queryPiont()
+      this.queryPiontHistory()
+    },
+    clickArrow(isAdd) {
+      if (!this.hasAlarm) {
+        return
       }
+      if (isAdd) {
+        this.alarmListIndex++
+      } else {
+        this.alarmListIndex--
+      }
+      this.init()
+    },
+    loop() {
+      this.alarmListIndex++
+      if (this.alarmListIndex === this.alarmList.length) {
+        this.alarmListIndex = 0
+      } else if (this.alarmListIndex === -1) {
+        this.alarmListIndex = this.alarmList.length - 1
+      }
+      this.init()
+    },
+    queryPiont() {
+      devicePoint(this.currentAlarmObj.BathID)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.allPointList = arr
+          // this.setFuncOfpoint()
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    queryPiontHistory(date) {
+      this.queryParams.id = this.currentAlarmObj.t_id
+      deviceHistory(this.queryParams)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.list = sortBy(arr, (v) => v.pick_time)
+          this.initChart()
+        })
+        .catch((err) => {
+          alert(err)
+        })
     },
 
     initChart() {
@@ -125,10 +271,10 @@ export default {
       // for (let i = 0; i < 100; i++) {
       //   this.xData.push(this.randomData())
       // }
-      this.xData = this.newList.map((v) => {
-        const time = that.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
-        return { value: [time, v.fv] }
-      })
+      // this.xData = this.list.map((v) => {
+      //   const time = that.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
+      //   return { value: [time, v.fv] }
+      // })
       this.option = {
         color: ['#18BAD7'],
 
@@ -155,7 +301,10 @@ export default {
           {
             show: false,
             dimension: 1,
-            pieces: [{ gte: that.alarmTemp, lte: 5000, color: alarmColor }], // pieces的值由动态数据决定
+            pieces: [
+              { gte: that.warningVal, lte: 5000, color: alarmColor },
+              { gte: -100, lte: that.unusualVal, color: alarmColor }
+            ], // pieces的值由动态数据决定
             outOfRange: {
               color: '#18BAD7'
             }
@@ -266,7 +415,12 @@ export default {
               label: { position: 'start' },
               data: [
                 {
-                  yAxis: that.alarmTemp,
+                  yAxis: that.warningVal,
+                  lineStyle: { width: 1, color: alarmColor },
+                  label: { show: false }
+                },
+                {
+                  yAxis: that.unusualVal,
                   lineStyle: { width: 1, color: alarmColor },
                   label: { show: false }
                 }
@@ -281,18 +435,33 @@ export default {
               label: { fontSize: 33.12 },
               data: [
                 {
-                  yAxis: that.alarmTemp,
+                  yAxis: that.warningVal,
                   x: '0%',
                   symbolSize: 0.1,
                   label: {
                     textStyle: { color: alarmColor },
                     // padding: [3.312, 8.28],
-                    fontSize: 22,
-                    fontWeight: 'bold',
+                    fontSize: 16,
+                    // fontWeight: 'bold',
                     // borderRadius: 13.248,
                     // backgroundColor: 'rgba(255, 72, 74, 0.5)',
                     position: 'right',
-                    formatter: `${that.alarmTemp}℃`
+                    formatter: `${that.warningVal}℃`
+                  }
+                },
+                {
+                  yAxis: that.unusualVal,
+                  x: '0%',
+                  symbolSize: 0.1,
+                  label: {
+                    textStyle: { color: alarmColor },
+                    // padding: [3.312, 8.28],
+                    fontSize: 16,
+                    // fontWeight: 'bold',
+                    // borderRadius: 13.248,
+                    // backgroundColor: 'rgba(255, 72, 74, 0.5)',
+                    position: 'right',
+                    formatter: `${that.unusualVal}℃`
                   }
                 }
                 // {
@@ -354,8 +523,8 @@ export default {
     }
   }
 }
-.detail-chart {
-  height: 80%;
+.alarm-chart {
+  height: 35%;
   width: 100%;
 
   .chart-tool {
@@ -382,13 +551,32 @@ export default {
       }
     }
   }
+  .alarm-chart-content {
+    height: calc(100% - 60px);
+    margin-top: 15px;
+    position: relative;
+
+    &.no-data {
+      &::before {
+        content: '暂无数据';
+        position: absolute;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        @include flex();
+        background: rgba(255, 255, 255, 0.1);
+        color: #ccc;
+      }
+    }
+  }
   .detail-chart-box {
     @include flex(space-between, center);
     flex-direction: column;
     padding: 20px 0;
     width: 100%;
     height: calc(100% - 49px);
-    background: rgba(255, 255, 255, 0.04);
+    background: rgba(255, 255, 255, 0);
+    position: relative;
     .select-date {
       @include flex(flex-end, center);
       padding: 0 20px;
@@ -408,6 +596,34 @@ export default {
         line-height: 24px;
       }
       .select-date-text {
+      }
+    }
+    .arrow {
+      position: absolute;
+      top: 0;
+      height: 100%;
+      @include flex();
+      cursor: pointer;
+      &:hover {
+        .icon {
+          color: #fff;
+        }
+      }
+      &.left {
+        left: -40px;
+      }
+      &.right {
+        right: -40px;
+      }
+      .icon {
+        font-size: 40px;
+        font-weight: bold;
+        color: #999;
+
+        .el-icon-arrow-right {
+        }
+        .el-icon-arrow-left {
+        }
       }
     }
   }

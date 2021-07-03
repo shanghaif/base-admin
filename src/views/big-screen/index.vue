@@ -12,6 +12,12 @@
         </div>
       </div> -->
       <Header />
+      <div class="setting">
+        <i
+          class="el-icon-setting"
+          @click="goManage"
+        />
+      </div>
       <div class="content">
         <div class="item left">
           <div class="chart-box">
@@ -331,6 +337,9 @@ export default {
 
         this.areaList.forEach((v, i) => {})
       })
+    },
+    goManage() {
+      this.$router.push({ name: 'Dashboard' })
     }
   }
 }
@@ -339,25 +348,12 @@ export default {
 $top-Height: 10vh;
 
 .big-screen {
-  // position: absolute;
-  // left: 0;
-  // top: 0;
   position: relative;
   width: 100%;
   height: 100%;
-  // .wrap {
-  //   min-width: auto;
-  //   width: 1920px;
-  //   min-height: auto;
-  //   height: 1080px;
-  //   overflow: auto;
-  //   transform-origin: 0px 0px 0px;
+
   background-image: url('~@/assets/images/bg.jpg');
-  //   background-size: contain;
-  //   background-position: 50% 0;
-  //   background-color: rgb(0, 0, 0);
-  //   overflow: auto;
-  // }
+
   &::before,
   &::after {
     content: '';
@@ -375,7 +371,21 @@ $top-Height: 10vh;
     right: 0;
     background: linear-gradient(to left, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
   }
-
+  .setting {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    cursor: pointer;
+    z-index: 1000;
+    > i {
+      color: #999;
+      font-size: 30px;
+      font-weight: bold;
+      &:hover {
+        color: #fff;
+      }
+    }
+  }
   .top {
     position: absolute;
     top: 0;
@@ -408,7 +418,7 @@ $top-Height: 10vh;
     padding-bottom: 2vh;
     margin: 0 auto;
     position: relative;
-    overflow: hidden;
+    // overflow: hidden;
     .item-map {
       height: 100%;
     }

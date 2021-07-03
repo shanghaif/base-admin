@@ -132,10 +132,10 @@ export default {
         return []
       }
     },
-    alarmTemp: {
-      type: Number,
-      default: 0
-    },
+    // warningVal: {
+    //   type: Number,
+    //   default: 0
+    // },
     className: {
       type: String,
       default: 'chart'
@@ -161,7 +161,7 @@ export default {
 
       option: null,
       timer: null,
-      // alarmTemp: 250,
+      // warningVal: 250,
       xData: [],
       newList: [],
       checkedTemp: [],
@@ -177,7 +177,8 @@ export default {
   computed: {
     ...mapState({
       alarmItem: (state) => state.station.alarmItem
-    })
+    }),
+    ...mapGetters(['warningVal', 'unusualVal'])
   },
   watch: {
     list: {
@@ -285,7 +286,10 @@ export default {
           {
             show: false,
             dimension: 1,
-            pieces: [{ gte: that.alarmTemp, lte: 5000, color: alarmColor }], // pieces的值由动态数据决定
+            pieces: [
+              { gte: that.warningVal, lte: 5000, color: alarmColor },
+              { gte: -100, lte: that.unusualVal, color: alarmColor }
+            ], // pieces的值由动态数据决定
             outOfRange: {
               color: '#18BAD7'
             }
@@ -396,7 +400,12 @@ export default {
               label: { position: 'start' },
               data: [
                 {
-                  yAxis: that.alarmTemp,
+                  yAxis: that.warningVal,
+                  lineStyle: { width: 1, color: alarmColor },
+                  label: { show: false }
+                },
+                {
+                  yAxis: that.unusualVal,
                   lineStyle: { width: 1, color: alarmColor },
                   label: { show: false }
                 }
@@ -411,7 +420,7 @@ export default {
               label: { fontSize: 33.12 },
               data: [
                 {
-                  yAxis: that.alarmTemp,
+                  yAxis: that.warningVal,
                   x: '0%',
                   symbolSize: 0.1,
                   label: {
@@ -422,7 +431,22 @@ export default {
                     // borderRadius: 13.248,
                     // backgroundColor: 'rgba(255, 72, 74, 0.5)',
                     position: 'right',
-                    formatter: `${that.alarmTemp}℃`
+                    formatter: `${that.warningVal}℃`
+                  }
+                },
+                {
+                  yAxis: that.unusualVal,
+                  x: '0%',
+                  symbolSize: 0.1,
+                  label: {
+                    textStyle: { color: alarmColor },
+                    // padding: [3.312, 8.28],
+                    fontSize: 20,
+                    // fontWeight: 'bold',
+                    // borderRadius: 13.248,
+                    // backgroundColor: 'rgba(255, 72, 74, 0.5)',
+                    position: 'right',
+                    formatter: `${that.unusualVal}℃`
                   }
                 }
                 // {

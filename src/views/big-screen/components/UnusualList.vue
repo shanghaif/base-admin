@@ -101,72 +101,6 @@ export default {
         { text: '当日', type: 'day' },
         { text: '一周', type: 'week' },
         { text: '30天', type: 'month' }
-      ],
-      list1: [
-        {
-          id: '10000',
-          type: 'error',
-          area: '一分区',
-          name: '电解槽10000',
-          reason: 'B37_LEFT: 趋势告警',
-          time: '2021.05.19 13:49:50'
-        },
-        {
-          id: 'b',
-          type: 'warning ',
-          area: '一分区',
-          name: '电解槽2027',
-          reason: 'A16_RIGHT: 通信异常',
-          time: '2021.05.19 13:49:50'
-        },
-        {
-          id: 'c',
-          type: 'off',
-          area: '一分区',
-          name: '电解槽2027',
-          reason: 'B06_RIGHT: 离线',
-          time: '2021.05.19 13:49:50'
-        },
-        {
-          id: 'd',
-          type: 'hot',
-          area: '一分区',
-          name: '电解槽2027',
-          reason: 'A01_MIDDLE: 温度过高',
-          time: '2021.05.19 13:49:50'
-        },
-        {
-          id: 'd',
-          type: 'hot',
-          area: '一分区',
-          name: '电解槽2027',
-          reason: 'A01_MIDDLE: 温度过高',
-          time: '2021.05.19 13:49:50'
-        },
-        {
-          id: 'd',
-          type: 'hot',
-          area: '一分区',
-          name: '电解槽2027',
-          reason: 'A01_MIDDLE: 温度过高',
-          time: '2021.05.19 13:49:50'
-        },
-        {
-          id: 'd',
-          type: 'hot',
-          area: '一分区',
-          name: '电解槽2027',
-          reason: 'A01_MIDDLE: 温度过高',
-          time: '2021.05.19 13:49:50'
-        },
-        {
-          id: 'd',
-          type: 'hot',
-          area: '一分区',
-          name: '电解槽2027',
-          reason: 'A01_MIDDLE: 温度过高',
-          time: '2021.05.19 13:49:50'
-        }
       ]
     }
   },
@@ -190,7 +124,8 @@ export default {
   mounted() {},
   methods: {
     ...mapMutations({
-      SET_ALARMITEM: 'station/SET_ALARMITEM'
+      SET_ALARMITEM: 'station/SET_ALARMITEM',
+      SET_ALARMLIST: 'station/SET_ALARMLIST'
     }),
     getDate(type) {
       let begin_time, end_time
@@ -255,7 +190,7 @@ export default {
       const res = await warningAll({ ...obj, ...this.chooseDate })
       this.noMoreList = (res.data.result && res.data.result.alarms) || []
       this.list = [...this.list, ...this.noMoreList]
-
+      this.SET_ALARMLIST(this.list)
       if (this.list.length === 0) {
         this.isEmpty = true
       }
@@ -268,7 +203,7 @@ export default {
 <style lang="scss" scoped>
 .unusual-wrap {
   width: 100%;
-  height: 70%;
+  height: 65%;
   .tabs {
     margin-top: 15px;
     margin-bottom: 10px;

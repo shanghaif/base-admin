@@ -29,7 +29,6 @@
 
             <detail-line-chart
               ref="DetailLineChart"
-              :alarm-temp="warningVal"
               :list="piontHistoryList"
               @refresh="refresh"
               @changeDate="changeDateQuery"
