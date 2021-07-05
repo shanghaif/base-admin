@@ -68,7 +68,7 @@
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="dialogVisible = false"
+          @click="save"
         >确 定</el-button>
       </span>
     </el-dialog>
@@ -78,6 +78,8 @@
 
 <script>
 import ModelEditProtocol from './ModelEditProtocol'
+import { tmodelProtocol } from '@/api/zmodel'
+import { param } from '@/utils'
 export default {
   name: 'ModelProtocol',
   components: { ModelEditProtocol },
@@ -96,7 +98,12 @@ export default {
   },
   data() {
     return {
-      dialogVisible: false
+      dialogVisible: false,
+      tableData: [
+        {
+          s_name: '1234'
+        }
+      ]
     }
   },
   computed: {},
@@ -111,6 +118,18 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    save() {
+      const params = {
+        model_id: ''
+      }
+      tmodelProtocol(params)
+        .then((res) => {
+          console.log('res :>> ', res)
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
     show() {
       this.dialogVisible = true
     },

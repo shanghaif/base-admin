@@ -29,6 +29,8 @@
           type="date"
           placeholder="选择日期"
           class="screen-select"
+          value-format="yyyy-MM-dd"
+          :picker-options="pickerOptionsSingle"
           @change="changeDate"
         />
       </div>
@@ -68,12 +70,16 @@
             <div class="filter-item-content">
               <el-date-picker
                 v-model="exportDate"
-                type="datetimerange"
+                type="daterange"
+                :picker-options="pickerOptions"
                 range-separator="至"
                 placeholder="选择日期"
                 class="screen-select"
+                unlink-panels
                 @change="changeExportDate"
-              />
+              >
+                />
+              </el-date-picker>
             </div>
           </div>
           <!-- <div class="filter-item">
@@ -171,7 +177,59 @@ export default {
       exportDate: [],
       value: Math.random() * 100,
       // step:  60 * 1000 // 1分钟
-      step: (10 / 60) * 60 * 1000
+      step: (10 / 60) * 60 * 1000,
+      pickerOptions: {
+        shortcuts: [
+          {
+            text: '当日',
+            onClick(picker) {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+              picker.$emit('pick', [start, end])
+            }
+          },
+          {
+            text: '一周',
+            onClick(picker) {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+              picker.$emit('pick', [start, end])
+            }
+          },
+          {
+            text: '30天',
+            onClick(picker) {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+              picker.$emit('pick', [start, end])
+            }
+          }
+        ]
+      },
+      pickerOptionsSingle: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        },
+        shortcuts: [
+          {
+            text: '今天',
+            onClick(picker) {
+              picker.$emit('pick', new Date())
+            }
+          },
+          {
+            text: '昨天',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() - 3600 * 1000 * 24)
+              picker.$emit('pick', date)
+            }
+          }
+        ]
+      }
     }
   },
   computed: {

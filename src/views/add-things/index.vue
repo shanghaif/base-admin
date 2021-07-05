@@ -27,13 +27,7 @@
           type="selection"
           width="55"
         />
-        <!-- <el-table-column
-          label="日期"
-          width="120"
-        >
-          <template slot-scope="scope">{{ scope.row.date }}</template>
-          <el-link type="primary">主要链接</el-link>
-        </el-table-column> -->
+
         <el-table-column
           prop="s_name"
           label="姓名"

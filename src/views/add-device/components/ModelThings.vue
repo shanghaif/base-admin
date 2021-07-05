@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog
-      title="提示"
+      :title="isNew ? '新增物模型': '编辑物模型'"
       :visible.sync="dialogVisible"
       width="50%"
       :close-on-click-modal="false"
@@ -13,6 +13,9 @@
         ref="ruleForm"
         :model="newItem"
         :rules="rules"
+        label-width="120px"
+        label-position="right"
+        style="width:50%"
       >
         <el-form-item
           label="名称"
@@ -20,7 +23,7 @@
           :label-width="formLabelWidth"
         >
           <el-input
-            v-model="newItem.s_name"
+            v-model="saveParams.s_name"
             autocomplete="off"
           />
         </el-form-item>
@@ -29,12 +32,51 @@
           :label-width="formLabelWidth"
         >
           <el-input
-            v-model="newItem.uid"
+            v-model="saveParams.uid"
             autocomplete="off"
           />
         </el-form-item>
+        <el-form-item label="温度告警范围">
+          <el-col :span="6">
+            <el-input
+              v-model="saveParams.temperature_low"
+              autocomplete="off"
+            />
+          </el-col>
+          <el-col
+            class="line"
+            :span="1"
+            style="text-align:center"
+          >-</el-col>
+          <el-col :span="6">
 
-        <el-form-item
+            <el-input
+              v-model="saveParams.temperature_high"
+              autocomplete="off"
+            />
+          </el-col>
+        </el-form-item>
+        <el-form-item label="温度趋势范围">
+          <el-col :span="6">
+            <el-input
+              v-model="saveParams.rate_low"
+              autocomplete="off"
+            />
+          </el-col>
+          <el-col
+            class="line"
+            :span="1"
+            style="text-align:center"
+          >-</el-col>
+          <el-col :span="6">
+
+            <el-input
+              v-model="saveParams.rate_high"
+              autocomplete="off"
+            />
+          </el-col>
+        </el-form-item>
+        <!-- <el-form-item
           label="类别"
           :label-width="formLabelWidth"
         >
@@ -50,7 +92,7 @@
             />
 
           </el-select>
-        </el-form-item>
+        </el-form-item> -->
         <el-form-item
           label="说明"
           :label-width="formLabelWidth"
@@ -92,11 +134,12 @@ export default {
     },
     isNew: {
       type: Boolean,
-      default: true
+      default: false
     }
   },
   data() {
     return {
+      saveParams: {},
       dialogVisible: false,
       formLabelWidth: '120px',
       activeModel: {},
@@ -108,13 +151,36 @@ export default {
       rules: {
         s_name: [
           { required: true, message: '请输入名称', trigger: 'blur' },
-          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+          {
+            min: 1,
+            max: 100,
+            message: '长度在 1 到 100 个字符',
+            trigger: 'blur'
+          }
         ]
       }
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+    newItem: {
+      handler(val, oldVal) {
+        if (val) {
+          this.saveParams = {
+            ...{
+              name: val.s_name,
+              temperature_high: 0,
+              temperature_low: 0,
+              rate_high: 0,
+              rate_low: 0
+            },
+            ...val
+          }
+        }
+      },
+      deep: true
+    }
+  },
 
   created() {
     // 生命周期钩子：组件实例创建完成，属性已绑定，但 DOM 还未生成，el 属性还不存在
@@ -137,17 +203,6 @@ export default {
     },
     show(item) {
       this.dialogVisible = true
-      if (item) {
-        this.activeModel = { ...item }
-      } else {
-        this.isNew = true
-        this.activeModel = {
-          s_name: '新增',
-          uid: 'm_' + nanoid(),
-          catalog_id: 'COMMON',
-          body: '{}'
-        }
-      }
     }
   }
 }

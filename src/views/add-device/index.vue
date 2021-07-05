@@ -31,7 +31,66 @@
       />
     </div>
     <div class="right">
-      <el-button-group>
+      <div class="count-container">
+        <div
+          class="count-item blue"
+          style="width: 32%"
+        >
+          <span>设备总数</span>
+          <p class="count-num">{{ total }}</p>
+          <i class="el-icon-info" />
+        </div>
+        <div
+          class="count-item gray"
+          style="width: 32%"
+        >
+          <span>在线设备</span>
+          <p class="count-num">936</p>
+          <i class="el-icon-success" />
+        </div>
+        <div
+          class="count-item red"
+          style="width: 32%"
+        >
+          <span>离线设备</span>
+          <p class="count-num">68</p>
+          <i class="el-icon-warning" />
+        </div>
+      </div>
+
+      <div class="filter-container">
+        <el-input
+          v-model="listQuery.point"
+          placeholder="请输入关联点位"
+          style="width: 160px; margin-right: 10px"
+          class="filter-item"
+          @keyup.enter.native="handleFilter"
+        />
+
+        <el-select
+          v-model="listQuery.net"
+          placeholder="状态"
+          clearable
+          style="width: 120px; margin-right: 10px"
+          class="filter-item"
+        >
+          <el-option
+            label="启用"
+            value="1"
+          />
+          <el-option
+            label="禁用"
+            value="0"
+          />
+        </el-select>
+        <el-button
+          class="filter-item"
+          type="primary"
+          icon="el-icon-search"
+          @click="handleFilter"
+        >
+          搜索
+        </el-button>
         <el-button
           type="primary"
           @click="addNewDevice"
@@ -44,7 +103,37 @@
           v-if="multipleSelection.length>0"
           type="danger"
         >删除已选</el-button>
-      </el-button-group>
+        <el-button
+          class="filter-item"
+          type="primary"
+          icon="el-icon-download"
+          @click="handleDownload"
+        >
+          导出选择
+        </el-button>
+        <el-button
+          class="filter-item"
+          type="primary"
+          icon="el-icon-download"
+          @click="handleDownload"
+        >
+          导出全部
+        </el-button>
+      </div>
+      <!-- <el-button-group>
+        <el-button
+          type="primary"
+          @click="addNewDevice"
+        >增加设备</el-button>
+        <el-button
+          type="primary"
+          @click="refreshDevice"
+        >刷新</el-button>
+        <el-button
+          v-if="multipleSelection.length>0"
+          type="danger"
+        >删除已选</el-button>
+      </el-button-group> -->
       <el-table
         ref="multipleTable"
         :data="tableData"
@@ -53,10 +142,10 @@
         :stripe="true"
         @selection-change="handleSelectionChange"
       >
-        <!-- <el-table-column
+        <el-table-column
           type="selection"
           width="55"
-        /> -->
+        />
 
         <el-table-column
           sortable
@@ -165,7 +254,7 @@
     />
     <AddDeviceDlg
       ref="AddDeviceDlg"
-      :is-new="false"
+      :is-new="zModelList"
       @confirmm="addDeviceConfirmm"
     />
   </el-card>
@@ -182,6 +271,7 @@ import {
   editThings,
   deviceStatus
 } from '@/api/station'
+import { zModelPage } from '@/api/zmodel'
 import DevicelDlg from './components/DevicelDlg'
 import AddDeviceDlg from './components/AddDeviceDlg'
 
@@ -215,6 +305,14 @@ export default {
       statusList: [],
       currentNode: {},
       currentDevice: {},
+      listQuery: {
+        page: 1,
+        limit: 20,
+        model: undefined,
+        company: undefined,
+        net: undefined,
+        sort: '+id'
+      },
       dlgData: {
         area: '',
         area_id: '',
@@ -236,6 +334,7 @@ export default {
         uid: ''
       },
       tableData: [],
+      zModelList: [],
       multipleSelection: [],
 
       props: {
@@ -270,6 +369,12 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    handleFilter() {
+      console.log('123 :>> ', 123)
+    },
+    handleDownload() {
+      console.log('123 :>> ', 123)
+    },
     addDeviceConfirmm() {
       console.log('123 :>> ', 123)
     },
@@ -391,6 +496,7 @@ export default {
     // 新增设备弹窗
     addNewDevice() {
       this.isNew = true
+
       this.$refs.AddDeviceDlg.show()
     }
   }
@@ -410,9 +516,6 @@ export default {
   min-height: calc(100vh - 84px);
   .btns-wrap {
     margin-bottom: 20px;
-  }
-  .pagination-wrap {
-    margin-top: 30px;
   }
 }
 .left {

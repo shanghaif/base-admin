@@ -16,7 +16,7 @@ export function removeToken() {
   return Cookies.remove(TokenKey)
 }
 export function getCell() {
-  return JSON.parse( Cookies.get(CellKey))
+  return Cookies.get(CellKey) && JSON.parse( Cookies.get(CellKey))
 }
 
 export function setCell(val) {
@@ -30,7 +30,7 @@ export function removeCell() {
 
 
 export function getAlarmItem() {
-  return JSON.parse( Cookies.get(alarmItem))
+  return Cookies.get(alarmItem) && JSON.parse( Cookies.get(alarmItem))
 }
 
 export function setAlarmItem(val) {

@@ -6,7 +6,11 @@
       width="60%"
       :close-on-click-modal="false"
     >
-      <ModelThings ref="ModelThings" />
+      <ModelThings
+        ref="ModelThings"
+        :is-new="isNew"
+        :new-item="activeModel"
+      />
       <ModelProtocol ref="ModelProtocol" />
       <!-- 左侧表单 -->
       <div class="device-dlg-left">
@@ -23,7 +27,7 @@
           <el-button
             type="primary"
             size="mini"
-            @click="addThings"
+            @click="addThings()"
           >
             新增
           </el-button>
@@ -31,60 +35,103 @@
         </el-button-group>
 
         <el-table
-          :data="tableData"
-          height="300"
-          style="width: 98%"
+          ref="multipleTable"
+          :data="list"
+          tooltip-effect="dark"
+          style="width: 100%"
+          :stripe="true"
+          height="400"
+          @selection-change="handleSelectionChange"
         >
           <el-table-column
+            type="selection"
+            width="55"
+          />
+
+          <el-table-column
             prop="s_name"
-            label="名称"
+            label="姓名"
+            width="120"
+          >
+            <template slot-scope="scope">
+
+              <el-link
+                type="primary"
+                @click="editThings(scope.row)"
+              >{{ scope.row.s_name }}</el-link>
+            </template>
+          </el-table-column>
+          <el-table-column
+            sortable
+            prop="uid"
+            label="id"
+            show-overflow-tooltip
           />
           <el-table-column
+            prop="desc"
+            label="说明"
+            show-overflow-tooltip
+          />
+
+          <el-table-column
             label="操作"
-            width="160"
+            width="120"
           >
             <template slot-scope="scope">
               <el-button
                 size="mini"
                 type="primary"
+                title="编辑"
                 @click="editThings(scope.row,scope.$index)"
-              >
-                编辑
-              </el-button>
+              ><i class="el-icon-edit" /></el-button>
               <el-popconfirm
                 title="确定删除该物模型吗？"
-                @confirm="delThings(scope.row,scope.$index)"
+                @confirm="handleDelete(scope.row,scope.$index)"
               >
                 <el-button
                   slot="reference"
                   size="mini"
                   type="danger"
-                  style="margin-left:10px;"
+                  title="删除"
+                  style="margin-left:6px"
                 >
-                  删除
+                  <i class="el-icon-delete" />
+
                 </el-button>
               </el-popconfirm>
             </template>
           </el-table-column>
-
         </el-table>
+        <div class="pagination-wrap">
+
+          <el-pagination
+            :hide-on-single-page="total <1"
+            background
+            :page-size="2"
+            layout="total, prev, pager, next"
+            :total="total"
+            @current-change="changePage"
+          />
+        </div>
       </div>
 
       <!-- 右侧表单 -->
       <div class="device-dlg-right">
+        <div class="device-dlg-title">点位信息</div>
+
         <el-form
           ref="ruleForm"
           class="form"
           label-width="80px"
         >
-          <el-form-item label="物模型">
+          <!-- <el-form-item label="物模型">
             <el-input
               v-model="defaultModel"
               autocomplete="off"
               readonly
               disabled
             />
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item
             label="名称"
             prop="s_name"
@@ -121,6 +168,9 @@
 </template>
 
 <script>
+import { nanoid } from 'nanoid'
+import { zModelPage } from '@/api/zmodel'
+
 import ModelThings from './ModelThings'
 import ModelProtocol from './ModelProtocol'
 
@@ -132,6 +182,10 @@ export default {
   data() {
     return {
       dialogVisible: false,
+      isNew: false,
+      activeModel: {},
+      multipleSelection: [],
+      list: [],
       defaultModel: '温度传感器',
       params: {
         s_name: '',
@@ -142,11 +196,22 @@ export default {
           s_name: '王小虎',
           address: '上海市普陀区金沙江路 1518 弄'
         }
-      ]
+      ],
+      queryParams: { page: 1, size: 10 }
     }
   },
-  computed: {},
-  watch: {},
+  computed: {
+    total() {
+      return this.list.length
+    }
+  },
+  watch: {
+    dialogVisible: {
+      handler(val, oldVal) {
+        this.init()
+      }
+    }
+  },
 
   created() {
     // 生命周期钩子：组件实例创建完成，属性已绑定，但 DOM 还未生成，el 属性还不存在
@@ -157,26 +222,83 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
-    editThings() {
-      console.log('1234 :>> ', 1234)
+    init() {
+      zModelPage(this.queryParams)
+        .then((res) => {
+          console.log('res :>> ', res)
+          this.list = res.data.result || []
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    handleSelectionChange(item) {
+      this.multipleSelection = item
+    },
+    changePage(page) {
+      // zModelPage(page).then((res) => {
+      //   debugger
+      //   this.tableData = res.data.result.devices || []
+      //   this.total = res.data.result.devices_count
+      // })
+    },
+    editThings(row) {
+      this.activeModel = { ...row }
       this.$refs.ModelThings.show()
     },
-    addThings() {
-      console.log('1234 :>> ', 1234)
+    addThings(item) {
+      if (item) {
+        this.activeModel = { ...item }
+      } else {
+        this.isNew = true
+        this.activeModel = {
+          s_name: '新增',
+          uid: 'm_' + nanoid(),
+          catalog_id: 'COMMON',
+          body: '{}'
+        }
+      }
       this.$refs.ModelThings.show()
     },
-    delThings() {
-      console.log('1234 :>> ', 1234)
-    },
+    delThings() {},
     show() {
       this.dialogVisible = true
     },
     editProtocol() {
-      console.log('1234 :>> ', 1234)
       this.$refs.ModelProtocol.show()
     },
     save() {
       this.$emit('confirmm', 123)
+    },
+    query() {
+      zModelPage({ page: 1, size: 10 })
+        .then((res) => {
+          console.log('res :>> ', res)
+          this.zModelList = res.data.result || []
+          this.$refs.AddDeviceDlg.show()
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
+    handleDelete(row, index) {
+      this.deleteModel(row.uid)
+        .then((res) => {
+          if (res.status === 200 && res.data.result === null) {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+          } else {
+            this.$message({
+              type: 'error',
+              message: '删除失败!'
+            })
+          }
+        })
+        .catch((err) => {
+          alert(err)
+        })
     }
   }
 }
@@ -184,22 +306,22 @@ export default {
 
 <style lang="scss" scoped>
 .device-dlg-wrap {
+  .device-dlg-title {
+    font-size: 16px;
+    text-align: center;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
   .device-dlg-left {
     display: inline-block;
 
-    width: 60%;
+    width: 70%;
     vertical-align: top;
-    .device-dlg-title {
-      font-size: 16px;
-      text-align: center;
-      // font-weight: bold;
-      margin-bottom: 10px;
-    }
+    border-right: 1px solid #ccc;
   }
   .device-dlg-right {
-    border-left: 1px solid #ccc;
     display: inline-block;
-    width: 40%;
+    width: 30%;
   }
 }
 </style>
