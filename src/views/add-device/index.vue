@@ -97,7 +97,7 @@
         </el-button>
         <el-button
           type="primary"
-          @click="addNewDevice"
+          @click="addNewDevice()"
         >增加设备</el-button>
         <el-button
           type="primary"
@@ -184,7 +184,7 @@
 
             <el-link
               type="primary"
-              @click="editDevice(scope.row)"
+              @click="addNewDevice(scope.row)"
             >{{ scope.row.s_name }}</el-link>
           </template>
         </el-table-column>
@@ -198,6 +198,7 @@
           prop="status_used"
           label="状态"
           show-overflow-tooltip
+          width="100"
         >
           <template slot-scope="scope">
 
@@ -212,12 +213,15 @@
           </template>
         </el-table-column>
 
-        <el-table-column label="操作">
+        <el-table-column
+          label="操作"
+          width="160"
+        >
           <template slot-scope="scope">
             <el-button
               size="mini"
               type="primary"
-              @click="editDevice(scope.row,scope.$index)"
+              @click="addNewDevice(scope.row,scope.$index)"
             >
               <!-- <i class="el-icon-edit" /> -->
               编辑
@@ -258,8 +262,10 @@
     />
     <AddDeviceDlg
       ref="AddDeviceDlg"
-      :is-new="zModelList"
-      @confirmm="addDeviceConfirmm"
+      :new-device="isNew"
+      :node="currentNode"
+      :new-item="dlgData"
+      @confirm="refreshDevice"
     />
   </el-card>
 </template>
@@ -286,10 +292,10 @@ export default {
       let res = ''
       if (type === 1) {
         res = '启用'
-      } else if (type === 0) {
+      } else if (type === -2) {
         res = '停用'
       } else if (type === -1) {
-        res = '进行中'
+        res = '维护'
       }
       return res
     }
@@ -307,7 +313,6 @@ export default {
       warningList: [],
       statusList: [],
       currentNode: {},
-      currentDevice: {},
       listQuery: {
         page: 1,
         limit: 20,
@@ -337,7 +342,6 @@ export default {
         uid: ''
       },
       tableData: [],
-      zModelList: [],
       multipleSelection: [],
 
       props: {
@@ -429,6 +433,7 @@ export default {
     },
 
     refreshDevice() {
+      debugger
       device(this.dlgData.bath_id, 1).then((res) => {
         this.tableData = res.data.result.devices || []
         this.total = res.data.result.devices_count
@@ -503,10 +508,17 @@ export default {
       this.$refs.DevicelDlg.show()
     },
     // 新增设备弹窗
-    addNewDevice() {
-      this.isNew = true
+    addNewDevice(item) {
+      if (item) {
+        this.isNew = false
+        this.multipleSelection = item
+        this.dlgData = item
 
-      this.$refs.AddDeviceDlg.show()
+        this.$refs.AddDeviceDlg.show()
+      } else {
+        this.isNew = true
+        this.$refs.AddDeviceDlg.show()
+      }
     }
   }
 }

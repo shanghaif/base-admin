@@ -89,3 +89,19 @@ export function tmodelNew(obj, isNew) {
     
   })
 }
+
+export function updateDevice(obj, isNew) {
+  const params = { ...{
+    new: true
+  },
+  ...obj
+  }
+  const method = isNew ? 'post' : 'PUT'
+  const url = `api/cfg/thing/?` + qs.stringify(params)
+  return request({
+    url,
+    method
+    
+  })
+}
+

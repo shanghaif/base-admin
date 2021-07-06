@@ -168,7 +168,7 @@ export default {
       option: null,
       timer: null,
       // warningVal: 250,
-      xData: [],
+      // xData: [],
       newList: [],
       checkedTemp: [],
       Temps: ['原始温度数据', '最高温度', '最低温度', '平均温度'],
@@ -236,7 +236,13 @@ export default {
     ...mapState({
       alarmItem: (state) => state.station.alarmItem
     }),
-    ...mapGetters(['warningVal', 'unusualVal'])
+    ...mapGetters(['warningVal', 'unusualVal']),
+    xData() {
+      return this.newList.map((v) => {
+        const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm:ss')
+        return { value: [time, v.fv] }
+      })
+    }
   },
   watch: {
     list: {
@@ -314,10 +320,10 @@ export default {
       // for (let i = 0; i < 100; i++) {
       //   this.xData.push(this.randomData())
       // }
-      this.xData = this.newList.map((v) => {
-        const time = that.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
-        return { value: [time, v.fv] }
-      })
+      // this.xData = this.newList.map((v) => {
+      //   const time = that.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
+      //   return { value: [time, v.fv] }
+      // })
       this.option = {
         color: ['#18BAD7'],
 
@@ -412,7 +418,7 @@ export default {
         },
         series: [
           {
-            name: '实时温度',
+            name: '温度',
             type: 'line',
             symbol: 'none',
             xAxisIndex: 0,

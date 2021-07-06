@@ -159,7 +159,7 @@ export default {
     },
     xData() {
       return this.list.map((v) => {
-        const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
+        const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm:ss')
         return { value: [time, v.fv] }
       })
     },

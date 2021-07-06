@@ -14,7 +14,7 @@
         :new-item="currentProtocol"
         @confirm="confirm"
       />
-      <el-button-group
+      <!-- <el-button-group
         v-if="list.length<1"
         class="btns-wrap"
       >
@@ -27,7 +27,7 @@
           新增
         </el-button>
 
-      </el-button-group>
+      </el-button-group> -->
       <el-table
         :data="list"
         height="300"

@@ -1,7 +1,7 @@
 <template>
   <div class="device-dlg-wrap">
     <el-dialog
-      title="新增设备"
+      :title="`${titleType}设备`"
       :visible.sync="dialogVisible"
       width="60%"
       :close-on-click-modal="false"
@@ -14,7 +14,10 @@
       />
       <ModelProtocol ref="ModelProtocol" />
       <!-- 左侧表单 -->
-      <div class="device-dlg-left">
+      <div
+        v-if="newDevice"
+        class="device-dlg-left"
+      >
 
         <div class="device-dlg-title">温度传感器</div>
         <el-button-group class="btns-wrap">
@@ -36,19 +39,27 @@
         </el-button-group>
 
         <el-table
-          ref="multipleTable"
           :data="list"
           tooltip-effect="dark"
           style="width: 100%"
           :stripe="true"
           height="400"
-          @selection-change="handleSelectionChange"
+          highlight-current-row
+          @current-change="handleCurrentChange"
         >
-          <!-- <el-table-column
-            type="selection"
-            width="55"
-          /> -->
 
+          <el-table-column
+            label="选择"
+            width="120"
+          >
+            <template slot-scope="scope">
+
+              <el-radio
+                v-model="radio"
+                :label="scope.row.uid"
+              >备选项</el-radio>
+            </template>
+          </el-table-column>
           <el-table-column
             prop="name"
             label="名称"
@@ -117,7 +128,10 @@
       </div>
 
       <!-- 右侧表单 -->
-      <div class="device-dlg-right">
+      <div
+        class="device-dlg-right"
+        :class="{full:!newDevice}"
+      >
         <div class="device-dlg-title">点位信息</div>
 
         <el-form
@@ -155,7 +169,31 @@
               clearable
             />
           </el-form-item>
+          <el-form-item
+            label="状态"
+            prop="status_used"
+          >
 
+            <el-select
+              v-model="form.status"
+              placeholder="状态"
+              style="width: 120px; margin-right: 10px"
+              class="filter-item"
+            >
+              <el-option
+                label="启用"
+                :value="1"
+              />
+              <el-option
+                label="停用"
+                :value="-2"
+              />
+              <el-option
+                label="维护"
+                :value="-1"
+              />
+            </el-select>
+          </el-form-item>
         </el-form>
       </div>
       <span
@@ -165,7 +203,7 @@
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="save"
+          @click="submitForm('ruleForm')"
         >确 定</el-button>
       </span>
     </el-dialog>
@@ -174,7 +212,7 @@
 
 <script>
 import { nanoid } from 'nanoid'
-import { zModelPage, delModel } from '@/api/zmodel'
+import { zModelPage, delModel, updateDevice } from '@/api/zmodel'
 
 import ModelThings from './ModelThings'
 import ModelProtocol from './ModelProtocol'
@@ -183,14 +221,32 @@ export default {
   name: 'AddDeviceDlg',
   components: { ModelThings, ModelProtocol },
 
-  props: {},
+  props: {
+    newItem: {
+      type: Object,
+      default() {
+        return {}
+      }
+    },
+    node: {
+      type: Object,
+      default() {
+        return {}
+      }
+    },
+    newDevice: {
+      type: Boolean,
+      default: null
+    }
+  },
   data() {
     return {
       dialogVisible: false,
       isNew: false,
       total: 0,
+      radio: '',
       activeModel: {},
-      multipleSelection: [],
+      currentRow: {},
       list: [],
       defaultModel: '温度传感器',
       params: {
@@ -200,6 +256,7 @@ export default {
       queryParams: { page: 1, size: 5 },
       form: {
         s_name: '',
+        status: '',
         uid: ''
       },
 
@@ -225,15 +282,29 @@ export default {
       }
     }
   },
-  computed: {},
+  computed: {
+    titleType() {
+      return this.newDevice ? '新增' : '编辑'
+    }
+  },
   watch: {
     dialogVisible: {
       handler(val, oldVal) {
-        if (val) {
-          this.init()
+        this.init()
+        if (this.newDevice) {
           this.form = {
             s_name: '新增_' + nanoid(),
+            status: 1,
             uid: 'm_' + nanoid()
+          }
+        } else {
+          this.form = {
+            ...{
+              s_name: this.newItem.s_name,
+              status: this.newItem.status_used,
+              uid: this.newItem.uid
+            },
+            ...this.newItem
           }
         }
       }
@@ -249,6 +320,50 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    submitForm(formName) {
+      if (!this.radio && this.newDevice) {
+        this.$message({
+          type: 'error',
+          message: `请选择物模型`
+        })
+        return
+      }
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          const obj = {
+            station_id: this.node.uid,
+            model_id: this.radio || this.form.model_id,
+            thing_id: this.form.uid,
+            s_name: this.form.s_name,
+            status: this.form.status
+          }
+          updateDevice(obj, this.newDevice)
+            .then((res) => {
+              debugger
+              if (res.data.result) {
+                this.dialogVisible = false
+                this.$message({
+                  type: 'success',
+                  message: `${this.titleType}设备成功`
+                })
+                this.dialogVisible = false
+                this.$emit('confirm')
+              } else {
+                this.$message({
+                  type: 'error',
+                  message: `${this.titleType}设备失败`
+                })
+              }
+            })
+            .catch((err) => {
+              alert(err)
+            })
+        } else {
+          console.log('error submit!!')
+          return false
+        }
+      })
+    },
     ThingsConfirm() {
       this.init()
     },
@@ -262,8 +377,12 @@ export default {
           alert(err)
         })
     },
-    handleSelectionChange(item) {
-      this.multipleSelection = item
+    // handleSelectionChange(item) {
+    //   this.multipleSelection = item
+    // },
+    handleCurrentChange(item) {
+      this.radio = item.uid
+      this.currentRow = item
     },
     changePage(page) {
       this.queryParams.page = page
@@ -355,6 +474,9 @@ export default {
   .device-dlg-right {
     display: inline-block;
     width: 30%;
+    &.full {
+      width: 50%;
+    }
   }
 }
 </style>

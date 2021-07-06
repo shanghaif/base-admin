@@ -80,9 +80,14 @@ export default {
         { label: '煤炭', value: '煤炭' }
       ],
       rules: {
-        protocol_path: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-          { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+        paramStr: [
+          { required: true, message: '请输入内容', trigger: 'blur' },
+          {
+            min: 1,
+            max: 500,
+            message: '长度在 3 到 500 个字符',
+            trigger: 'blur'
+          }
         ]
       }
     }
