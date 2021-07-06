@@ -8,8 +8,16 @@
       :modal="false"
       top="10vh"
     >
-      <ModelEditProtocol ref="ModelEditProtocol" />
-      <el-button-group class="btns-wrap">
+      <ModelEditProtocol
+        ref="ModelEditProtocol"
+        :is-new="isNewProtocol"
+        :new-item="currentProtocol"
+        @confirm="confirm"
+      />
+      <el-button-group
+        v-if="list.length<1"
+        class="btns-wrap"
+      >
 
         <el-button
           type="primary"
@@ -21,17 +29,17 @@
 
       </el-button-group>
       <el-table
-        :data="tableData"
+        :data="list"
         height="300"
         style="width: 98%"
       >
         <el-table-column
-          prop="s_name"
+          prop="protocol_path"
           label="名称"
         />
         <el-table-column
           label="操作"
-          width="160"
+          width="100"
         >
           <template slot-scope="scope">
             <el-button
@@ -42,7 +50,7 @@
               <!-- <i class="el-icon-edit" /> -->
               编辑
             </el-button>
-            <el-popconfirm
+            <!-- <el-popconfirm
               title="确定删除该协议吗？"
               @confirm="delProtocol(scope.row,scope.$index)"
             >
@@ -52,11 +60,11 @@
                 type="danger"
                 style="margin-left:10px;"
               >
-                <!-- <i class="el-icon-delete" /> -->
+                <i class="el-icon-delete" />
                 删除
 
               </el-button>
-            </el-popconfirm>
+            </el-popconfirm> -->
           </template>
         </el-table-column>
 
@@ -78,7 +86,11 @@
 
 <script>
 import ModelEditProtocol from './ModelEditProtocol'
-import { tmodelProtocol } from '@/api/zmodel'
+import {
+  tmodelProtocol,
+  updateTmodelProtocol,
+  delTmodelProtocol
+} from '@/api/zmodel'
 import { param } from '@/utils'
 export default {
   name: 'ModelProtocol',
@@ -99,14 +111,16 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      tableData: [
-        {
-          s_name: '1234'
-        }
-      ]
+      isNewProtocol: false,
+      list: [],
+      currentProtocol: {}
     }
   },
-  computed: {},
+  computed: {
+    titleType() {
+      return this.isNewProtocol ? '新增' : '编辑'
+    }
+  },
   watch: {},
 
   created() {
@@ -118,13 +132,42 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    confirm(data) {
+      const obj = {
+        protocol_path: data.protocol_path,
+        param: data.paramStr
+      }
+      updateTmodelProtocol(obj, this.isNewProtocol)
+        .then((res) => {
+          if (res) {
+            this.$refs.ModelEditProtocol.hide()
+
+            this.$message({
+              type: 'success',
+              message: `${this.titleType}成功!`
+            })
+            this.queryProtocolList()
+          } else {
+            this.$message({
+              type: 'error',
+              message: `${this.titleType}失败!`
+            })
+          }
+        })
+        .catch((err) => {
+          alert(err)
+        })
+    },
     save() {
       const params = {
         model_id: ''
       }
-      tmodelProtocol(params)
+    },
+    queryProtocolList() {
+      tmodelProtocol()
         .then((res) => {
-          console.log('res :>> ', res)
+          // this.list = (res.data && res.data.result) || []
+          this.list = [res.data.result]
         })
         .catch((err) => {
           alert(err)
@@ -132,16 +175,44 @@ export default {
     },
     show() {
       this.dialogVisible = true
+      this.queryProtocolList()
     },
     addProtocol() {
       console.log('123 :>> ', 123)
+      this.isNewProtocol = true
+      this.currentProtocol = {}
       this.$refs.ModelEditProtocol.show()
     },
-    delProtocol() {
+    delProtocol(row) {
+      delTmodelProtocol(row)
+        .then((res) => {
+          if (res.data.result === 'OK') {
+            this.$message({
+              type: 'success',
+              message: '删除成功!'
+            })
+            this.$refs.ModelEditProtocol.hide()
+
+            this.queryProtocolList()
+          } else {
+            this.$message({
+              type: 'error',
+              message: '删除失败!'
+            })
+          }
+        })
+        .catch((err) => {
+          alert(err)
+        })
       console.log('123 :>> ', 123)
     },
-    editProtocol() {
+    editProtocol(row) {
       console.log('123 :>> ', 123)
+      this.isNewProtocol = false
+      this.currentProtocol = {
+        ...row,
+        ...{ paramStr: JSON.stringify(row.param) }
+      }
       this.$refs.ModelEditProtocol.show()
     }
   }

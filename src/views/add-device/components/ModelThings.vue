@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog
-      :title="isNew ? '新增物模型': '编辑物模型'"
+      :title="`${msg}物模型`"
       :visible.sync="dialogVisible"
       width="50%"
       :close-on-click-modal="false"
@@ -11,29 +11,32 @@
 
       <el-form
         ref="ruleForm"
-        :model="newItem"
+        :model="saveParams"
         :rules="rules"
         label-width="120px"
         label-position="right"
-        style="width:50%"
+        style="width:60%"
       >
         <el-form-item
           label="名称"
-          prop="s_name"
+          prop="name"
           :label-width="formLabelWidth"
         >
           <el-input
-            v-model="saveParams.s_name"
+            v-model="saveParams.name"
             autocomplete="off"
+            :disabled="!isNew"
           />
         </el-form-item>
         <el-form-item
           label="id"
+          prop="uid"
           :label-width="formLabelWidth"
         >
           <el-input
             v-model="saveParams.uid"
             autocomplete="off"
+            :disabled="!isNew"
           />
         </el-form-item>
         <el-form-item label="温度告警范围">
@@ -76,29 +79,13 @@
             />
           </el-col>
         </el-form-item>
-        <!-- <el-form-item
-          label="类别"
-          :label-width="formLabelWidth"
-        >
-          <el-select
-            v-model="newItem.catalog_id"
-            placeholder="请选择"
-          >
-            <el-option
-              v-for="(item,i) in options"
-              :key="item +i"
-              :label="item.label"
-              :value="item.value"
-            />
 
-          </el-select>
-        </el-form-item> -->
         <el-form-item
           label="说明"
           :label-width="formLabelWidth"
         >
           <el-input
-            v-model="newItem.desc"
+            v-model="saveParams.desc"
             type="textarea"
           />
         </el-form-item>
@@ -110,7 +97,7 @@
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="dialogVisible = false"
+          @click="submitForm('ruleForm')"
         >确 定</el-button>
       </span>
     </el-dialog>
@@ -119,7 +106,7 @@
 </template>
 
 <script>
-import { nanoid } from 'nanoid'
+import { tmodelNew } from '@/api/zmodel'
 
 export default {
   name: 'ModelThings',
@@ -149,7 +136,16 @@ export default {
         { label: '煤炭', value: '煤炭' }
       ],
       rules: {
-        s_name: [
+        name: [
+          { required: true, message: '请输入名称', trigger: 'blur' },
+          {
+            min: 1,
+            max: 100,
+            message: '长度在 1 到 100 个字符',
+            trigger: 'blur'
+          }
+        ],
+        uid: [
           { required: true, message: '请输入名称', trigger: 'blur' },
           {
             min: 1,
@@ -161,21 +157,16 @@ export default {
       }
     }
   },
-  computed: {},
+  computed: {
+    msg() {
+      return this.isNew ? '新增' : '编辑'
+    }
+  },
   watch: {
     newItem: {
       handler(val, oldVal) {
         if (val) {
-          this.saveParams = {
-            ...{
-              name: val.s_name,
-              temperature_high: 0,
-              temperature_low: 0,
-              rate_high: 0,
-              rate_low: 0
-            },
-            ...val
-          }
+          this.saveParams = { ...val }
         }
       },
       deep: true
@@ -194,7 +185,27 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
+          // this.saveParams.rate_high = Number(this.saveParams.rate_high)
+          // this.saveParams.rate_low = Number(this.saveParams.rate_low)
+          // this.saveParams.temperature_high = Number(
+          //   this.saveParams.temperature_high
+          // )
+          // this.saveParams.temperature_low = Number(
+          //   this.saveParams.temperature_low
+          // )
+
+          tmodelNew(this.saveParams, this.isNew)
+            .then((res) => {
+              this.$message({
+                type: 'success',
+                message: `${this.msg}成功!`
+              })
+              this.dialogVisible = false
+              this.$emit('confirm')
+            })
+            .catch((err) => {
+              alert(err)
+            })
         } else {
           console.log('error submit!!')
           return false

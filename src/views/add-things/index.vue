@@ -29,7 +29,7 @@
         />
 
         <el-table-column
-          prop="s_name"
+          prop="name"
           label="姓名"
           width="120"
         >
@@ -38,7 +38,7 @@
             <el-link
               type="primary"
               @click="handleEdit(scope.row)"
-            >{{ scope.row.s_name }}</el-link>
+            >{{ scope.row.name }}</el-link>
           </template>
         </el-table-column>
         <el-table-column

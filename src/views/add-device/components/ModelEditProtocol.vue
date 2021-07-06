@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog
-      title="提示"
+      :title="`${titleType}协议`"
       :visible.sync="dialogVisible"
       width="40%"
       :close-on-click-modal="false"
@@ -17,21 +17,23 @@
       >
         <el-form-item
           label="路径"
-          prop="s_name"
+          prop="protocol_path"
           :label-width="formLabelWidth"
         >
           <el-input
-            v-model="newItem.s_name"
+            v-model="newItem.protocol_path"
             autocomplete="off"
+            disabled
           />
         </el-form-item>
 
         <el-form-item
           label="运行参数"
+          prop="paramStr"
           :label-width="formLabelWidth"
         >
           <el-input
-            v-model="newItem.desc"
+            v-model="newItem.paramStr"
             type="textarea"
           />
         </el-form-item>
@@ -43,7 +45,7 @@
         <el-button @click="dialogVisible = false">取 消</el-button>
         <el-button
           type="primary"
-          @click="dialogVisible = false"
+          @click="submitForm('ruleForm')"
         >确 定</el-button>
       </span>
     </el-dialog>
@@ -78,14 +80,18 @@ export default {
         { label: '煤炭', value: '煤炭' }
       ],
       rules: {
-        s_name: [
+        protocol_path: [
           { required: true, message: '请输入名称', trigger: 'blur' },
           { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
         ]
       }
     }
   },
-  computed: {},
+  computed: {
+    titleType() {
+      return this.isNew ? '新增' : '编辑'
+    }
+  },
   watch: {},
 
   created() {
@@ -100,7 +106,7 @@ export default {
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!')
+          this.$emit('confirm', this.newItem)
         } else {
           console.log('error submit!!')
           return false
@@ -109,6 +115,9 @@ export default {
     },
     show() {
       this.dialogVisible = true
+    },
+    hide() {
+      this.dialogVisible = false
     }
   }
 }

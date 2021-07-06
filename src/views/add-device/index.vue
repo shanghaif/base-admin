@@ -2,22 +2,23 @@
   <el-card class="device-wrap">
 
     <div class="left">
-      <!-- <el-button-group class="btns-wrap">
+      <el-button-group class="btns-wrap">
         <el-button
           type="primary"
           icon="el-icon-plus"
-          @click="addNew"
+          @click="addNewNode"
         />
         <el-button
           type="primary"
           icon="el-icon-refresh-right"
-          @click="refresh"
+          @click="refreshNode"
         />
         <el-button
           type="danger"
           icon="el-icon-delete"
+          @click="delNode"
         />
-      </el-button-group> -->
+      </el-button-group>
 
       <el-tree
         ref="tree"
@@ -30,7 +31,10 @@
         @node-click="clickNode"
       />
     </div>
-    <div class="right">
+    <div
+      v-if="currentNode.leaf"
+      class="right"
+    >
       <div class="count-container">
         <div
           class="count-item blue"
@@ -271,7 +275,6 @@ import {
   editThings,
   deviceStatus
 } from '@/api/station'
-import { zModelPage } from '@/api/zmodel'
 import DevicelDlg from './components/DevicelDlg'
 import AddDeviceDlg from './components/AddDeviceDlg'
 
@@ -409,7 +412,7 @@ export default {
           alert(err)
         })
     },
-    addNew(node) {
+    addNewNode(node) {
       if (this.isCheck) {
         console.log('node :>> ', node)
         this.$refs.tree.append(
@@ -417,6 +420,12 @@ export default {
           this.currentNode
         )
       }
+    },
+    refreshNode(node) {
+      console.log('node :>> ', node)
+    },
+    delNode(node) {
+      console.log('node :>> ', node)
     },
 
     refreshDevice() {

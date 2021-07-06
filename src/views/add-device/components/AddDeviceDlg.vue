@@ -10,6 +10,7 @@
         ref="ModelThings"
         :is-new="isNew"
         :new-item="activeModel"
+        @confirm="ThingsConfirm"
       />
       <ModelProtocol ref="ModelProtocol" />
       <!-- 左侧表单 -->
@@ -43,14 +44,14 @@
           height="400"
           @selection-change="handleSelectionChange"
         >
-          <el-table-column
+          <!-- <el-table-column
             type="selection"
             width="55"
-          />
+          /> -->
 
           <el-table-column
-            prop="s_name"
-            label="姓名"
+            prop="name"
+            label="名称"
             width="120"
           >
             <template slot-scope="scope">
@@ -58,7 +59,7 @@
               <el-link
                 type="primary"
                 @click="editThings(scope.row)"
-              >{{ scope.row.s_name }}</el-link>
+              >{{ scope.row.name }}</el-link>
             </template>
           </el-table-column>
           <el-table-column
@@ -107,7 +108,7 @@
           <el-pagination
             :hide-on-single-page="total <1"
             background
-            :page-size="2"
+            :page-size="5"
             layout="total, prev, pager, next"
             :total="total"
             @current-change="changePage"
@@ -121,6 +122,8 @@
 
         <el-form
           ref="ruleForm"
+          :model="form"
+          :rules="deviceFormRules"
           class="form"
           label-width="80px"
         >
@@ -137,8 +140,9 @@
             prop="s_name"
           >
             <el-input
-              v-model="params.s_name"
+              v-model="form.s_name"
               autocomplete="off"
+              clearable
             />
           </el-form-item>
           <el-form-item
@@ -146,8 +150,9 @@
             prop="uid"
           >
             <el-input
-              v-model="params.uid"
+              v-model="form.uid"
               autocomplete="off"
+              clearable
             />
           </el-form-item>
 
@@ -169,7 +174,7 @@
 
 <script>
 import { nanoid } from 'nanoid'
-import { zModelPage } from '@/api/zmodel'
+import { zModelPage, delModel } from '@/api/zmodel'
 
 import ModelThings from './ModelThings'
 import ModelProtocol from './ModelProtocol'
@@ -183,6 +188,7 @@ export default {
     return {
       dialogVisible: false,
       isNew: false,
+      total: 0,
       activeModel: {},
       multipleSelection: [],
       list: [],
@@ -191,24 +197,45 @@ export default {
         s_name: '',
         uid: ''
       },
-      tableData: [
-        {
-          s_name: '王小虎',
-          address: '上海市普陀区金沙江路 1518 弄'
-        }
-      ],
-      queryParams: { page: 1, size: 10 }
+      queryParams: { page: 1, size: 5 },
+      form: {
+        s_name: '',
+        uid: ''
+      },
+
+      deviceFormRules: {
+        s_name: [
+          { required: true, message: '请输入名称', trigger: 'blur' },
+          {
+            min: 1,
+            max: 100,
+            message: '长度在 1 到 100 个字符',
+            trigger: 'blur'
+          }
+        ],
+        uid: [
+          { required: true, message: '请输入id', trigger: 'blur' },
+          {
+            min: 1,
+            max: 100,
+            message: '长度在 1 到 100 个字符',
+            trigger: 'blur'
+          }
+        ]
+      }
     }
   },
-  computed: {
-    total() {
-      return this.list.length
-    }
-  },
+  computed: {},
   watch: {
     dialogVisible: {
       handler(val, oldVal) {
-        this.init()
+        if (val) {
+          this.init()
+          this.form = {
+            s_name: '新增_' + nanoid(),
+            uid: 'm_' + nanoid()
+          }
+        }
       }
     }
   },
@@ -222,11 +249,14 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    ThingsConfirm() {
+      this.init()
+    },
     init() {
       zModelPage(this.queryParams)
         .then((res) => {
-          console.log('res :>> ', res)
-          this.list = res.data.result || []
+          this.list = res.data.result.data || []
+          this.total = res.data.result.count || 0
         })
         .catch((err) => {
           alert(err)
@@ -236,13 +266,11 @@ export default {
       this.multipleSelection = item
     },
     changePage(page) {
-      // zModelPage(page).then((res) => {
-      //   debugger
-      //   this.tableData = res.data.result.devices || []
-      //   this.total = res.data.result.devices_count
-      // })
+      this.queryParams.page = page
+      this.init()
     },
     editThings(row) {
+      this.isNew = false
       this.activeModel = { ...row }
       this.$refs.ModelThings.show()
     },
@@ -252,10 +280,13 @@ export default {
       } else {
         this.isNew = true
         this.activeModel = {
-          s_name: '新增',
+          name: '新增',
           uid: 'm_' + nanoid(),
-          catalog_id: 'COMMON',
-          body: '{}'
+          desc: '',
+          rate_high: 100,
+          rate_low: 30,
+          temperature_high: 300,
+          temperature_low: 200
         }
       }
       this.$refs.ModelThings.show()
@@ -268,10 +299,11 @@ export default {
       this.$refs.ModelProtocol.show()
     },
     save() {
+      debugger
       this.$emit('confirmm', 123)
     },
     query() {
-      zModelPage({ page: 1, size: 10 })
+      zModelPage({ page: 1, size: 2 })
         .then((res) => {
           console.log('res :>> ', res)
           this.zModelList = res.data.result || []
@@ -282,13 +314,14 @@ export default {
         })
     },
     handleDelete(row, index) {
-      this.deleteModel(row.uid)
+      delModel(row.uid)
         .then((res) => {
           if (res.status === 200 && res.data.result === null) {
             this.$message({
               type: 'success',
               message: '删除成功!'
             })
+            this.init()
           } else {
             this.$message({
               type: 'error',

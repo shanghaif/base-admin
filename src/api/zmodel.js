@@ -1,5 +1,5 @@
 import request from '@/utils/request'
-
+import qs from 'qs'
 const baseUrl = 'api/cfg/tmodel'
 export function zModel() {
   return request({
@@ -11,7 +11,7 @@ export function zModel() {
 export function zModelPage(obj) {
   const params = {
     page: obj.page || 1,
-    size: obj.page || 5,
+    size: obj.size || 5,
     ...obj
   }
   return request({
@@ -35,23 +35,57 @@ export function delModel(id) {
   })
 }
 export function tmodelProtocol() {
+  const params = {
+    temperature: true
+  }
   return request({
     url: `api/cfg/tmodelprotocol`,
-    method: 'post'
+    method: 'get',
+    params
+  })
+}
+export function updateTmodelProtocol(obj, isNew) {
+  const params = {
+    new: true,
+    path: obj.protocol_path,
+    param: obj.param
+
+  }
+  debugger
+  const method = isNew ? 'post' : 'PUT'
+  const url = `api/cfg/tmodelprotocol/?` + qs.stringify(params)
+  return request({
+    url,
+    method
+    
+  })
+}
+export function delTmodelProtocol(obj) {
+  const data = {
+    model_id: obj.model_id,
+    protocols: []
+  }
+  return request({
+    url: 'api/cfg/tmodelprotocol',
+    method: 'post',
+    data
+    
   })
 }
 
-
 // 温度传感器增删改查
 
-export function tmodelNew(obj) {
-  const data = {
+export function tmodelNew(obj, isNew) {
+  const params = { ...{
     new: true
+  },
+  ...obj
   }
-  
+  const method = isNew ? 'post' : 'PUT'
+  const url = `api/cfg/tmodel/?` + qs.stringify(params)
   return request({
-    url: `api/cfg/tmodelprotocol`,
-    method: 'post',
-    data
+    url,
+    method
+    
   })
 }

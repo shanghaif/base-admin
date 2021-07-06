@@ -8,13 +8,16 @@
     >
       <el-form
         ref="ruleForm"
+        v-model="form"
         class="form"
         label-width="80px"
       >
-        <el-form-item label="物模型">
+        <el-form-item
+          label="物模型"
+          style="display:none;"
+        >
           <el-input
             v-model="defaultModel"
-            autocomplete="off"
             readonly
             disabled
           />
@@ -25,7 +28,7 @@
         >
           <el-input
             v-model="params.s_name"
-            autocomplete="off"
+            disabled
           />
         </el-form-item>
         <el-form-item
@@ -34,8 +37,29 @@
         >
           <el-input
             v-model="params.uid"
-            autocomplete="off"
+            disabled
           />
+        </el-form-item>
+        <el-form-item
+          label="状态"
+          prop="status_used"
+        >
+
+          <el-select
+            v-model="params.status_used"
+            placeholder="状态"
+            style="width: 120px; margin-right: 10px"
+            class="filter-item"
+          >
+            <el-option
+              label="启用"
+              :value="1"
+            />
+            <el-option
+              label="停用"
+              :value="0"
+            />
+          </el-select>
         </el-form-item>
 
       </el-form>
