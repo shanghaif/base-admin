@@ -105,3 +105,23 @@ export function updateDevice(obj, isNew) {
   })
 }
 
+export function updateStation(data, isNew) {
+  const method = isNew ? 'post' : 'PUT'
+  const url = `api/cfg/station`
+  return request({
+    url,
+    method,
+    data
+    
+  })
+}
+export function delStation(id) {
+  const method = 'DELETE'
+  const url = `api/cfg/station/${id}`
+  return request({
+    url,
+    method
+    
+  })
+}
+

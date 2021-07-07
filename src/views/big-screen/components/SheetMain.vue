@@ -189,6 +189,10 @@ export default {
     color: #fff;
     font-size: 16px;
     margin-left: 20px;
+    cursor: pointer;
+    &:hover {
+      color: $selfColor;
+    }
   }
   .cells {
     display: flex;

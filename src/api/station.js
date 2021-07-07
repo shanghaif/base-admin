@@ -197,7 +197,7 @@ export function editThings(data) { // 编辑设备
     data: data
   })
 }
-export function deleteThings(id) { // 编辑设备
+export function deleteThings(id) { // 删除设备
   return request({
     url: `api/cfg/thing/${id}`,
     method: 'delete'

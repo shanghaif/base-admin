@@ -132,7 +132,7 @@ export default {
       const obj = {}
       if (type === 'now') {
         begin_time = this.$dayjs()
-          .subtract(600, 'second')
+          .subtract(3600, 'second')
           .format('YYYY-MM-DD HH:mm')
         end_time = this.$dayjs().format('YYYY-MM-DD HH:mm')
       } else if (type === 'day') {
@@ -186,6 +186,9 @@ export default {
         t_id: this.currentFactory.uid,
         page: this.page,
         size: this.size
+      }
+      if (this.activeTab === 'now') {
+        obj.active = true
       }
       const res = await warningAll({ ...obj, ...this.chooseDate })
       this.noMoreList = (res.data.result && res.data.result.alarms) || []

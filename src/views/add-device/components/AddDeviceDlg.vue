@@ -50,14 +50,14 @@
 
           <el-table-column
             label="选择"
-            width="120"
+            width="50"
           >
             <template slot-scope="scope">
 
               <el-radio
                 v-model="radio"
                 :label="scope.row.uid"
-              >备选项</el-radio>
+              ><span /></el-radio>
             </template>
           </el-table-column>
           <el-table-column
@@ -132,7 +132,10 @@
         class="device-dlg-right"
         :class="{full:!newDevice}"
       >
-        <div class="device-dlg-title">点位信息</div>
+        <div
+          class="device-dlg-title"
+          style="text-align:left"
+        >点位信息</div>
 
         <el-form
           ref="ruleForm"
@@ -339,7 +342,6 @@ export default {
           }
           updateDevice(obj, this.newDevice)
             .then((res) => {
-              debugger
               if (res.data.result) {
                 this.dialogVisible = false
                 this.$message({
@@ -418,7 +420,6 @@ export default {
       this.$refs.ModelProtocol.show()
     },
     save() {
-      debugger
       this.$emit('confirmm', 123)
     },
     query() {

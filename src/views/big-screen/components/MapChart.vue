@@ -191,7 +191,7 @@ export default {
                 str += `<div class="map-comp-name ${isActive}" onclick="selectFactory(event,'${v.uid}')">${v.s_name}</div>`
               })
               html = `<div class="map-tips">
-                 <div class="map-tips-title">云南分公司</div>
+                 <div class="map-tips-title">${params.name}分公司</div>
                  <div class="map-comp-names">
                    ${str}
                  </div>
@@ -328,7 +328,7 @@ export default {
   z-index: 100;
   // background: rgba(29, 29, 29, 0.8);
   width: 310px;
-  height: 156px;
+  // height: 156px;
   padding: 14px;
   // border: 1px solid #01adf9;
   border-radius: 10px;
@@ -343,8 +343,9 @@ export default {
     margin-bottom: 10px;
   }
   .map-comp-names {
-    @include flex();
+    @include flex(flex-start, center);
     flex-wrap: wrap;
+    margin-left: 25px;
     .map-comp-name {
       width: 110px;
       height: 34px;

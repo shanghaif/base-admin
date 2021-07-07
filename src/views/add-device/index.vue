@@ -6,6 +6,7 @@
         <el-button
           type="primary"
           icon="el-icon-plus"
+          :disabled="canAdd"
           @click="addNewNode"
         />
         <el-button
@@ -13,6 +14,11 @@
           icon="el-icon-refresh-right"
           @click="refreshNode"
         />
+        <!-- <el-button
+          type="primary"
+          icon="el-icon-edit"
+          @click="editNode"
+        /> -->
         <el-button
           type="danger"
           icon="el-icon-delete"
@@ -21,20 +27,19 @@
       </el-button-group>
 
       <el-tree
+        :key="treeId"
         ref="tree"
         :props="props"
         :load="loadNode"
         :highlight-current="true"
         :check-on-click-node="true"
+        :default-expanded-keys="expandedKeys"
         lazy
         node-key="uid"
         @node-click="clickNode"
       />
     </div>
-    <div
-      v-if="currentNode.leaf"
-      class="right"
-    >
+    <div class="right">
       <div class="count-container">
         <div
           class="count-item blue"
@@ -61,70 +66,74 @@
           <i class="el-icon-warning" />
         </div>
       </div>
+      <div
+        v-if="currentNode.leaf"
+        class="right-content"
+      >
 
-      <div class="filter-container">
-        <el-input
-          v-model="listQuery.point"
-          placeholder="请输入关联点位"
-          style="width: 160px; margin-right: 10px"
-          class="filter-item"
-          @keyup.enter.native="handleFilter"
-        />
+        <div class="filter-container">
+          <!-- <el-input
+            v-model="listQuery.point"
+            placeholder="请输入关联点位"
+            style="width: 160px; margin-right: 10px"
+            class="filter-item"
+            @keyup.enter.native="handleFilter"
+          />
 
-        <el-select
-          v-model="listQuery.net"
-          placeholder="状态"
-          clearable
-          style="width: 120px; margin-right: 10px"
-          class="filter-item"
-        >
-          <el-option
-            label="启用"
-            value="1"
-          />
-          <el-option
-            label="禁用"
-            value="0"
-          />
-        </el-select>
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-search"
-          @click="handleFilter"
-        >
-          搜索
-        </el-button>
-        <el-button
-          type="primary"
-          @click="addNewDevice()"
-        >增加设备</el-button>
-        <el-button
-          type="primary"
-          @click="refreshDevice"
-        >刷新</el-button>
-        <el-button
-          v-if="multipleSelection.length>0"
-          type="danger"
-        >删除已选</el-button>
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-download"
-          @click="handleDownload"
-        >
-          导出选择
-        </el-button>
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-download"
-          @click="handleDownload"
-        >
-          导出全部
-        </el-button>
-      </div>
-      <!-- <el-button-group>
+          <el-select
+            v-model="listQuery.net"
+            placeholder="状态"
+            clearable
+            style="width: 120px; margin-right: 10px"
+            class="filter-item"
+          >
+            <el-option
+              label="启用"
+              value="1"
+            />
+            <el-option
+              label="禁用"
+              value="0"
+            />
+          </el-select> -->
+          <el-button
+            class="filter-item"
+            type="primary"
+            icon="el-icon-search"
+            @click="handleFilter"
+          >
+            搜索
+          </el-button>
+          <el-button
+            type="primary"
+            @click="addNewDevice()"
+          >增加设备</el-button>
+          <el-button
+            type="primary"
+            @click="refreshDevice"
+          >刷新</el-button>
+          <el-button
+            v-if="multipleSelection.length>0"
+            type="danger"
+          >删除已选</el-button>
+          <!-- <el-button
+            class="filter-item"
+            type="primary"
+            icon="el-icon-download"
+            @click="handleDownload"
+          >
+            导出选择
+          </el-button>
+          <el-button
+            class="filter-item"
+            type="primary"
+            icon="el-icon-download"
+            @click="handleDownload"
+          >
+            导出全部
+          </el-button> -->
+        </div>
+        <!-- <el-button-group>
         <el-button
           type="primary"
           @click="addNewDevice"
@@ -138,120 +147,121 @@
           type="danger"
         >删除已选</el-button>
       </el-button-group> -->
-      <el-table
-        ref="multipleTable"
-        :data="tableData"
-        tooltip-effect="dark"
-        style="width: 100%"
-        :stripe="true"
-        @selection-change="handleSelectionChange"
-      >
-        <el-table-column
-          type="selection"
-          width="55"
-        />
-
-        <el-table-column
-          sortable
-          prop="company"
-          label="公司"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          sortable
-          prop="factory"
-          label="厂区"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          sortable
-          prop="area"
-          label="分区"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          sortable
-          prop="bath"
-          label="电解槽"
-          show-overflow-tooltip
-        />
-        <el-table-column
-          prop="s_name"
-          label="名称"
-          width="120"
+        <el-table
+          ref="multipleTable"
+          :data="tableData"
+          tooltip-effect="dark"
+          style="width: 100%"
+          :stripe="true"
+          @selection-change="handleSelectionChange"
         >
-          <template slot-scope="scope">
+          <el-table-column
+            type="selection"
+            width="55"
+          />
 
-            <el-link
-              type="primary"
-              @click="addNewDevice(scope.row)"
-            >{{ scope.row.s_name }}</el-link>
-          </template>
-        </el-table-column>
-        <el-table-column
-          sortable
-          prop="uid"
-          label="id"
-        />
+          <el-table-column
+            sortable
+            prop="company"
+            label="公司"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            sortable
+            prop="factory"
+            label="厂区"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            sortable
+            prop="area"
+            label="分区"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            sortable
+            prop="bath"
+            label="电解槽"
+            show-overflow-tooltip
+          />
+          <el-table-column
+            prop="s_name"
+            label="名称"
+            width="120"
+          >
+            <template slot-scope="scope">
 
-        <el-table-column
-          prop="status_used"
-          label="状态"
-          show-overflow-tooltip
-          width="100"
-        >
-          <template slot-scope="scope">
+              <el-link
+                type="primary"
+                @click="addNewDevice(scope.row)"
+              >{{ scope.row.s_name }}</el-link>
+            </template>
+          </el-table-column>
+          <el-table-column
+            sortable
+            prop="uid"
+            label="id"
+          />
 
-            <!-- <el-link
+          <el-table-column
+            prop="status_used"
+            label="状态"
+            show-overflow-tooltip
+            width="100"
+          >
+            <template slot-scope="scope">
+
+              <!-- <el-link
               type="primary"
               @click="editDevice(scope.row)"
             >{{ scope.row.s_name }}</el-link> -->
-            <el-tag
-              :type="typeFunc(scope.row.status_used)"
-              plain
-            >{{ scope.row.status_used | statusFilter }}</el-tag>
-          </template>
-        </el-table-column>
+              <el-tag
+                :type="typeFunc(scope.row.status_used)"
+                plain
+              >{{ scope.row.status_used | statusFilter }}</el-tag>
+            </template>
+          </el-table-column>
 
-        <el-table-column
-          label="操作"
-          width="160"
-        >
-          <template slot-scope="scope">
-            <el-button
-              size="mini"
-              type="primary"
-              @click="addNewDevice(scope.row,scope.$index)"
-            >
-              <!-- <i class="el-icon-edit" /> -->
-              编辑
-            </el-button>
-            <el-popconfirm
-              title="确定删除该物模型吗？"
-              @confirm="delDevice(scope.row,scope.$index)"
-            >
+          <el-table-column
+            label="操作"
+            width="160"
+          >
+            <template slot-scope="scope">
               <el-button
-                slot="reference"
                 size="mini"
-                type="danger"
+                type="primary"
+                @click="addNewDevice(scope.row,scope.$index)"
               >
-                <!-- <i class="el-icon-delete" /> -->
-                删除
-
+                <!-- <i class="el-icon-edit" /> -->
+                编辑
               </el-button>
-            </el-popconfirm>
-          </template>
-        </el-table-column>
-      </el-table>
-      <div class="pagination-wrap">
+              <el-popconfirm
+                title="确定删除该物模型吗？"
+                @confirm="delDevice(scope.row,scope.$index)"
+              >
+                <el-button
+                  slot="reference"
+                  size="mini"
+                  type="danger"
+                >
+                  <!-- <i class="el-icon-delete" /> -->
+                  删除
 
-        <el-pagination
-          :hide-on-single-page="total < 10"
-          background
-          layout="total, prev, pager, next"
-          :total="total"
-          @current-change="changePage"
-        />
+                </el-button>
+              </el-popconfirm>
+            </template>
+          </el-table-column>
+        </el-table>
+        <div class="pagination-wrap">
+
+          <el-pagination
+            :hide-on-single-page="total < 10"
+            background
+            layout="total, prev, pager, next"
+            :total="total"
+            @current-change="changePage"
+          />
+        </div>
       </div>
     </div>
     <devicel-dlg
@@ -265,7 +275,13 @@
       :new-device="isNew"
       :node="currentNode"
       :new-item="dlgData"
-      @confirm="refreshDevice"
+      @confirm="confirmAddDeviceDlg"
+    />
+    <ModelEditStation
+      ref="ModelEditStation"
+      :is-new="isNewStation"
+      :new-item="currentNode"
+      @confirm="confirmStationDlg"
     />
   </el-card>
 </template>
@@ -281,12 +297,16 @@ import {
   editThings,
   deviceStatus
 } from '@/api/station'
+import { delStation } from '@/api/zmodel'
+
 import DevicelDlg from './components/DevicelDlg'
 import AddDeviceDlg from './components/AddDeviceDlg'
+import ModelEditStation from './components/ModelEditStation'
+import groupBy from 'lodash/groupBy'
 
 export default {
   name: 'AddDevice',
-  components: { DevicelDlg, AddDeviceDlg },
+  components: { DevicelDlg, AddDeviceDlg, ModelEditStation },
   filters: {
     statusFilter(type) {
       let res = ''
@@ -303,7 +323,9 @@ export default {
   data() {
     return {
       total: 0,
+      treeId: 0,
       isNew: false,
+      isNewStation: false,
       treeData: [],
       companyList: [],
       factoryList: [],
@@ -312,6 +334,7 @@ export default {
       deviceList: [],
       warningList: [],
       statusList: [],
+      expandedKeys: [],
       currentNode: {},
       listQuery: {
         page: 1,
@@ -321,6 +344,7 @@ export default {
         net: undefined,
         sort: '+id'
       },
+
       dlgData: {
         area: '',
         area_id: '',
@@ -364,6 +388,12 @@ export default {
   computed: {
     isCheck() {
       return Object.keys(this.currentNode).length > 0
+    },
+    isLeaf() {
+      return this.currentNode.leaf === true
+    },
+    canAdd() {
+      return !(this.isCheck && !this.isLeaf)
     }
   },
 
@@ -376,6 +406,12 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    confirmAddDeviceDlg() {
+      this.refreshDevice()
+    },
+    confirmStationDlg() {
+      this.treeId++
+    },
     handleFilter() {
       console.log('123 :>> ', 123)
     },
@@ -417,12 +453,28 @@ export default {
         })
     },
     addNewNode(node) {
+      this.isNewStation = true
       if (this.isCheck) {
         console.log('node :>> ', node)
-        this.$refs.tree.append(
-          { s_name: '电解铝5厂', leaf: false },
-          this.currentNode
-        )
+        // this.$refs.tree.append(
+        //   { s_name: '电解铝5厂', leaf: false },
+        //   this.currentNode
+        // )
+
+        this.$refs.ModelEditStation.show()
+      }
+    },
+    editNode(node) {
+      this.isNewStation = false
+
+      if (this.isCheck) {
+        console.log('node :>> ', node)
+        // this.$refs.tree.append(
+        //   { s_name: '电解铝5厂', leaf: false },
+        //   this.currentNode
+        // )
+
+        this.$refs.ModelEditStation.show()
       }
     },
     refreshNode(node) {
@@ -430,10 +482,38 @@ export default {
     },
     delNode(node) {
       console.log('node :>> ', node)
+      this.$confirm('此操作将永久删除该场站, 是否继续?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          delStation(this.currentNode.uid).then((res) => {
+            if (res.data.result) {
+              this.dialogVisible = false
+              this.$message({
+                type: 'success',
+                message: `删除场站成功`
+              })
+              this.dialogVisible = false
+              this.treeId++
+            } else {
+              this.$message({
+                type: 'error',
+                message: `删除场站失败`
+              })
+            }
+          })
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          })
+        })
     },
 
     refreshDevice() {
-      debugger
       device(this.dlgData.bath_id, 1).then((res) => {
         this.tableData = res.data.result.devices || []
         this.total = res.data.result.devices_count
@@ -460,6 +540,11 @@ export default {
         // 第一次加载
         company(1).then((res) => {
           this.companyList = res.data.result.stations
+          const keysArr = this.companyList.map((v) => {
+            return v.uid
+          })
+          this.expandedKeys = [...keysArr]
+
           resolve(this.companyList)
         })
       } else if (node.level === 1) {
@@ -468,6 +553,10 @@ export default {
         const { uid } = node.data
         factory(uid, 1).then((res) => {
           this.factoryList = res.data.result.stations || []
+          const keysArr = this.factoryList.map((v) => {
+            return v.uid
+          })
+          this.expandedKeys = [...keysArr]
           resolve(this.factoryList)
         })
       } else if (node.level === 2) {
@@ -477,13 +566,13 @@ export default {
 
         area(uid, 1).then((res) => {
           const data = res.data.result.stations || []
+
           return resolve(data)
         })
       } else if (node.level === 3) {
         const { uid } = node.data
         this.dlgData.area = node.data.s_name
         this.dlgData.area_id = node.data.uid
-
         cell(uid, 1).then((res) => {
           const data = res.data.result.stations || []
           data.map((v, i) => {
@@ -491,6 +580,7 @@ export default {
           })
           return resolve(data)
         })
+        // return resolve([])
       } else if (node.level === 4) {
         return resolve([])
       }
