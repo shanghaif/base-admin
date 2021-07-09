@@ -125,47 +125,64 @@ export const constantRoutes = [
           title: 'pagePermission',
           roles: ['admin'] // or you can only set roles in sub nav
         }
+      },
+      {
+        path: 'directive',
+        component: () => import('@/views/permission/directive'),
+        name: 'DirectivePermission',
+        meta: {
+          title: 'directivePermission'
+          // if do not set roles, means: this page does not require permission
+        }
+      },
+      {
+        path: 'role',
+        component: () => import('@/views/permission/role'),
+        name: 'RolePermission',
+        meta: {
+          title: 'rolePermission',
+          roles: ['admin']
+        }
+      }
+    ]
+  },
+  {
+    path: '/z_device',
+    component: Layout,
+    redirect: '/z_device/gateway',
+    name: 'Z_device',
+    meta: {
+      title: '设备管理',
+      icon: 'table',
+      roles: ['admin', 'editor'] // you can set roles in root nav
+    },
+    children: [
+      // {
+      //   path: '/z_device/add-things',
+      //   component: () => import('@/views/add-things/index'),
+      //   name: 'AddThings',
+      //   meta: { title: '新建物模型', roles: ['admin', 'editor'] }
+      // },
+      {
+        path: '/z_device/add-device',
+        component: () => import('@/views/add-device/index'),
+        name: 'AddDevice',
+        meta: { title: '添加设备', roles: ['admin', 'editor'] }
       }
       // {
-      //   path: 'directive',
-      //   component: () => import('@/views/permission/directive'),
-      //   name: 'DirectivePermission',
-      //   meta: {
-      //     title: 'directivePermission'
-      //     // if do not set roles, means: this page does not require permission
-      //   }
+      //   path: '/z_device/gateway',
+      //   component: () => import('@/views/z_device/gateway'),
+      //   name: 'Gateway',
+      //   meta: { title: '网关管理', roles: ['admin', 'editor'] }
       // },
       // {
-      //   path: 'role',
-      //   component: () => import('@/views/permission/role'),
-      //   name: 'RolePermission',
-      //   meta: {
-      //     title: 'rolePermission',
-      //     roles: ['admin']
-      //   }
+      //   path: '/z_device/point',
+      //   component: () => import('@/views/z_device/point'),
+      //   name: 'Point',
+      //   meta: { title: '测温点位管理', roles: ['admin', 'editor'] }
       // }
     ]
-  }, // {
-  //   path: '/device-manage',
-  //   component: Layout,
-  //   redirect: '/add-device/index',
-  //   name: 'DeviceManage',
-  //   meta: {
-  //     title: '设备管理',
-  //     icon: 'table',
-  //     roles: ['admin', 'editor'] // you can set roles in root nav
-  //   },
-  //   children: [
-     
-  //     {
-  //       path: '/add-device',
-  //       component: () => import('@/views/add-device/index'),
-  //       name: 'AddDevice',
-  //       meta: { title: '添加设备', roles: ['admin', 'editor'] }
-  //     }
-      
-  //   ]
-  // }
+  },
   // {
   //   path: '/z_data',
   //   component: Layout,
@@ -190,12 +207,12 @@ export const constantRoutes = [
       roles: ['admin', 'editor'] // you can set roles in root nav
     },
     children: [
-      {
-        path: '/z_alert/info',
-        component: () => import('@/views/z_device/gateway'),
-        name: 'Info',
-        meta: { title: '告警汇总', roles: ['admin', 'editor'] }
-      },
+      // {
+      //   path: '/z_alert/info',
+      //   component: () => import('@/views/z_device/gateway'),
+      //   name: 'Info',
+      //   meta: { title: '告警汇总', roles: ['admin', 'editor'] }
+      // },
       {
         path: '/z_alert/log',
         component: () => import('@/views/z_alert/log'),

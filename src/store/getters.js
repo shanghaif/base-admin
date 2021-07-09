@@ -10,6 +10,7 @@ const getters = {
   name: state => state.user.name,
   introduction: state => state.user.introduction,
   roles: state => state.user.roles,
+  loginData: state => state.user.loginData,
   permission_routes: state => state.permission.routes,
   warningVal: state => state.deviceSetting.warningVal,
   unusualVal: state => state.deviceSetting.unusualVal,

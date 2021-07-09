@@ -92,7 +92,7 @@ import {
   handelAlarm,
   deviceStatus
 } from '@/api/station'
-import { getCell, setCell, removeCell } from '@/utils/auth'
+import { getCell, setCell, removeCell, setCurrentFactory } from '@/utils/auth'
 
 function createData(len) {
   const arr = []
@@ -275,7 +275,8 @@ export default {
           ).uid
           const factoryResult = await factory(id_company, 1)
           this.factoryList = factoryResult.data.result.stations || []
-          this.SET_FACTORY(this.factoryList[0])
+          this.SET_FACTORY(this.factoryList[1])
+          setCurrentFactory(this.factoryList[1])
         } catch (err) {
           alert('工厂错误')
         }

@@ -1,6 +1,10 @@
 export default {
   route: {
     dashboard: '首页',
+    Device: '设备管理',
+    AddDevice: '添加设备',
+    AlarmManage: '告警管理',
+    AlarmHistory: '告警历史',
     documentation: '文档',
     guide: '引导页',
     permission: '权限测试页',

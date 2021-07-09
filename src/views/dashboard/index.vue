@@ -1,7 +1,36 @@
 <template>
-  <div class="dashboard-container">
-    <!-- <component :is="currentRole" /> -->
-  </div>
+  <el-card>
+
+    <div class="dashboard-container">
+      <!-- <component :is="currentRole" /> -->
+      <!-- <div class="count-container">
+        <div
+          class="count-item blue"
+          style="width: 32%"
+        >
+          <span>设备总数</span>
+          <p class="count-num"> 1000 </p>
+          <i class="el-icon-info" />
+        </div>
+        <div
+          class="count-item gray"
+          style="width: 32%"
+        >
+          <span>在线设备</span>
+          <p class="count-num">936</p>
+          <i class="el-icon-success" />
+        </div>
+        <div
+          class="count-item red"
+          style="width: 32%"
+        >
+          <span>离线设备</span>
+          <p class="count-num">68</p>
+          <i class="el-icon-warning" />
+        </div>
+      </div> -->
+    </div>
+  </el-card>
 </template>
 
 <script>

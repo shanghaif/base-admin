@@ -1,5 +1,7 @@
 import { login, logout, getInfo } from '@/api/user'
-import { getToken, setToken, removeToken } from '@/utils/auth'
+import { userData } from '@/api/userData'
+import { getToken, setToken, removeToken, getLoginData, setLoginData} from '@/utils/auth'
+
 import router, { resetRouter } from '@/router'
 
 const state = {
@@ -7,7 +9,11 @@ const state = {
   name: '',
   avatar: '',
   introduction: '',
-  roles: []
+  roles: [],
+  menu: [],
+  permissions: [],
+  userInfo: [],
+  loginData: {}
 }
 
 const mutations = {
@@ -25,7 +31,20 @@ const mutations = {
   },
   SET_ROLES: (state, roles) => {
     state.roles = roles
+  },
+  SET_PERMISSIONS: (state, permissions) => {
+    state.permissions = permissions
+  },
+  SET_MENU: (state, menu) => {
+    state.menu = menu
+  },
+  SET_USERINFO: (state, userInfo) => {
+    state.menu = userInfo
+  },
+  SET_LOGINDATA: (state, loginData) => {
+    state.loginData = loginData
   }
+   
 }
 
 const actions = {
@@ -33,11 +52,38 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ un: username.trim(), pd: password }).then(res => {
-        const { token } = res.data.result
+      login({ un: username.trim(), pd: password }).then(result => {
+        const res = userData
+        const { token, menu, user, permissions, role} = res
+        commit('SET_LOGINDATA', userInfo)
         commit('SET_TOKEN', token)
+        
         setToken(token)
-        resolve()
+        setLoginData(userInfo)
+        resolve(res)
+      }).catch(error => {
+        reject(error)
+      })
+      // setTimeout(() => {
+      //   const { token } = 'abc'
+      //   commit('SET_TOKEN', token)
+      //   setToken(token)
+      //   resolve()
+      // }, 0)
+    })
+  },
+  getInfo({ commit }, userInfo) {
+    const { username, password } = userInfo
+
+    return new Promise((resolve, reject) => {
+      login({ un: username.trim(), pd: password }).then(result => {
+        const res = userData
+        const { token, menu, user, permissions, role} = res
+        commit('SET_MENU', menu)
+        commit('SET_PERMISSIONS', permissions)
+        commit('SET_USERINFO', user)
+        commit('SET_ROLES', [role.role_id])
+        resolve(res)
       }).catch(error => {
         reject(error)
       })
@@ -50,46 +96,46 @@ const actions = {
     })
   },
 
-  // get user info
-  getInfo({ commit, state }) {
-    return new Promise((resolve, reject) => {
-      // getInfo(state.token).then(res => {
-      //   // const { data } = response
+  // // get user info
+  // getInfo({ commit, state }) {
+  //   return new Promise((resolve, reject) => {
+  //     // getInfo(state.token).then(res => {
+  //     //   // const { data } = response
 
-      //   // if (!data) {
-      //   //   reject('Verification failed, please Login again.')
-      //   // }
+  //     //   // if (!data) {
+  //     //   //   reject('Verification failed, please Login again.')
+  //     //   // }
 
-      //   // const { roles, name, avatar, introduction } = data
+  //     //   // const { roles, name, avatar, introduction } = data
 
-      //   // roles must be a non-empty array
-      //   // if (!roles || roles.length <= 0) {
-      //   //   reject('getInfo: roles must be a non-null array!')
-      //   // }
+  //     //   // roles must be a non-empty array
+  //     //   // if (!roles || roles.length <= 0) {
+  //     //   //   reject('getInfo: roles must be a non-null array!')
+  //     //   // }
 
-      //   // commit('SET_ROLES', roles)
-      //   // commit('SET_NAME', name)
-      //   // commit('SET_AVATAR', avatar)
-      //   // commit('SET_INTRODUCTION', introduction)
+  //     //   // commit('SET_ROLES', roles)
+  //     //   // commit('SET_NAME', name)
+  //     //   // commit('SET_AVATAR', avatar)
+  //     //   // commit('SET_INTRODUCTION', introduction)
 
         
-      //   // 模拟返回的数据
-      //   const obj = {
-      //     roles: ['admin']
-      //   }
-      //   commit('SET_ROLES', obj.roles)
-      //   resolve(obj)
-      // }).catch(error => {
-      //   reject(error)
-      // })
-      const roles = ['admin']
-      setTimeout(() => {
-        commit('SET_ROLES', roles)
+  //     //   // 模拟返回的数据
+  //     //   const obj = {
+  //     //     roles: ['admin']
+  //     //   }
+  //     //   commit('SET_ROLES', obj.roles)
+  //     //   resolve(obj)
+  //     // }).catch(error => {
+  //     //   reject(error)
+  //     // })
+  //     const roles = ['admin']
+  //     setTimeout(() => {
+  //       commit('SET_ROLES', roles)
 
-        resolve({ roles})
-      }, 0)
-    })
-  },
+  //       resolve({ roles})
+  //     }, 0)
+  //   })
+  // },
 
   // user logout
   logout({ commit, state, dispatch }) {
@@ -110,6 +156,7 @@ const actions = {
       //   })
       setTimeout(() => {
         commit('SET_TOKEN', '')
+        commit('SET_LOGINDATA', {})
         commit('SET_ROLES', [])
         removeToken()
         resetRouter()

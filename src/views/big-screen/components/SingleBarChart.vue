@@ -91,8 +91,8 @@ export default {
         arrLine[i] = objLine[n]
       }
 
-      this.dataBar = arrBar
-      this.dataLine = arrLine
+      this.dataBar = arrBar.reverse()
+      this.dataLine = arrLine.reverse()
     },
     getDate() {
       const n = 7

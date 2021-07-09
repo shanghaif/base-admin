@@ -165,6 +165,7 @@
           <el-form-item
             label="id"
             prop="uid"
+            disabled
           >
             <el-input
               v-model="form.uid"
@@ -436,6 +437,7 @@ export default {
     handleDelete(row, index) {
       delModel(row.uid)
         .then((res) => {
+          debugger
           if (res.status === 200 && res.data.result === null) {
             this.$message({
               type: 'success',

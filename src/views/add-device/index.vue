@@ -96,14 +96,14 @@
               value="0"
             />
           </el-select> -->
-          <el-button
+          <!-- <el-button
             class="filter-item"
             type="primary"
             icon="el-icon-search"
             @click="handleFilter"
           >
             搜索
-          </el-button>
+          </el-button> -->
           <el-button
             type="primary"
             @click="addNewDevice()"

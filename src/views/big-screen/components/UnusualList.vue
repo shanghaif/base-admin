@@ -168,6 +168,7 @@ export default {
       return obj
     },
     choose(val) {
+      this.page = 1
       this.activeTab = val
       this.list = []
       this.getDate(val)
