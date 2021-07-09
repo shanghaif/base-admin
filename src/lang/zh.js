@@ -5,6 +5,8 @@ export default {
     AddDevice: '添加设备',
     AlarmManage: '告警管理',
     AlarmHistory: '告警历史',
+    UserManage: '权限管理',
+    AddUser: '用户管理',
     documentation: '文档',
     guide: '引导页',
     permission: '权限测试页',

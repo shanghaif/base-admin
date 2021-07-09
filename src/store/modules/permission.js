@@ -41,17 +41,22 @@ export function filterAsyncRoutes(routes, roles) {
 // 定义全部的路由对应关系
 const routerMapComponents = {
   'add-thing': () => import('@/views/add-device/index'),
-  'alarm-history': () => import('@/views/alarm-manage/index')
+  'alarm-history': () => import('@/views/alarm-manage/index'),
+  'add-user': () => import('@/views/user-manage/AddUser')
 }
 const iconMap = {
-  device: 'table'
+  device: 'table',
+  'alarm-manage': 'el-icon-message-solid',
+  'user-manage': 'el-icon-s-custom'
 }
 
 const nameMap = {
   device: 'Device',
   'add-thing': 'AddDevice',
   'alarm-manage': 'AlarmManage', // 告警管理
-  'alarm-history': 'AlarmHistory'
+  'alarm-history': 'AlarmHistory', // 告警管理
+  'user-manage': 'UserManage',
+  'add-user': 'AddUser'
 }
 // 递归将封装list
 const getList = function (menu) {
@@ -76,6 +81,16 @@ const getList = function (menu) {
        
       ],
       path: 'alarm-manage'
+    },
+    {
+      children: [
+        
+        {
+          path: 'add-user'
+        }
+       
+      ],
+      path: 'user-manage'
     }
   ]
   arr.forEach(v => {

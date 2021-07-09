@@ -145,7 +145,7 @@ export const constantRoutes = [
       //   }
       // }
     ]
-  }, // {
+  } // {
   //   path: '/device-manage',
   //   component: Layout,
   //   redirect: '/add-device/index',
@@ -179,37 +179,37 @@ export const constantRoutes = [
   //   ]
   // },
   
-  {
-    path: '/z_alert',
-    component: Layout,
-    redirect: '/z_alert/info',
-    name: 'Z_alert',
-    meta: {
-      title: '告警管理',
-      icon: 'el-icon-message-solid',
-      roles: ['admin', 'editor'] // you can set roles in root nav
-    },
-    children: [
-      {
-        path: '/z_alert/info',
-        component: () => import('@/views/z_device/gateway'),
-        name: 'Info',
-        meta: { title: '告警汇总', roles: ['admin', 'editor'] }
-      },
-      {
-        path: '/z_alert/log',
-        component: () => import('@/views/z_alert/log'),
-        name: 'Log',
-        meta: { title: '告警日志', roles: ['admin', 'editor'] }
-      },
-      {
-        path: '/z_alert/push',
-        component: () => import('@/views/z_alert/push'),
-        name: 'Push',
-        meta: { title: '推送设置', roles: ['admin', 'editor'] }
-      }
-    ]
-  }
+  // {
+  //   path: '/z_alert',
+  //   component: Layout,
+  //   redirect: '/z_alert/info',
+  //   name: 'Z_alert',
+  //   meta: {
+  //     title: '告警管理',
+  //     icon: 'el-icon-message-solid',
+  //     roles: ['admin', 'editor'] // you can set roles in root nav
+  //   },
+  //   children: [
+  //     {
+  //       path: '/z_alert/info',
+  //       component: () => import('@/views/z_device/gateway'),
+  //       name: 'Info',
+  //       meta: { title: '告警汇总', roles: ['admin', 'editor'] }
+  //     },
+  //     {
+  //       path: '/z_alert/log',
+  //       component: () => import('@/views/z_alert/log'),
+  //       name: 'Log',
+  //       meta: { title: '告警日志', roles: ['admin', 'editor'] }
+  //     },
+  //     {
+  //       path: '/z_alert/push',
+  //       component: () => import('@/views/z_alert/push'),
+  //       name: 'Push',
+  //       meta: { title: '推送设置', roles: ['admin', 'editor'] }
+  //     }
+  //   ]
+  // }
    
 ]
 

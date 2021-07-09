@@ -41,20 +41,6 @@
             v-if="multipleSelection.length>0"
             type="danger"
           >删除已选</el-button> -->
-          <el-date-picker
-            v-model="dateRange"
-            type="daterange"
-            :picker-options="pickerOptions"
-            range-separator="至"
-            placeholder="选择日期"
-            class="screen-select"
-            unlink-panels
-            value-format="yyyy-MM-dd HH:mm"
-            :default-time="['00:00:00','23:59:59']"
-            @change="changeDate"
-          >
-            />
-          </el-date-picker>
           <el-select
             v-model="factoryStr"
             placeholder="选择厂区"
@@ -70,6 +56,21 @@
             />
 
           </el-select>
+          <el-date-picker
+            v-model="dateRange"
+            type="daterange"
+            :picker-options="pickerOptions"
+            range-separator="至"
+            placeholder="选择日期"
+            class="screen-select"
+            unlink-panels
+            value-format="yyyy-MM-dd HH:mm"
+            :default-time="['00:00:00','23:59:59']"
+            @change="changeDate"
+          >
+            />
+          </el-date-picker>
+
         </div>
 
         <el-table
