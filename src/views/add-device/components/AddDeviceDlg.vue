@@ -174,6 +174,7 @@
               v-model="form.uid"
               autocomplete="off"
               clearable
+              :disabled="!newDevice"
             />
           </el-form-item>
           <el-form-item

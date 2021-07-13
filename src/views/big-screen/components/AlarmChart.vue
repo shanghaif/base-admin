@@ -406,7 +406,7 @@ export default {
               shadowBlur: 10
             },
             data: this.xData,
-            smooth: true,
+            smooth: false,
             // 标记的线
             markLine: {
               symbol: 'none',

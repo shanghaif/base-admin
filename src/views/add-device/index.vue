@@ -47,7 +47,7 @@
           style="width: 32%"
         >
           <span>设备总数</span>
-          <p class="count-num">{{ total }}</p>
+          <p class="count-num">{{ rightTopInfo.devices_count }}</p>
           <i class="el-icon-info" />
         </div>
         <div
@@ -55,7 +55,7 @@
           style="width: 32%"
         >
           <span>在线设备</span>
-          <p class="count-num">936</p>
+          <p class="count-num">{{ rightTopInfo.devices_online_count }}</p>
           <i class="el-icon-success" />
         </div>
         <div
@@ -63,14 +63,12 @@
           style="width: 32%"
         >
           <span>离线设备</span>
-          <p class="count-num">68</p>
+          <p class="count-num">{{ rightTopInfo.devices_offline_count }}</p>
           <i class="el-icon-warning" />
         </div>
       </div>
-      <div
-        v-if="currentNode.leaf"
-        class="right-content"
-      >
+      <!-- v-if="currentNode.leaf" -->
+      <div class="right-content">
 
         <div class="filter-container">
           <!-- <el-input
@@ -200,6 +198,7 @@
             </template>
           </el-table-column>
           <el-table-column
+            v-if="false"
             sortable
             prop="uid"
             label="id"
@@ -268,12 +267,12 @@
         </div>
       </div>
     </div>
-    <devicel-dlg
+    <!-- <DevicelDlg
       ref="DevicelDlg"
       :params="dlgData"
       :is-new="isNew"
       @refresh="refreshDevice"
-    />
+    /> -->
     <AddDeviceDlg
       ref="AddDeviceDlg"
       :new-device="isNew"
@@ -299,20 +298,21 @@ import {
   area,
   cell,
   device,
+  countDevice,
   deleteThings,
   editThings,
   deviceStatus
 } from '@/api/station'
 import { delStation } from '@/api/zmodel'
 
-import DevicelDlg from './components/DevicelDlg'
+// import DevicelDlg from './components/DevicelDlg'
 import AddDeviceDlg from './components/AddDeviceDlg'
 import ModelEditStation from './components/ModelEditStation'
 import groupBy from 'lodash/groupBy'
 
 export default {
   name: 'AddDevice',
-  components: { DevicelDlg, AddDeviceDlg, ModelEditStation },
+  components: { AddDeviceDlg, ModelEditStation },
   filters: {
     statusFilter(type) {
       let res = ''
@@ -378,6 +378,17 @@ export default {
         label: 's_name',
         children: 'zones',
         isLeaf: 'leaf'
+      },
+      queryDeviceParams: {
+        page: 1,
+        size: 10,
+        level: 0,
+        uid: ''
+      },
+      rightTopInfo: {
+        devices_count: 0,
+        devices_offline_count: 0,
+        devices_online_count: 0
       },
       zDevices: [
         {
@@ -455,10 +466,12 @@ export default {
     },
     changePage(page) {
       const id = this.currentNode.uid
-      device(id, 1, page).then((res) => {
-        this.tableData = res.data.result.devices || []
-        this.total = res.data.result.devices_count
-      })
+      // device(id, 1, page).then((res) => {
+      //   this.tableData = res.data.result.devices || []
+      //   this.total = res.data.result.devices_count
+      // })
+      this.queryDeviceParams.page = page
+      this.queryCountDevice()
     },
     delDevice(row) {
       deleteThings(row.uid)
@@ -539,25 +552,39 @@ export default {
     },
 
     refreshDevice() {
-      device(this.dlgData.bath_id, 1).then((res) => {
-        this.tableData = res.data.result.devices || []
-        this.total = res.data.result.devices_count
-      })
+      this.queryCountDevice()
     },
 
     // 当前点击的节点
     clickNode(node) {
       this.currentNode = node
-      if (node.leaf) {
-        console.log('node :>> ', node)
-        this.dlgData.bath = node.s_name
-        this.dlgData.bath_id = node.uid
+      // if (node.leaf) {
+      //   console.log('node :>> ', node)
+      //   this.dlgData.bath = node.s_name
+      //   this.dlgData.bath_id = node.uid
 
-        device(node.uid, 1).then((res) => {
+      //   device(node.uid, 1).then((res) => {
+      //     this.tableData = res.data.result.devices || []
+      //     this.total = res.data.result.devices_count
+      //   })
+      // }
+      this.dlgData.bath = node.s_name
+      this.dlgData.bath_id = node.uid
+      this.queryDeviceParams.uid = node.uid
+      this.queryDeviceParams.level = node.level
+
+      this.queryCountDevice()
+    },
+    queryCountDevice() {
+      countDevice(this.queryDeviceParams)
+        .then((res) => {
           this.tableData = res.data.result.devices || []
           this.total = res.data.result.devices_count
+          this.rightTopInfo = res.data.result.info
         })
-      }
+        .catch((err) => {
+          this.$message({ type: 'error', message: err })
+        })
     },
     // 点击树结构
     loadNode(node, resolve) {
@@ -569,6 +596,10 @@ export default {
             return v.uid
           })
           this.expandedKeys = [...keysArr]
+          this.queryDeviceParams.level = 0
+          this.queryDeviceParams.uid =
+            this.companyList.length > 0 && this.companyList[0].uid
+          this.queryCountDevice()
 
           resolve(this.companyList)
         })
@@ -613,16 +644,8 @@ export default {
     handleSelectionChange(item) {
       this.multipleSelection = item
     },
-    // 编辑设备弹窗
 
-    editDevice(item) {
-      console.log('item :>> ', item)
-      this.multipleSelection = item
-      this.dlgData = item
-      this.isNew = false
-      this.$refs.DevicelDlg.show()
-    },
-    // 新增设备弹窗
+    // 新增编辑设备弹窗
     addNewDevice(item) {
       if (item) {
         this.isNew = false

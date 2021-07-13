@@ -526,9 +526,11 @@ export default {
         window.URL.revokeObjectURL(href)
       }
     },
-    exportPoint(arr) {
-      const obj = {
+    exportPoint(obj) {
+      const { arr, is_compress } = obj
+      const params = {
         id: this.alarmItem.t_id,
+        is_compress,
         sTime: arr[0],
         eTime: arr[1]
       }
@@ -536,9 +538,15 @@ export default {
       //   'http://10.53.31.114:9527/api/data/export?tid=temperature@run-50.exe&begin_time=2021-06-01%2015:48&end_time=2021-06-21%2016:48'
       // console.log('111111111')
       // window.location.href = l
-      exportPointInfo(obj)
+      exportPointInfo(params)
         .then((res) => {
           this.isExcel(res)
+
+          // if (res.result) {
+          //   this.$message({ type: 'error', message: res.result })
+          // } else {
+          //   this.isExcel(res)
+          // }
           // type 为需要导出的文件类型，此处为xls表格类型
 
           this.$refs.DetailLineChart.hideExport()

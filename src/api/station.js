@@ -209,7 +209,8 @@ export function exportPointInfo(obj) { // 获取设备
   const params = {
     begin_time: obj.sTime,
     end_time: obj.eTime,
-    tid: obj.id
+    tid: obj.id,
+    is_compress: obj.is_compress
   }
   return request({
     url: `api/data/export`,
@@ -220,4 +221,12 @@ export function exportPointInfo(obj) { // 获取设备
   })
 }
 
+// 点击场站获取设备和计数
+export function countDevice(params) { 
+  return request({
+    url: `api/data/devices`,
+    method: 'get',
+    params
+  })
+}
 

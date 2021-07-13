@@ -14,11 +14,21 @@
         <div
           class="btn"
           @click="refresh"
-        ><i class="el-icon-refresh-right" /> 刷新</div>
+        >
+          <svg-icon
+            class="svg"
+            icon-class="refresh"
+          /> 刷新
+        </div>
         <div
           class="btn"
           @click="exportChart"
-        ><i class="el-icon-upload" /> 导出</div>
+        >
+          <svg-icon
+            class="svg"
+            icon-class="export"
+          /> 导出
+        </div>
       </div>
     </div>
     <div class="detail-chart-box">
@@ -106,10 +116,24 @@
         slot="footer"
         class="dialog-footer"
       >
-        <el-button
+        <!-- <el-button
           class="detail-ok-btn"
           @click="exportPoint"
-        >导出</el-button>
+        >导出</el-button> -->
+        <el-dropdown
+          trigger="click"
+          @command="exportPoint"
+        >
+          <!-- <span class="el-dropdown-link">
+            导出<i class="el-icon-arrow-down el-icon--right" />
+          </span> -->
+          <el-button class="detail-ok-btn">导出</el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item :command="true">压缩</el-dropdown-item>
+            <el-dropdown-item :command="false">不压缩</el-dropdown-item>
+
+          </el-dropdown-menu>
+        </el-dropdown>
         <el-button
           class="detail-cancel-btn"
           @click="exportDialogVisible = false"
@@ -179,6 +203,9 @@ export default {
       // step:  60 * 1000 // 1分钟
       step: (10 / 60) * 60 * 1000,
       pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        },
         shortcuts: [
           {
             text: '当日',
@@ -269,12 +296,13 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
-    exportPoint() {
+    exportPoint(is_compress) {
       if (this.exportDate.length < 1) {
         this.$message.error('请先选择日期')
         return
       }
-      this.$emit('exportPoint', this.exportDate)
+      const params = { arr: this.exportDate, is_compress }
+      this.$emit('exportPoint', params)
     },
     changeDate(date) {
       const formatDate = this.$dayjs(date).format('YYYY-MM-DD')
@@ -455,7 +483,7 @@ export default {
               shadowBlur: 10
             },
             data: this.xData,
-            smooth: true,
+            smooth: false,
             // 标记的线
             markLine: {
               symbol: 'none',
@@ -550,6 +578,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.svg {
+  margin-right: 8px;
+}
 .export-filter {
   .filter-items {
     .filter-item {
