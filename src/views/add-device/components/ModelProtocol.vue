@@ -43,6 +43,7 @@
         >
           <template slot-scope="scope">
             <el-button
+              :disabled="!isShowBtn('edit')"
               size="mini"
               type="primary"
               @click="editProtocol(scope.row,scope.$index)"
@@ -85,6 +86,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import ModelEditProtocol from './ModelEditProtocol'
 import {
   tmodelProtocol,
@@ -117,6 +120,12 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      permissions: (state) => state.user.permissions
+    }),
+    isPermissions() {
+      return this.permissions.find((v) => v.id === 'protocol').Permission
+    },
     titleType() {
       return this.isNewProtocol ? '新增' : '编辑'
     }
@@ -132,6 +141,9 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    isShowBtn(str) {
+      return this.isPermissions.includes(str)
+    },
     confirm(data) {
       const obj = {
         protocol_path: data.protocol_path,

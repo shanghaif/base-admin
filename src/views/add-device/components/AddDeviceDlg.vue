@@ -29,6 +29,7 @@
             协议接入
           </el-button>
           <el-button
+            :disabled="!isShowBtn('add')"
             type="primary"
             size="mini"
             @click="addThings()"
@@ -91,6 +92,7 @@
           >
             <template slot-scope="scope">
               <el-button
+                :disabled="!isShowBtn('edit')"
                 size="mini"
                 type="primary"
                 title="编辑"
@@ -102,6 +104,7 @@
               >
                 <el-button
                   slot="reference"
+                  :disabled="!isShowBtn('delete')"
                   size="mini"
                   type="danger"
                   title="删除"
@@ -142,7 +145,7 @@
           :model="form"
           :rules="deviceFormRules"
           class="form"
-          label-width="80px"
+          label-width="100px"
         >
           <!-- <el-form-item label="物模型">
             <el-input
@@ -169,6 +172,17 @@
           >
             <el-input
               v-model="form.uid"
+              autocomplete="off"
+              clearable
+            />
+          </el-form-item>
+          <el-form-item
+            label="温度漂移值"
+            prop="value"
+            disabled
+          >
+            <el-input
+              v-model="form.value"
               autocomplete="off"
               clearable
             />
@@ -215,6 +229,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import { nanoid } from 'nanoid'
 import { zModelPage, delModel, updateDevice } from '@/api/zmodel'
 
@@ -261,6 +277,7 @@ export default {
       form: {
         s_name: '',
         status: '',
+        value: 0,
         uid: ''
       },
 
@@ -282,11 +299,20 @@ export default {
             message: '长度在 1 到 100 个字符',
             trigger: 'blur'
           }
+        ],
+        value: [
+          { required: true, message: '请输入温度漂移值', trigger: 'blur' }
         ]
       }
     }
   },
   computed: {
+    ...mapState({
+      permissions: (state) => state.user.permissions
+    }),
+    isPermissions() {
+      return this.permissions.find((v) => v.id === 'tmodel').Permission
+    },
     titleType() {
       return this.newDevice ? '新增' : '编辑'
     }
@@ -299,6 +325,7 @@ export default {
           this.form = {
             s_name: '新增_' + nanoid(),
             status: 1,
+            value: 0,
             uid: 'm_' + nanoid()
           }
         } else {
@@ -306,6 +333,7 @@ export default {
             ...{
               s_name: this.newItem.s_name,
               status: this.newItem.status_used,
+              value: this.newItem.value,
               uid: this.newItem.uid
             },
             ...this.newItem
@@ -324,6 +352,9 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    isShowBtn(str) {
+      return this.isPermissions.includes(str)
+    },
     submitForm(formName) {
       if (!this.radio && this.newDevice) {
         this.$message({
@@ -339,6 +370,7 @@ export default {
             model_id: this.radio || this.form.model_id,
             thing_id: this.form.uid,
             s_name: this.form.s_name,
+            value: this.form.value,
             status: this.form.status
           }
           updateDevice(obj, this.newDevice)
@@ -354,7 +386,7 @@ export default {
               } else {
                 this.$message({
                   type: 'error',
-                  message: `${this.titleType}设备失败`
+                  message: res.data.error.message || `${this.titleType}设备失败`
                 })
               }
             })
@@ -470,13 +502,13 @@ export default {
   .device-dlg-left {
     display: inline-block;
 
-    width: 70%;
+    width: 65%;
     vertical-align: top;
     border-right: 1px solid #ccc;
   }
   .device-dlg-right {
     display: inline-block;
-    width: 30%;
+    width: 35%;
     &.full {
       width: 50%;
     }

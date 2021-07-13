@@ -377,7 +377,6 @@ export default {
           params.permission = pArr
           params.stations_list = this.$refs.treeF.getCheckedKeys()
           delete params.stations
-          debugger
           updateRole(params, this.isNew)
             .then((res) => {
               if (res.data.result) {

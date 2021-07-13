@@ -498,7 +498,7 @@ export default {
           this.queryPiontHistory()
         })
         .catch((err) => {
-          alert(err)
+          this.$message(err)
         })
     },
     isExcel(res) {
@@ -544,7 +544,7 @@ export default {
           this.$refs.DetailLineChart.hideExport()
         })
         .catch((err) => {
-          alert(err)
+          this.$message(err)
         })
     },
     refresh() {
@@ -627,7 +627,7 @@ export default {
           this.setFuncOfpoint()
         })
         .catch((err) => {
-          alert(err)
+          this.$message(err)
         })
     },
     queryPiontHistory(date) {
@@ -638,7 +638,7 @@ export default {
           this.piontHistoryList = sortBy(arr, (v) => v.pick_time)
         })
         .catch((err) => {
-          alert(err)
+          this.$message(err)
         })
     },
     // async queryCell() {
@@ -661,7 +661,7 @@ export default {
     //       }
     //     })
     //   } catch (err) {
-    //     alert('电解槽错误')
+    //     this.$message('电解槽错误')
     //   }
     // },
 

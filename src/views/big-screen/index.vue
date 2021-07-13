@@ -14,7 +14,7 @@
       <Header />
       <div class="setting">
         <i
-          class="el-icon-setting"
+          class="el-icon-right"
           @click="goManage"
         />
       </div>
@@ -230,7 +230,7 @@ export default {
           const res = await handelAlarm(this.factoryId)
           this.alarmData = res.data.result
         } catch (err) {
-          alert('处理告警查询错误')
+          this.$message('处理告警查询错误')
         }
       }
     },
@@ -243,7 +243,7 @@ export default {
           this.query()
         })
         .catch((err) => {
-          alert(err)
+          this.$message(err)
         })
     },
     async refresh() {
@@ -255,7 +255,7 @@ export default {
         this.getStatus(this.factoryId)
         this.handelAlarmQuery()
       } catch (err) {
-        alert('分区错误')
+        this.$message('分区错误')
       }
     },
     // 公司查询
@@ -265,7 +265,7 @@ export default {
       //   const companyResult = await company(1)
       //   this.companyList = companyResult.data.result.stations || []
       // } catch (err) {
-      //   alert('分公司错误')
+      //   this.$message('分公司错误')
       // }
       if (this.companyList.length > 0) {
         try {
@@ -275,10 +275,13 @@ export default {
           ).uid
           const factoryResult = await factory(id_company, 1)
           this.factoryList = factoryResult.data.result.stations || []
-          this.SET_FACTORY(this.factoryList[1])
-          setCurrentFactory(this.factoryList[1])
+          const hasData = this.factoryList.find(
+            (v) => v.s_name === '电解铝二厂'
+          )
+          this.SET_FACTORY(hasData)
+          setCurrentFactory(hasData)
         } catch (err) {
-          alert('工厂错误')
+          this.$message('工厂错误')
         }
       }
       if (this.factoryList.length > 0) {
@@ -289,7 +292,7 @@ export default {
           this.areaList = areaResult.data.result || []
           this.getStatus(this.factoryId)
         } catch (err) {
-          alert('分区错误')
+          this.$message('分区错误')
         }
       }
       // if (this.areaList.length > 0) {
@@ -299,7 +302,7 @@ export default {
       //     const cellResult = await cell(id_area,1)
       //     this.cellList = cellResult.data.result.stations
       //   } catch (err) {
-      //     alert('电解槽错误')
+      //     this.$message('电解槽错误')
       //   }
       // }
       // if (this.cellList.length > 0) {
@@ -311,7 +314,7 @@ export default {
       //     this.SET_CELL(this.cellList[1])
       //     setCell(this.cellList[1])
       //   } catch (err) {
-      //     alert('设备错误')
+      //     this.$message('设备错误')
       //   }
       // }
       this.handelAlarmQuery()
@@ -321,7 +324,7 @@ export default {
       try {
         this.statusList = res.data.result.infoMap
       } catch (err) {
-        alert('状态错误')
+        this.$message('状态错误')
       }
     },
     selectFactory(item) {

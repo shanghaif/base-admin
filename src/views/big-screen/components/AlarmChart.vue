@@ -248,7 +248,7 @@ export default {
           // this.setFuncOfpoint()
         })
         .catch((err) => {
-          alert(err)
+          this.$message(err)
         })
     },
     queryPiontHistory(date) {
@@ -260,7 +260,7 @@ export default {
           this.initChart()
         })
         .catch((err) => {
-          alert(err)
+          this.$message(err)
         })
     },
 

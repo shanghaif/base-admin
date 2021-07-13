@@ -2,7 +2,7 @@
   <el-card>
     <div>
       <el-button
-        v-if="isShowBtn('add')"
+        :disabled="!isShowBtn('add')"
         type="primary"
         @click="addRole()"
       >增加角色</el-button>
@@ -103,7 +103,7 @@
       >
         <template slot-scope="scope">
           <el-button
-            v-if="isShowBtn('edit')"
+            :disabled="!isShowBtn('edit')"
             size="mini"
             type="primary"
             @click="addRole(scope.row,scope.$index)"
@@ -115,8 +115,8 @@
             @confirm="delRole(scope.row,scope.$index)"
           >
             <el-button
-              v-if="isShowBtn('delete')"
               slot="reference"
+              :disabled="!isShowBtn('delete')"
               size="mini"
               type="danger"
               style="margin-left:10px"
@@ -256,7 +256,7 @@ export default {
     ...mapState({
       permissions: (state) => state.user.permissions
     }),
-    rolePermissions() {
+    isPermissions() {
       return this.permissions.find((v) => v.id === 'role').Permission
     }
   },
@@ -275,7 +275,7 @@ export default {
       this.query()
     },
     isShowBtn(str) {
-      return this.rolePermissions.includes(str)
+      return this.isPermissions.includes(str)
     },
     query() {
       queryRole(this.pageParams)
@@ -291,20 +291,25 @@ export default {
     // 构造树结构
     getAllTree() {
       const arr = []
-      this.companyList.forEach((v) => {
-        const company = { uid: v.uid, s_name: v.s_name }
+      this.companyList.forEach((v, i) => {
+        const company = { uid: v[i].uid, s_name: v[i].s_name }
         const children0 = []
         arr.push(company)
-        this.factoryList.forEach((f) => {
-          const factory = { uid: f.uid, s_name: f.s_name }
-          const children1 = []
-          children0.push(factory)
-          this.areaList.forEach((item) => {
-            const area = { uid: item.uid, s_name: item.s_name }
-            children1.push(area)
+        const len0 = this.factoryList.length > 0
+        len0 &&
+          this.factoryList[i].forEach((f, j) => {
+            const factory = { uid: f.uid, s_name: f.s_name }
+            const children1 = []
+            children0.push(factory)
+            const len1 = this.areaList.length > 0
+
+            len1 &&
+              this.areaList[j].forEach((item, k) => {
+                const area = { uid: item.uid, s_name: item.s_name }
+                children1.push(area)
+              })
+            factory.children = children1
           })
-          factory.children = children1
-        })
         company.children = children0
       })
       this.treeData = arr
@@ -313,34 +318,41 @@ export default {
       if (node.level === 0) {
         // 第一次加载
         company(1).then((res) => {
-          this.companyList = res.data.result.stations
-          const keysArr = this.companyList.map((v) => {
+          const arr = (res.data.result && res.data.result.stations) || []
+          this.companyList.push(arr)
+          const keysArr = arr.map((v) => {
             return v.uid
           })
           this.expandedKeys = [...keysArr]
 
-          resolve(this.companyList)
+          resolve(arr)
         })
       } else if (node.level === 1) {
         const { uid } = node.data
         factory(uid, 1).then((res) => {
-          this.factoryList = res.data.result.stations || []
-          const keysArr = this.factoryList.map((v) => {
+          console.log('工厂')
+
+          const arr = (res.data.result && res.data.result.stations) || []
+          this.factoryList.push(arr)
+
+          const keysArr = arr.map((v) => {
             return v.uid
           })
           this.expandedKeys = [...keysArr]
-          resolve(this.factoryList)
+          resolve(arr)
         })
       } else if (node.level === 2) {
         const { uid } = node.data
 
         area(uid, 1).then((res) => {
-          this.areaList = res.data.result.stations || []
-          const data = this.areaList
+          console.log('分区')
+          const arr = (res.data.result && res.data.result.stations) || []
+          this.areaList.push(arr)
+
+          const data = arr
           data.map((v, i) => {
             return (v.leaf = true)
           })
-          this.getAllTree()
 
           return resolve(data)
         })
@@ -357,6 +369,9 @@ export default {
       } else if (node.level === 4) {
         return resolve([])
       }
+      setTimeout(() => {
+        this.getAllTree()
+      }, 1000)
     },
     getTreeData(arr) {
       const list = []

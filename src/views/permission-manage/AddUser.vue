@@ -2,6 +2,7 @@
   <el-card>
     <div>
       <el-button
+        :disabled="!isShowBtn('add')"
         type="primary"
         @click="addUser()"
       >增加用户</el-button>
@@ -58,6 +59,7 @@
       >
         <template slot-scope="scope">
           <el-button
+            :disabled="!isShowBtn('edit')"
             size="mini"
             type="primary"
             @click="addUser(scope.row,scope.$index)"
@@ -70,6 +72,7 @@
           >
             <el-button
               slot="reference"
+              :disabled="!isShowBtn('delete')"
               size="mini"
               type="danger"
             >
@@ -102,6 +105,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import { queryUser, queryRole, deleteUser } from '@/api/user'
 import UserFormDlg from './components/UserFormDlg'
 
@@ -122,7 +127,14 @@ export default {
     }
   },
 
-  computed: {},
+  computed: {
+    ...mapState({
+      permissions: (state) => state.user.permissions
+    }),
+    isPermissions() {
+      return this.permissions.find((v) => v.id === 'user').Permission
+    }
+  },
   watch: {},
 
   created() {
@@ -137,7 +149,9 @@ export default {
     init() {
       this.query()
     },
-
+    isShowBtn(str) {
+      return this.isPermissions.includes(str)
+    },
     query() {
       const params = {
         page: this.page,

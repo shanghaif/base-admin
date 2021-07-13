@@ -210,7 +210,7 @@ export default {
           return { value: `${item.name}`, label: `${item.name}` }
         })
       } catch (err) {
-        alert('电解槽错误')
+        this.$message('电解槽错误')
       }
     },
     remoteMethod(query) {

@@ -4,9 +4,9 @@
     <div class="left">
       <el-button-group class="btns-wrap">
         <el-button
+          :disabled="canAdd || !isShowBtn('add')"
           type="primary"
           icon="el-icon-plus"
-          :disabled="canAdd"
           @click="addNewNode"
         />
         <el-button
@@ -20,6 +20,7 @@
           @click="editNode"
         /> -->
         <el-button
+          :disabled="!isShowBtn('delete')"
           type="danger"
           icon="el-icon-delete"
           @click="delNode"
@@ -105,6 +106,7 @@
             搜索
           </el-button> -->
           <el-button
+            :disabled="!isShowBtnDvice('add')"
             type="primary"
             @click="addNewDevice()"
           >增加设备</el-button>
@@ -112,10 +114,10 @@
             type="primary"
             @click="refreshDevice"
           >刷新</el-button>
-          <el-button
+          <!-- <el-button
             v-if="multipleSelection.length>0"
             type="danger"
-          >删除已选</el-button>
+          >删除已选</el-button> -->
           <!-- <el-button
             class="filter-item"
             type="primary"
@@ -228,6 +230,7 @@
           >
             <template slot-scope="scope">
               <el-button
+                :disabled="!isShowBtnDvice('edit')"
                 size="mini"
                 type="primary"
                 @click="addNewDevice(scope.row,scope.$index)"
@@ -241,6 +244,7 @@
               >
                 <el-button
                   slot="reference"
+                  :disabled="!isShowBtnDvice('delete')"
                   size="mini"
                   type="danger"
                 >
@@ -287,6 +291,8 @@
 </template>
 
 <script>
+import { mapState } from 'vuex'
+
 import {
   company,
   factory,
@@ -386,6 +392,15 @@ export default {
     }
   },
   computed: {
+    ...mapState({
+      permissions: (state) => state.user.permissions
+    }),
+    isPermissions() {
+      return this.permissions.find((v) => v.id === 'station').Permission
+    },
+    isPermissionsDvice() {
+      return this.permissions.find((v) => v.id === 'thing').Permission
+    },
     isCheck() {
       return Object.keys(this.currentNode).length > 0
     },
@@ -406,6 +421,12 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    isShowBtn(str) {
+      return this.isPermissions.includes(str)
+    },
+    isShowBtnDvice(str) {
+      return this.isPermissionsDvice.includes(str)
+    },
     confirmAddDeviceDlg() {
       this.refreshDevice()
     },
@@ -444,7 +465,8 @@ export default {
         .then((res) => {
           this.$message({
             type: 'success',
-            message: '删除成功!'
+            message: '删除成功!',
+            duration: 5000
           })
           this.clickNode(this.currentNode)
         })
@@ -493,14 +515,17 @@ export default {
               this.dialogVisible = false
               this.$message({
                 type: 'success',
-                message: `删除场站成功`
+                message: `删除场站成功`,
+                duration: 5000
               })
               this.dialogVisible = false
               this.treeId++
             } else {
+              const message = res.data.error.message || '删除失败'
               this.$message({
                 type: 'error',
-                message: `删除场站失败`
+                message,
+                duration: 5000
               })
             }
           })
