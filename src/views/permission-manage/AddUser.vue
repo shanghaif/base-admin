@@ -31,6 +31,7 @@
         show-overflow-tooltip
       />
       <el-table-column
+        v-if="false"
         prop="password"
         label="密码"
         show-overflow-tooltip
@@ -89,56 +90,32 @@
         @current-change="changePage"
       />
     </div>
-    <userFormDlg
-      ref="userFormDlg"
+    <UserFormDlg
+      ref="UserFormDlg"
       :is-new="isNewUser"
       :obj="userItem"
-      @confirm="userFormDlgonfirm"
+      :roles="roles"
+      @confirm="formDlgConfirm"
     />
+
   </el-card>
 </template>
 
 <script>
-import { zModelPage } from '@/api/zmodel'
-import userFormDlg from './components/userFormDlg'
-
-const result = {
-  count: 4,
-  list: [
-    {
-      uid: 1001,
-      user_name: 'test0',
-      nick_name: '测试',
-      password: 'admin',
-      email: '123@test.com',
-      phone: '456',
-      address: 'addr',
-      role_id: 1001,
-      role_name: 'super'
-    },
-    {
-      uid: 20706957582464,
-      user_name: '测试员1',
-      nick_name: '测试测试',
-      password: 'admin',
-      email: '123@test.com',
-      phone: '12345',
-      address: '',
-      role_id: 1001,
-      role_name: 'super'
-    }
-  ]
-}
+import { queryUser, queryRole, deleteUser } from '@/api/user'
+import UserFormDlg from './components/UserFormDlg'
 
 export default {
   name: 'AddUser',
-  components: { userFormDlg },
+  components: { UserFormDlg },
 
   props: {},
   data() {
     return {
       total: 0,
       tableData: [],
+
+      roles: [],
       page: 1,
       isNewUser: false,
       userItem: {}
@@ -158,45 +135,77 @@ export default {
 
   methods: {
     init() {
-      this.queryUser()
+      this.query()
     },
-    queryUser() {
+
+    query() {
       const params = {
         page: this.page,
         size: 10
       }
-      zModelPage(params)
+      queryUser(params)
         .then((res) => {
-          this.tableData = result.list
-          this.total = result.count
+          const { list, count } = (res.data && res.data.result) || []
+          this.tableData = list
+          this.total = count
+        })
+        .catch((err) => {
+          alert(err)
+        })
+      queryRole(params)
+        .then((res) => {
+          const { list } = (res.data && res.data.result) || []
+          this.roles = list
         })
         .catch((err) => {
           alert(err)
         })
     },
-    userFormDlgonfirm(obj) {
-      if (this.isNewUser) {
-        console.log('123 :>> ', 123)
-        this.tableData.push(obj)
-      } else {
-        const index = this.tableData.findIndex((item) => item.uid === obj.uid)
-        this.tableData.splice(index, 1, obj)
-      }
+    formDlgConfirm(obj) {
+      // if (this.isNewUser) {
+
+      //   // updateUser(obj,'add').then(res=>{
+      //   //   console.log('res :>> ', res);
+      //   // })catch(err=>{
+
+      //   // })
+      // } else {
+      //   const index = this.tableData.findIndex((item) => item.uid === obj.uid)
+      //   this.tableData.splice(index, 1, obj)
+      // }
+      this.query()
     },
     addUser(item) {
       if (item) {
         this.isNewUser = false
         this.userItem = { ...item }
-        this.$refs.userFormDlg.$_show()
+        this.$refs.UserFormDlg.$_show()
       } else {
         this.isNewUser = true
         this.userItem = {}
 
-        this.$refs.userFormDlg.$_show()
+        this.$refs.UserFormDlg.$_show()
       }
     },
-    delUser() {
-      console.log('123 :>> ', 123)
+    delUser(row) {
+      deleteUser(row.uid)
+        .then((res) => {
+          if (res.data.result) {
+            this.$message({
+              type: 'success',
+              message: `删除用户成功`
+            })
+            this.query()
+          } else {
+            this.$message({
+              type: 'error',
+              message: `删除用户失败`
+            })
+          }
+        })
+        .catch((err) => {
+          alert(err)
+        })
     },
     changePage(page) {
       console.log('page :>> ', page)

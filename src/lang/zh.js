@@ -7,6 +7,7 @@ export default {
     AlarmHistory: '告警历史',
     UserManage: '权限管理',
     AddUser: '用户管理',
+    AddRole: '角色管理',
     documentation: '文档',
     guide: '引导页',
     permission: '权限测试页',

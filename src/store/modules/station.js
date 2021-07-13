@@ -6,6 +6,7 @@ import { getCell, setCell, getAlarmItem, setAlarmItem, getCurrentFactory} from '
 const state = {
   currentCompany: {},
   currentFactory: getCurrentFactory(),
+  // currentFactory: {},
   alarmList: [],
   alarmItem: getAlarmItem(),
   currentCell: getCell()

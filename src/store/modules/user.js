@@ -52,9 +52,9 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ un: username.trim(), pd: password }).then(result => {
-        const res = userData
-        const { token, menu, user, permissions, role} = res
+      login({ un: username.trim(), pd: password }).then(res => {
+        // const res = userData
+        const { token, menu, user, permissions, role} = res.data.result
         commit('SET_LOGINDATA', userInfo)
         commit('SET_TOKEN', token)
         
@@ -76,9 +76,9 @@ const actions = {
     const { username, password } = userInfo
 
     return new Promise((resolve, reject) => {
-      login({ un: username.trim(), pd: password }).then(result => {
-        const res = userData
-        const { token, menu, user, permissions, role} = res
+      login({ un: username.trim(), pd: password }).then(res => {
+        // const res = userData
+        const { token, menu, user, permissions, role} = res.data.result
         commit('SET_MENU', menu)
         commit('SET_PERMISSIONS', permissions)
         commit('SET_USERINFO', user)

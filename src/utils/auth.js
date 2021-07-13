@@ -20,9 +20,15 @@ export function removeToken() {
 
 
 
-
+// 当前工厂
 export function getCurrentFactory() {
-  return Cookies.get(CurrentFactory) && JSON.parse( Cookies.get(CurrentFactory))
+  let res = {}
+  try {
+    res = JSON.parse( Cookies.get(CurrentFactory))
+  } catch (err) {
+    console.log('cookie undefind')
+  }
+  return res
 }
 
 export function setCurrentFactory(val) {
@@ -34,9 +40,15 @@ export function removeCurrentFactory() {
 }
 
 
-
+// 当前登录账号密码
 export function getLoginData() {
-  return Cookies.get(LoginData)
+  let res = {}
+  try {
+    res = JSON.parse( Cookies.get(LoginData))
+  } catch (err) {
+    console.log('cookie undefind')
+  }
+  return res
 }
 
 export function setLoginData(val) {
@@ -51,7 +63,13 @@ export function removeLoginData() {
 
 
 export function getCell() {
-  return Cookies.get(CellKey) && JSON.parse( Cookies.get(CellKey))
+  let res = {}
+  try {
+    res = JSON.parse( Cookies.get(CellKey))
+  } catch (err) {
+    console.log('cookie undefind')
+  }
+  return res
 }
 
 export function setCell(val) {
@@ -63,9 +81,15 @@ export function removeCell() {
 }
 
 
-
+// 当前告警
 export function getAlarmItem() {
-  return Cookies.get(alarmItem) && JSON.parse( Cookies.get(alarmItem))
+  let res = {}
+  try {
+    res = JSON.parse( Cookies.get(alarmItem))
+  } catch (err) {
+    console.log('cookie undefind')
+  }
+  return res
 }
 
 export function setAlarmItem(val) {

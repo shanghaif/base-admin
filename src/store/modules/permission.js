@@ -42,7 +42,17 @@ export function filterAsyncRoutes(routes, roles) {
 const routerMapComponents = {
   'add-thing': () => import('@/views/add-device/index'),
   'alarm-history': () => import('@/views/alarm-manage/index'),
-  'add-user': () => import('@/views/user-manage/AddUser')
+  'add-user': () => import('@/views/permission-manage/AddUser'),
+  'add-role': () => import('@/views/permission-manage/AddRole')
+}
+const nameMap = {
+  device: 'Device',
+  'add-thing': 'AddDevice',
+  'alarm-manage': 'AlarmManage', // 告警管理
+  'alarm-history': 'AlarmHistory', // 告警管理
+  'user-manage': 'UserManage',
+  'add-user': 'AddUser',
+  'add-role': 'AddRole'
 }
 const iconMap = {
   device: 'table',
@@ -50,14 +60,6 @@ const iconMap = {
   'user-manage': 'el-icon-s-custom'
 }
 
-const nameMap = {
-  device: 'Device',
-  'add-thing': 'AddDevice',
-  'alarm-manage': 'AlarmManage', // 告警管理
-  'alarm-history': 'AlarmHistory', // 告警管理
-  'user-manage': 'UserManage',
-  'add-user': 'AddUser'
-}
 // 递归将封装list
 const getList = function (menu) {
   var rootList = []
@@ -87,6 +89,9 @@ const getList = function (menu) {
         
         {
           path: 'add-user'
+        },
+        {
+          path: 'add-role'
         }
        
       ],
@@ -170,7 +175,7 @@ const actions = {
     commit
   }, res) {
     return new Promise(resolve => {
-      const { menu } = res
+      const { menu } = res.data.result
       // formatRoutes(vueMenuList) // 将后台返回的表放到函数递归对照,加载路由
       const accessedRoutes = getList(menu)
       // this.$log(accessedRoutes)
