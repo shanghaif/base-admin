@@ -1,68 +1,145 @@
 <template>
-  <div class="alarm-chart">
-    <div class="chart-box-title">异常点位温度曲线</div>
-    <div
-      class="alarm-chart-content"
-      :class="{'no-data':!hasAlarm}"
-    >
+  <div class="detail-chart">
+    <div class="chart-tool">
+      <div class="left-text">
 
-      <div
-        v-if="list.length>0"
-        class="chart-box-tool"
-      >
-        <div class="hart-box-describe">
-          <div class="hart-box-describe-left">
-            <div
-              v-if="currentAlarmObj"
-              class="chart-dt"
-            >{{ currentAlarmObj.Area }}/{{ currentAlarmObj.Bath }}</div>
-            <div
-              v-if="currentAlarmObj"
-              class="err-text"
-            >{{ currentAlarmObj.t_id }}: {{ currentAlarmObj.alarm_name }}</div>
-          </div>
-          <div class="hart-box-describe-right">
-            <div class="temperature cur-tem">
-              <span>当前温度：</span>
-              <span
-                class="tem-val "
-                :class="{err:nowTemp>warningVal}"
-              >{{ nowTemp }}℃</span>
+        <div class="chart-box-title">测温点温度曲线</div>
+        <div class="content-crumbs">
+          <div class="content-crumb">{{ alarmItem.Bath }}</div>
+          <div class="content-crumb">{{ alarmItem.t_id }}</div>
 
-            </div>
-            <div class="temperature average-tem">
-              <span>平均温度：</span>
-              <span class="tem-val">{{ averageTemp }}℃</span>
-
-            </div>
-          </div>
         </div>
       </div>
-      <div class="detail-chart-box">
-
+      <div class="right-btns">
         <div
-          :id="id"
-          :class="className"
-          :style="{height:height,width:width}"
-        />
-        <div
-          v-show="alarmListIndex !== 0 && hasAlarm"
-          class="arrow left"
-          @click="clickArrow(0)"
+          class="btn"
+          @click="refresh"
         >
-          <i class="icon el-icon-arrow-left" />
+          <svg-icon
+            class="svg"
+            icon-class="refresh"
+          /> 刷新
         </div>
         <div
-          v-show="alarmListIndex !== alarmList.length - 1 && hasAlarm"
-          class="arrow right"
-          @click="clickArrow(1)"
+          class="btn"
+          @click="exportChart"
         >
-          <i class="icon el-icon-arrow-right" />
+          <svg-icon
+            class="svg"
+            icon-class="export"
+          /> 导出
         </div>
       </div>
-
     </div>
+    <div class="detail-chart-box">
+      <div class="select-date">
+        <span class="select-date-text">数据日期：</span>
+        <el-date-picker
+          v-model="date"
+          type="date"
+          placeholder="选择日期"
+          class="screen-select"
+          value-format="yyyy-MM-dd"
+          :picker-options="pickerOptionsSingle"
+          @change="changeDate"
+        />
+      </div>
+      <div
+        :id="id"
+        :class="className"
+        :style="{height:height,width:width}"
+      />
+    </div>
+    <el-dialog
+      title="导出"
+      :visible.sync="exportDialogVisible"
+      width="40%"
+      center
+    >
+      <div class="export-filter">
+        <div class="filter-items">
+          <div class="filter-item">
+            <div class="filter-item-label">
+              导出点位
+            </div>
+            <div class="filter-item-content">
 
+              <div class="content-crumbs">
+                <div class="content-crumb">{{ alarmItem.Company }}</div>
+                <div class="content-crumb">{{ alarmItem.Factory }}</div>
+                <div class="content-crumb">{{ alarmItem.Area }}</div>
+                <div class="content-crumb">{{ alarmItem.Bath }}</div>
+                <div class="content-crumb">{{ alarmItem.t_id }}</div>
+              </div>
+            </div>
+          </div>
+          <div class="filter-item">
+            <div class="filter-item-label">
+              时间范围
+            </div>
+            <div class="filter-item-content">
+              <el-date-picker
+                v-model="exportDate"
+                type="daterange"
+                :picker-options="pickerOptions"
+                range-separator="至"
+                placeholder="选择日期"
+                class="screen-select"
+                unlink-panels
+                @change="changeExportDate"
+              >
+                />
+              </el-date-picker>
+            </div>
+          </div>
+          <!-- <div class="filter-item">
+            <div class="filter-item-label">
+              温度数据
+            </div>
+            <div class="filter-item-content">
+              <el-checkbox-group
+                v-model="checkedTemp"
+                @change="handleCheckedTempChange"
+              >
+                <el-checkbox
+                  v-for="temp in Temps"
+                  :key="temp"
+                  :label="temp"
+                >{{ temp }}</el-checkbox>
+              </el-checkbox-group>
+
+            </div>
+          </div> -->
+        </div>
+      </div>
+      <span
+        slot="footer"
+        class="dialog-footer"
+      >
+        <!-- <el-button
+          class="detail-ok-btn"
+          @click="exportPoint"
+        >导出</el-button> -->
+        <el-dropdown
+          trigger="click"
+          @command="exportPoint"
+        >
+          <!-- <span class="el-dropdown-link">
+            导出<i class="el-icon-arrow-down el-icon--right" />
+          </span> -->
+          <el-button class="detail-ok-btn">导出</el-button>
+          <el-dropdown-menu slot="dropdown">
+            <el-dropdown-item :command="true">压缩</el-dropdown-item>
+            <el-dropdown-item :command="false">不压缩</el-dropdown-item>
+
+          </el-dropdown-menu>
+        </el-dropdown>
+        <el-button
+          class="detail-cancel-btn"
+          @click="exportDialogVisible = false"
+        >取消</el-button>
+      </span>
+    </el-dialog>
   </div>
 
 </template>
@@ -72,23 +149,30 @@ import * as echarts from 'echarts'
 import resize from './mixins/resize'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import { color } from 'echarts'
-import { deviceHistory, devicePoint } from '@/api/station'
-import sortBy from 'lodash/sortBy'
 
 const alarmColor = '#ff2f14'
-// 通过arrow点击索引来改变当前的报警对象,在init请求数据更新
 export default {
-  name: 'AlarmChart',
+  name: 'DetailLineChart',
   components: {},
   mixins: [resize],
   props: {
+    list: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
+    // warningVal: {
+    //   type: Number,
+    //   default: 0
+    // },
     className: {
       type: String,
       default: 'chart'
     },
     id: {
       type: String,
-      default: 'AlarmChart'
+      default: 'DetailLineChart'
     },
     width: {
       type: String,
@@ -96,19 +180,15 @@ export default {
     },
     height: {
       type: String,
-      default: '100%'
+      default: '90%'
     }
   },
 
   data() {
     return {
       chart: null,
-      alarmListIndex: 0,
       exportDialogVisible: false,
 
-      value: Math.random() * 100,
-      // step:  60 * 1000 // 1分钟
-      step: 8 * 60 * 1000,
       option: null,
       timer: null,
       // warningVal: 250,
@@ -119,85 +199,93 @@ export default {
       now: 0,
       date: '',
       exportDate: [],
-      allPointList: [
-        {
-          tid: '',
-          value: 0
-        }
-      ],
-      list: [
-        // {
-        //   fv: 0,
-        //   pick_time: '',
-        //   pid: '',
-        //   tid: ''
-        // }
-      ],
-
-      queryParams: {
-        sTime: '',
-        eTime: '',
-        id: ''
+      value: Math.random() * 100,
+      // step:  60 * 1000 // 1分钟
+      step: (10 / 60) * 60 * 1000,
+      pickerOptions: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        },
+        shortcuts: [
+          {
+            text: '当日',
+            onClick(picker) {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+              picker.$emit('pick', [start, end])
+            }
+          },
+          {
+            text: '一周',
+            onClick(picker) {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+              picker.$emit('pick', [start, end])
+            }
+          },
+          {
+            text: '30天',
+            onClick(picker) {
+              const end = new Date()
+              const start = new Date()
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+              picker.$emit('pick', [start, end])
+            }
+          }
+        ]
+      },
+      pickerOptionsSingle: {
+        disabledDate(time) {
+          return time.getTime() > Date.now()
+        },
+        shortcuts: [
+          {
+            text: '今天',
+            onClick(picker) {
+              picker.$emit('pick', new Date())
+            }
+          },
+          {
+            text: '昨天',
+            onClick(picker) {
+              const date = new Date()
+              date.setTime(date.getTime() - 3600 * 1000 * 24)
+              picker.$emit('pick', date)
+            }
+          }
+        ]
       }
     }
   },
   computed: {
     ...mapState({
-      alarmList: (state) => state.station.alarmList
+      alarmItem: (state) => state.station.alarmItem
     }),
     ...mapGetters(['warningVal', 'unusualVal']),
-
-    currentAlarmObj: {
-      get() {
-        return this.alarmList[this.alarmListIndex]
-      },
-      set(v) {}
-    },
-
-    hasAlarm() {
-      return this.alarmList.length > 0
-    },
     xData() {
-      return this.list.map((v) => {
+      return this.newList.map((v) => {
         const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm:ss')
         return { value: [time, v.fv] }
       })
-    },
-    nowTemp() {
-      const obj = this.allPointList.find(
-        (v) => v.tid === this.currentAlarmObj.t_id
-      )
-      return obj ? obj.value : 0
-    },
-    averageTemp() {
-      const sum = this.list.reduce((pre, cur) => {
-        return cur.fv + pre
-      }, 0)
-      const res = sum ? (sum / this.list.length).toFixed(1) : 0
-      return Number(res)
     }
   },
   watch: {
-    alarmList: {
+    list: {
       handler(newName, oldName) {
-        clearInterval(this.timer)
-
-        // this.newList = [...newName]
-        if (newName.length > 0) {
-          this.init()
-          this.timer = setInterval(() => {
-            this.loop()
-          }, this.step)
-        } else {
-          this.list = []
-          this.initChart()
-        }
+        this.newList = [...newName]
+        // this.xData = newName.map((v) => {
+        //   const time = this.$dayjs(v.pick_time).indexOf()
+        //   return { value: [time, v.fv] }
+        // })
+        this.initChart()
       },
       deep: true
     }
   },
   mounted() {
-    // this.date = this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD')
+    this.date = this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD')
   },
   beforeDestroy() {
     if (!this.chart) {
@@ -208,60 +296,49 @@ export default {
     clearInterval(this.timer)
   },
   methods: {
-    init() {
-      // this.currentAlarmObj = this.alarmList[0]
-      this.queryParams.sTime =
-        this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
-        ' 00:00'
-      this.queryParams.eTime =
-        this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
-        ' 23:59'
-
-      this.queryPiont()
-      this.queryPiontHistory()
-    },
-    clickArrow(isAdd) {
-      if (!this.hasAlarm) {
+    exportPoint(is_compress) {
+      if (this.exportDate.length < 1) {
+        this.$message.error('请先选择日期')
         return
       }
-      if (isAdd) {
-        this.alarmListIndex++
-      } else {
-        this.alarmListIndex--
+      const params = { arr: this.exportDate, is_compress }
+      this.$emit('exportPoint', params)
+    },
+    changeDate(date) {
+      const formatDate = this.$dayjs(date).format('YYYY-MM-DD')
+      this.$emit('changeDate', formatDate)
+    },
+    changeExportDate(arr) {
+      this.exportDate[0] = this.$dayjs(arr[0]).format('YYYY-MM-DD')
+      this.exportDate[1] = this.$dayjs(arr[1]).format('YYYY-MM-DD')
+    },
+    refresh(val) {
+      this.$emit('refresh', val)
+    },
+    hideExport(val) {
+      this.exportDialogVisible = false
+    },
+    handleCheckedTempChange(val) {},
+    // 生成从minNum到maxNum的随机数
+    exportChart(Min, Max) {
+      this.exportDialogVisible = true
+    },
+
+    randomNum(Min, Max) {
+      var Range = Max - Min
+      var Rand = Math.random()
+      var num = Min + Math.round(Rand * Range) // 四舍五入
+      return num
+    },
+
+    randomData() {
+      this.now += this.step
+      this.value = this.randomNum(50, 150)
+      return {
+        name: this.now.toString(),
+        // name: '小明',
+        value: [this.now, Math.round(this.value)]
       }
-      this.init()
-    },
-    loop() {
-      this.alarmListIndex++
-      if (this.alarmListIndex === this.alarmList.length) {
-        this.alarmListIndex = 0
-      } else if (this.alarmListIndex === -1) {
-        this.alarmListIndex = this.alarmList.length - 1
-      }
-      this.init()
-    },
-    queryPiont() {
-      devicePoint(this.currentAlarmObj.BathID)
-        .then((res) => {
-          const arr = res.data.result || []
-          this.allPointList = arr
-          // this.setFuncOfpoint()
-        })
-        .catch((err) => {
-          this.$message(err)
-        })
-    },
-    queryPiontHistory(date) {
-      this.queryParams.id = this.currentAlarmObj.t_id
-      deviceHistory(this.queryParams)
-        .then((res) => {
-          const arr = res.data.result || []
-          this.list = sortBy(arr, (v) => v.pick_time)
-          this.initChart()
-        })
-        .catch((err) => {
-          this.$message(err)
-        })
     },
 
     initChart() {
@@ -271,7 +348,7 @@ export default {
       // for (let i = 0; i < 100; i++) {
       //   this.xData.push(this.randomData())
       // }
-      // this.xData = this.list.map((v) => {
+      // this.xData = this.newList.map((v) => {
       //   const time = that.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
       //   return { value: [time, v.fv] }
       // })
@@ -369,7 +446,7 @@ export default {
         },
         series: [
           {
-            name: '实时温度',
+            name: '温度',
             type: 'line',
             symbol: 'none',
             xAxisIndex: 0,
@@ -441,8 +518,8 @@ export default {
                   label: {
                     textStyle: { color: alarmColor },
                     // padding: [3.312, 8.28],
-                    fontSize: 16,
-                    // fontWeight: 'bold',
+                    fontSize: 22,
+                    fontWeight: 'bold',
                     // borderRadius: 13.248,
                     // backgroundColor: 'rgba(255, 72, 74, 0.5)',
                     position: 'right',
@@ -456,7 +533,7 @@ export default {
                   label: {
                     textStyle: { color: alarmColor },
                     // padding: [3.312, 8.28],
-                    fontSize: 16,
+                    fontSize: 20,
                     // fontWeight: 'bold',
                     // borderRadius: 13.248,
                     // backgroundColor: 'rgba(255, 72, 74, 0.5)',
@@ -501,6 +578,9 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
+.svg {
+  margin-right: 8px;
+}
 .export-filter {
   .filter-items {
     .filter-item {
@@ -517,14 +597,14 @@ export default {
         line-height: 32px;
         margin-left: 25px;
         .content-crumbs {
-          color: #525252;
+          color: #999;
         }
       }
     }
   }
 }
-.alarm-chart {
-  height: 35%;
+.detail-chart {
+  height: 80%;
   width: 100%;
 
   .chart-tool {
@@ -551,32 +631,13 @@ export default {
       }
     }
   }
-  .alarm-chart-content {
-    height: calc(100% - 60px);
-    margin-top: 15px;
-    position: relative;
-
-    &.no-data {
-      &::before {
-        content: '暂无数据';
-        position: absolute;
-        margin: 0;
-        height: 100%;
-        width: 100%;
-        @include flex();
-        background: rgba(255, 255, 255, 0.1);
-        color: #ccc;
-      }
-    }
-  }
   .detail-chart-box {
     @include flex(space-between, center);
     flex-direction: column;
     padding: 20px 0;
     width: 100%;
     height: calc(100% - 49px);
-    background: rgba(255, 255, 255, 0);
-    position: relative;
+    background: rgba(255, 255, 255, 0.04);
     .select-date {
       @include flex(flex-end, center);
       padding: 0 20px;
@@ -596,34 +657,6 @@ export default {
         line-height: 24px;
       }
       .select-date-text {
-      }
-    }
-    .arrow {
-      position: absolute;
-      top: 0;
-      height: 100%;
-      @include flex();
-      cursor: pointer;
-      &:hover {
-        .icon {
-          color: #fff;
-        }
-      }
-      &.left {
-        left: -40px;
-      }
-      &.right {
-        right: -40px;
-      }
-      .icon {
-        font-size: 40px;
-        font-weight: bold;
-        color: #999;
-
-        .el-icon-arrow-right {
-        }
-        .el-icon-arrow-left {
-        }
       }
     }
   }

@@ -239,6 +239,7 @@ export default {
       }
     },
     getSearch(val) {
+      debugger
       if (!val) {
         this.list = this.cacheList
       } else {

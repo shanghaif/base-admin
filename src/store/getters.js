@@ -11,6 +11,7 @@ const getters = {
   introduction: state => state.user.introduction,
   roles: state => state.user.roles,
   loginData: state => state.user.loginData,
+  userInfo: state => state.user.userInfo,
   permission_routes: state => state.permission.routes,
   warningVal: state => state.deviceSetting.warningVal,
   unusualVal: state => state.deviceSetting.unusualVal,

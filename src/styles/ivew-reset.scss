@@ -1,0 +1,212 @@
+.ivu-modal-footer {
+  text-align: center;
+  .ivu-btn {
+    margin-left: 30px;
+    width: 120px;
+  }
+}
+.ivu-input {
+  background: rgba(255, 255, 255, 0.1);
+  height: 24px;
+  line-height: 24px;
+  border: 0;
+  border-radius: 0;
+  color: #fff;
+}
+
+.ivu-input-suffix i {
+  font-size: 18px;
+  line-height: 24px;
+}
+.ivu-dropdown-item {
+  margin: 0;
+  line-height: normal;
+  padding: 7px 16px;
+  clear: both;
+  color: #999;
+  font-size: 12px !important;
+  white-space: nowrap;
+  list-style: none;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+  &:hover {
+    background: $selfColor;
+    color: #fff;
+  }
+}
+//日历
+.ivu-select-dropdown {
+  background: rgba(40, 40, 40, 0.9);
+}
+
+.ivu-date-picker-header {
+  border-color: #999;
+}
+.ivu-picker-panel-sidebar {
+  background: rgba(40, 40, 40, 0.9);
+
+  border-color: #999;
+}
+
+.ivu-date-picker-cells {
+  .ivu-date-picker-cells-cell {
+    &:hover {
+      // color: $selfColor;
+      // background: linear-gradient(90deg, rgba(24, 186, 215, 0.5) 100%);
+      em {
+        color: $selfColor;
+        background: linear-gradient(90deg, rgba(24, 186, 215, 0.5) 100%);
+      }
+    }
+    em {
+      color: #ffffff;
+    }
+    &.ivu-date-picker-cells-cell-today {
+      em {
+        &::after {
+          background: $selfColor;
+        }
+      }
+    }
+    &.ivu-date-picker-cells-focused {
+      em {
+        box-shadow: 0 0 0 1px $selfColor inset;
+        color: $selfColor;
+        font-size: 14px;
+        font-weight: bold;
+        background: linear-gradient(90deg, rgba(24, 186, 215, 0.5) 100%);
+        &::after {
+          background: $selfColor;
+        }
+      }
+    }
+    &.ivu-date-picker-cells-cell-selected {
+      // background: linear-gradient(90deg, rgba(24, 186, 215, 0.5) 100%);
+      em {
+        background: linear-gradient(90deg, rgba(24, 186, 215, 0.5) 100%);
+
+        font-size: 14px;
+        font-weight: bold;
+        font-family: DIN;
+        color: $selfColor;
+      }
+    }
+    &.ivu-date-picker-cells-cell-disabled {
+      opacity: 0.2;
+      background: rgba(40, 40, 40, 0.3);
+
+      &:hover {
+        color: #fff;
+        background: rgba(40, 40, 40, 0.3);
+        em {
+          color: #fff;
+          background: rgba(40, 40, 40, 0.3);
+        }
+      }
+    }
+    &.ivu-date-picker-cells-cell-range {
+      &::before {
+        content: "";
+        display: block;
+        background: linear-gradient(90deg, rgba(24, 186, 215, 0.1) 100%);
+        border-radius: 0;
+        border: 0;
+        position: absolute;
+        top: 2px;
+        bottom: 2px;
+        left: 0;
+        right: 0;
+      }
+    }
+    &.ivu-date-picker-cells-cell-next-month,
+    &.ivu-date-picker-cells-cell-prev-month {
+      em {
+        font-size: 14px;
+        font-family: DIN;
+        font-weight: 400;
+        color: #999;
+        opacity: 0.3;
+      }
+    }
+  }
+}
+
+//弹窗
+.ivu-modal-mask {
+  background: rgba(0, 0, 0, 0.5);
+}
+.ivu-modal-wrap {
+  .ivu-modal {
+    box-shadow: 0px 0px 27px 3px rgba(255, 47, 20, 0.5);
+    border: 1px solid #ff2f14;
+    // background: rgba(40,40,40, 0.9);
+    .ivu-modal-content {
+      background: rgba(40, 40, 40, 0.9);
+    }
+    .ivu-modal-header {
+      // background: rgba(40,40,40, 0.9);
+      text-align: center;
+      border: 0;
+      .ivu-modal-header-inner {
+        font-weight: 400;
+        color: #fff;
+        font-size: 18px;
+        line-height: 1;
+      }
+    }
+    .ivu-modal-close {
+      display: none;
+    }
+    .ivu-modal-body {
+      // background: rgba(40,40,40, 0.9);
+
+      color: #fff;
+      .wran-alert-body {
+        @include flex(flex-start, center);
+        .wran-alert-body-content {
+          margin-left: 20px;
+          .wran-alert-reason-box {
+            margin-top: 20px;
+            font-size: 18px;
+            .wran-alert-reason {
+              color: $err;
+              font-weight: bold;
+              &.un {
+                color: $yl;
+              }
+            }
+            .now-text {
+              margin: 0 10px;
+            }
+            .temp-num {
+              &.err {
+                color: $err;
+                font-weight: bold;
+              }
+            }
+          }
+        }
+        .svg-icon {
+          width: 120px;
+          height: 120px;
+        }
+      }
+    }
+    .ivu-modal-footer {
+      border: 0;
+      // background: rgba(40,40,40, 0.9);
+      padding: 20px;
+      .detail-ok-btn {
+        background: $selfColor;
+        color: #fff;
+        border: 0;
+      }
+      .detail-cancel-btn {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.2);
+        border: 0;
+        margin-left: 40px;
+      }
+    }
+  }
+}

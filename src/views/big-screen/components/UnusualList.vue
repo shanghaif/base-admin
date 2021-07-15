@@ -29,16 +29,14 @@
           :key="i + 'b'"
           class="unusual-list-item"
           :class="styleStatus(item.alarm_id)"
+          @click="detail(item)"
         >
           <div class="left">
             <!-- <div>{{ item.area }} / {{ item.name }}</div> -->
             <div>{{ item.Area }} / {{ item.Bath }}</div>
             <div class="reason">{{ item.thing_name }}：{{ item.alarm_id | t_type }}</div>
           </div>
-          <div
-            class="right"
-            @click="detail(item)"
-          >
+          <div class="right">
             {{ $dayjs(item.AlarmTime).format('YYYY.MM.DD HH:mm:ss') }}
             <i class="el-icon-arrow-right" />
           </div>
@@ -74,6 +72,8 @@ export default {
         res = '温度告警'
       } else if (val === 'offline') {
         res = '离线'
+      } else if (val === 'rate_high') {
+        res = '趋势预警'
       }
       return res
     }
@@ -163,7 +163,7 @@ export default {
     styleStatus(val) {
       const obj = {}
       obj.hot = val === 'temperature_high'
-      obj.error = val === 'a'
+      obj.error = val === 'rate_high'
       obj.warning = val === 'b'
       return obj
     },

@@ -50,6 +50,12 @@
                 :key="'tmodel_child' + j"
                 plain
               >{{ cell | btns }}</el-tag>
+
+              <el-tag
+                v-if="item.Permission.length <1"
+                type="info"
+                plain
+              >无权限</el-tag>
             </span>
           </div>
           <!-- <div>
@@ -82,7 +88,7 @@
       <el-table-column
         label="场站权限"
         show-overflow-tooltip
-        align="center"
+        align="top"
       >
         <template slot-scope="scope">
 
@@ -90,11 +96,14 @@
             :data="getTreeData(scope.row.stations)"
             :props="defaultProps"
           /> -->
-          <el-tag
+          <div
             v-for="(cell,j) in scope.row.stations"
             :key="'tmodel_child' + j"
-            plain
-          >{{ cell.s_name }}</el-tag>
+            class="role-station"
+          >
+
+            <el-tag plain>{{ cell.s_name }}</el-tag>
+          </div>
         </template>
       </el-table-column>
       <el-table-column
@@ -429,11 +438,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.role-station {
+  margin-bottom: 10px;
+}
 .permission-item {
   margin-bottom: 10px;
 }
 .permission-label {
-  width: 60px;
+  width: 36px;
   text-align: right;
   display: inline-block;
 }

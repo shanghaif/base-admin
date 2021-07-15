@@ -200,17 +200,17 @@
               class="filter-item"
             >
               <el-option
-                label="启用"
+                label="绑定"
                 :value="1"
               />
               <el-option
-                label="停用"
+                label="解绑"
                 :value="-2"
               />
-              <el-option
+              <!-- <el-option
                 label="维护"
                 :value="-1"
-              />
+              /> -->
             </el-select>
           </el-form-item>
         </el-form>

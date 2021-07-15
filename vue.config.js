@@ -90,13 +90,18 @@ module.exports = {
       }
     }
   },
+  
   css: {
     loaderOptions: {
       sass: {
         prependData: `@import "@/styles/variables.scss";@import "@/styles/mixin.scss";`
+      },
+      less: { // 配置less（其他样式解析用法一致） 使用ivew
+        javascriptEnabled: true // 设置为true
       }
     }
   },
+  
   configureWebpack: config => {
     const plugins = []
     if (isProd) {
@@ -189,7 +194,13 @@ module.exports = {
         symbolId: 'icon-[name]'
       })
       .end()
-
+    config.module // ivew
+      .rule('iview') 
+      .test(/iview.src.*?js$/) 
+      .use('babel') 
+      .loader('babel-loader') 
+      .end() 
+ 
     config
       .when(process.env.NODE_ENV !== 'development',
         config => {

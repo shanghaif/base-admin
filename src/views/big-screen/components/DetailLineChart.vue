@@ -34,7 +34,7 @@
     <div class="detail-chart-box">
       <div class="select-date">
         <span class="select-date-text">数据日期：</span>
-        <el-date-picker
+        <!-- <el-date-picker
           v-model="date"
           type="date"
           placeholder="选择日期"
@@ -42,6 +42,14 @@
           value-format="yyyy-MM-dd"
           :picker-options="pickerOptionsSingle"
           @change="changeDate"
+        /> -->
+        <Date-picker
+          :value="date"
+          type="daterange"
+          :options="pickerOptions"
+          placeholder="选择日期"
+          style="width: 200px"
+          @on-change="changeDate"
         />
       </div>
       <div
@@ -50,9 +58,9 @@
         :style="{height:height,width:width}"
       />
     </div>
-    <el-dialog
+    <Modal
+      v-model="exportDialogVisible"
       title="导出"
-      :visible.sync="exportDialogVisible"
       width="40%"
       center
     >
@@ -78,7 +86,7 @@
               时间范围
             </div>
             <div class="filter-item-content">
-              <el-date-picker
+              <!-- <el-date-picker
                 v-model="exportDate"
                 type="daterange"
                 :picker-options="pickerOptions"
@@ -89,7 +97,15 @@
                 @change="changeExportDate"
               >
                 />
-              </el-date-picker>
+              </el-date-picker> -->
+              <Date-picker
+                :value="exportDate"
+                type="daterange"
+                :options="pickerOptions"
+                placeholder="选择日期"
+                style="width: 200px"
+                @on-change="changeExportDate"
+              />
             </div>
           </div>
           <!-- <div class="filter-item">
@@ -120,26 +136,26 @@
           class="detail-ok-btn"
           @click="exportPoint"
         >导出</el-button> -->
-        <el-dropdown
+        <Dropdown
           trigger="click"
-          @command="exportPoint"
+          @on-click="exportPoint"
         >
           <!-- <span class="el-dropdown-link">
             导出<i class="el-icon-arrow-down el-icon--right" />
           </span> -->
-          <el-button class="detail-ok-btn">导出</el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item :command="true">压缩</el-dropdown-item>
-            <el-dropdown-item :command="false">不压缩</el-dropdown-item>
+          <Button class="detail-ok-btn">导出</Button>
+          <DropdownMenu slot="list">
+            <DropdownItem name="1">压缩</DropdownItem>
+            <DropdownItem name="0">不压缩</DropdownItem>
 
-          </el-dropdown-menu>
-        </el-dropdown>
-        <el-button
+          </DropdownMenu>
+        </Dropdown>
+        <Button
           class="detail-cancel-btn"
           @click="exportDialogVisible = false"
-        >取消</el-button>
+        >取消</Button>
       </span>
-    </el-dialog>
+    </Modal>
   </div>
 
 </template>
@@ -148,12 +164,25 @@
 import * as echarts from 'echarts'
 import resize from './mixins/resize'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
-import { color } from 'echarts'
+// import { color } from 'echarts'
+import Button from 'iview/src/components/button'
+import DatePicker from 'iview/src/components/date-picker'
+import Modal from 'iview/src/components/modal'
+import Dropdown from 'iview/src/components/dropdown'
+import DropdownMenu from 'iview/src/components/dropdown-menu'
+import DropdownItem from 'iview/src/components/dropdown-item'
 
 const alarmColor = '#ff2f14'
 export default {
   name: 'DetailLineChart',
-  components: {},
+  components: {
+    Button,
+    DatePicker,
+    Modal,
+    Dropdown,
+    DropdownMenu,
+    DropdownItem
+  },
   mixins: [resize],
   props: {
     list: {
@@ -187,7 +216,7 @@ export default {
   data() {
     return {
       chart: null,
-      exportDialogVisible: false,
+      exportDialogVisible: true,
 
       option: null,
       timer: null,
@@ -197,7 +226,7 @@ export default {
       checkedTemp: [],
       Temps: ['原始温度数据', '最高温度', '最低温度', '平均温度'],
       now: 0,
-      date: '',
+      date: [],
       exportDate: [],
       value: Math.random() * 100,
       // step:  60 * 1000 // 1分钟
@@ -208,30 +237,30 @@ export default {
         },
         shortcuts: [
           {
-            text: '当日',
-            onClick(picker) {
+            text: '最近三天',
+            value() {
               const end = new Date()
               const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
-              picker.$emit('pick', [start, end])
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 2)
+              return [start, end]
             }
           },
           {
-            text: '一周',
-            onClick(picker) {
+            text: '最近一周',
+            value() {
               const end = new Date()
               const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
-              picker.$emit('pick', [start, end])
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 6)
+              return [start, end]
             }
           },
           {
-            text: '30天',
-            onClick(picker) {
+            text: '最近30天',
+            value() {
               const end = new Date()
               const start = new Date()
-              start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
-              picker.$emit('pick', [start, end])
+              start.setTime(start.getTime() - 3600 * 1000 * 24 * 29)
+              return [start, end]
             }
           }
         ]
@@ -297,20 +326,19 @@ export default {
   },
   methods: {
     exportPoint(is_compress) {
+      const flag = is_compress === '1'
       if (this.exportDate.length < 1) {
         this.$message.error('请先选择日期')
         return
       }
-      const params = { arr: this.exportDate, is_compress }
+      const params = { arr: this.exportDate, is_compress: flag }
       this.$emit('exportPoint', params)
     },
     changeDate(date) {
-      const formatDate = this.$dayjs(date).format('YYYY-MM-DD')
-      this.$emit('changeDate', formatDate)
+      this.$emit('changeDate', date)
     },
     changeExportDate(arr) {
-      this.exportDate[0] = this.$dayjs(arr[0]).format('YYYY-MM-DD')
-      this.exportDate[1] = this.$dayjs(arr[1]).format('YYYY-MM-DD')
+      this.exportDate = arr
     },
     refresh(val) {
       this.$emit('refresh', val)
@@ -585,6 +613,7 @@ export default {
   .filter-items {
     .filter-item {
       @include flex(flex-start, flex-start);
+      margin-bottom: 20px;
       width: 100%;
       .filter-item-label {
         font-size: 16px;
@@ -597,7 +626,7 @@ export default {
         line-height: 32px;
         margin-left: 25px;
         .content-crumbs {
-          color: #525252;
+          color: #999;
         }
       }
     }

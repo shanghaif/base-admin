@@ -11,7 +11,10 @@
           <span>2020-01-01</span>
         </div>
       </div> -->
-      <Header />
+      <Header
+        :step="step"
+        @change="changeStep"
+      />
       <div class="setting">
         <i
           class="el-icon-right"
@@ -129,6 +132,8 @@ export default {
     return {
       company: '',
       rowKey: 0,
+      step: 60 * 15 * 1000,
+      timer: null,
       companyList: [],
       factoryList: [],
       areaList: [],
@@ -210,7 +215,10 @@ export default {
   mounted() {
     // screenSize(this.$refs.editor)
   },
-  destroyed() {},
+
+  beforeDestroy() {
+    clearInterval(this.timer)
+  },
   methods: {
     // ...mapActions({
     //   getCompany: 'station/getCompany',
@@ -222,6 +230,10 @@ export default {
       SET_FACTORY: 'station/SET_FACTORY',
       SET_CELL: 'station/SET_CELL'
     }),
+    changeStep(step) {
+      this.step = step
+      this.init()
+    },
     async handelAlarmQuery() {
       if (this.factoryList.length > 0) {
         try {
@@ -234,8 +246,7 @@ export default {
         }
       }
     },
-
-    init() {
+    queryInit() {
       company(1)
         .then((res) => {
           this.companyList = res.data.result.stations || []
@@ -245,6 +256,12 @@ export default {
         .catch((err) => {
           this.$message(err)
         })
+    },
+    init() {
+      this.queryInit()
+      this.timer = setTimeout(() => {
+        this.queryInit()
+      }, this.step)
     },
     async refresh() {
       try {
@@ -275,9 +292,9 @@ export default {
           ).uid
           const factoryResult = await factory(id_company, 1)
           this.factoryList = factoryResult.data.result.stations || []
-          const hasData = this.factoryList.find(
-            (v) => v.s_name === '电解铝二厂'
-          )
+          const len = this.factoryList.length
+
+          const hasData = len > 1 ? this.factoryList[1] : this.factoryList[0]
           this.SET_FACTORY(hasData)
           setCurrentFactory(hasData)
         } catch (err) {
@@ -478,6 +495,7 @@ $top-Height: 10vh;
   }
   .bar-chart-row-box {
     height: 84%;
+    overflow: auto;
     &.no-data {
       position: relative;
       &::before {

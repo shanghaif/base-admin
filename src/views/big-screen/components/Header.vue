@@ -29,23 +29,26 @@
 export default {
   name: 'Header',
   components: {},
-  props: {},
+  props: {
+    step: {
+      type: Number,
+      default: 0
+    }
+  },
   data() {
     return {
       updateTime: this.$dayjs().format('YYYY/MM/DD HH:mm:ss'),
 
-      selectFreshTime: '30',
-      cellFreshTimeOptions: [
-        { value: '10', label: '10秒' },
-        { value: '30', label: '30秒' },
-        { value: '60', label: '1分钟' },
-        { value: '300', label: '5分钟' },
-        { value: '600', label: '10分钟' }
-      ]
+      selectFreshTime: 0,
+      cellFreshTimeOptions: [{ value: 15 * 60 * 1000, label: '15分钟' }]
     }
   },
   computed: {},
-  watch: {},
+  watch: {
+    step(newVal, oldVal) {
+      this.selectFreshTime = newVal
+    }
+  },
 
   created() {
     // 生命周期钩子：组件实例创建完成，属性已绑定，但 DOM 还未生成，el 属性还不存在
@@ -54,10 +57,12 @@ export default {
 
   mounted() {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
+    this.selectFreshTime = this.step
   },
 
   methods: {
     change(val) {
+      this.selectFreshTime = val
       console.log('val :>> ', val)
       this.$emit('change', val)
     }

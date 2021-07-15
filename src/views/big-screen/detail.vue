@@ -25,7 +25,10 @@
 
           </div>
           <div class="detail-item detail-item-center">
-            <Header @change="updateRate" />
+            <Header
+              :step="step"
+              @change="changeStep"
+            />
 
             <detail-line-chart
               ref="DetailLineChart"
@@ -297,7 +300,8 @@ export default {
   },
   data() {
     return {
-      step: (30 / 60) * 60 * 1000, //  60 * 1000 // 1分钟
+      step: 60 * 15 * 1000,
+
       centerDialogVisible: false,
 
       updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
@@ -559,9 +563,9 @@ export default {
       this.queryPiontHistory()
     },
     changeDateQuery(date) {
-      this.queryParams.sTime = date + ' 00:00'
-      this.queryParams.eTime = date + ' 23:59'
-      this.queryPiontHistory(date)
+      this.queryParams.sTime = date[0] + ' 00:00'
+      this.queryParams.eTime = date[1] + ' 23:59'
+      this.queryPiontHistory()
     },
     pointClick(val) {
       const obj = { ...this.alarmItem }
@@ -570,8 +574,9 @@ export default {
       this.queryPiontHistory()
       // deviceInfo(val).then((res) => {})
     },
-    updateRate(val) {
-      this.step = val * 1000
+    changeStep(step) {
+      this.step = step
+
       this.init()
     },
     init() {

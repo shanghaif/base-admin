@@ -1,12 +1,36 @@
 <template>
-  <div class="sidebar-logo-container" :class="{'collapse':collapse}">
+  <div
+    class="sidebar-logo-container"
+    :class="{'collapse':collapse}"
+  >
     <transition name="sidebarLogoFade">
-      <router-link v-if="collapse" key="collapse" class="sidebar-logo-link" to="/">
-        <img v-if="logo" :src="logo" class="sidebar-logo">
-        <h1 v-else class="sidebar-title">{{ title }} </h1>
+      <router-link
+        v-if="collapse"
+        key="collapse"
+        class="sidebar-logo-link"
+        to="/"
+      >
+        <img
+          v-if="logo"
+          :src="logo"
+          class="sidebar-logo"
+        >
+        <h1
+          v-else
+          class="sidebar-title"
+        >{{ title }} </h1>
       </router-link>
-      <router-link v-else key="expand" class="sidebar-logo-link" to="/">
-        <img v-if="logo" :src="logo" class="sidebar-logo">
+      <router-link
+        v-else
+        key="expand"
+        class="sidebar-logo-link"
+        to="/"
+      >
+        <img
+          v-if="logo"
+          :src="logo"
+          class="sidebar-logo"
+        >
         <h1 class="sidebar-title">{{ title }} </h1>
       </router-link>
     </transition>
@@ -24,8 +48,9 @@ export default {
   },
   data() {
     return {
-      title: 'Vue Element Admin',
-      logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      title: '测温系统',
+      // logo: 'https://wpimg.wallstcn.com/69a1c46c-eb1c-4b46-8bd4-e9e686ef5251.png'
+      logo: '//nwzimg.wezhan.cn/sitefiles10204/10204966/中兴新视.jpg'
     }
   }
 }
@@ -47,8 +72,9 @@ export default {
   height: 50px;
   line-height: 50px;
   background: #2b2f3a;
-  text-align: center;
+  text-align: left;
   overflow: hidden;
+  padding: 0 20px;
 
   & .sidebar-logo-link {
     height: 100%;

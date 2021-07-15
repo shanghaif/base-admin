@@ -3,10 +3,11 @@ import Vue from 'vue'
 import Cookies from 'js-cookie'
 import dayjs from 'dayjs'
 import 'normalize.css/normalize.css' // a modern alternative to CSS resets
-
+// import iView from 'iview'
 import Element from 'element-ui'
 import './styles/element-variables.scss'
-
+// import './styles/my-ivew-theme.less'
+import 'iview/dist/styles/iview.css' // ivew
 import '@/styles/index.scss' // global css
 
 import App from './App'
@@ -19,7 +20,7 @@ import './permission' // permission control
 import './utils/error-log' // error log
 // import '@/utils/log'
 import * as filters from './filters' // global filters
-
+// import Checkbox from 'iview/src/components/checkbox'
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -32,8 +33,9 @@ import * as filters from './filters' // global filters
 //   const { mockXHR } = require('../mock')
 //   mockXHR()
 // }
+// Vue.use(iView)
 Vue.prototype.$dayjs = dayjs// 可以全局使用dayjs
-
+// Vue.use(Checkbox)
 Vue.use(Element, {
   size: Cookies.get('size') || 'small', // set element-ui default size
   i18n: (key, value) => i18n.t(key, value)

@@ -2,6 +2,7 @@
   <el-card class="device-wrap">
 
     <div class="left">
+
       <el-button-group class="btns-wrap">
         <el-button
           :disabled="canAdd || !isShowBtn('add')"
@@ -54,7 +55,7 @@
           class="count-item gray"
           style="width: 32%"
         >
-          <span>在线设备</span>
+          <span>绑定设备数</span>
           <p class="count-num">{{ rightTopInfo.devices_online_count }}</p>
           <i class="el-icon-success" />
         </div>
@@ -62,7 +63,7 @@
           class="count-item red"
           style="width: 32%"
         >
-          <span>离线设备</span>
+          <span>解绑设备数</span>
           <p class="count-num">{{ rightTopInfo.devices_offline_count }}</p>
           <i class="el-icon-warning" />
         </div>
@@ -104,7 +105,7 @@
             搜索
           </el-button> -->
           <el-button
-            :disabled="!isShowBtnDvice('add')"
+            :disabled="!isShowBtnDvice('add') || queryDeviceParams.level !== 3"
             type="primary"
             @click="addNewDevice()"
           >增加设备</el-button>
@@ -317,11 +318,9 @@ export default {
     statusFilter(type) {
       let res = ''
       if (type === 1) {
-        res = '启用'
+        res = '绑定'
       } else if (type === -2) {
-        res = '停用'
-      } else if (type === -1) {
-        res = '维护'
+        res = '解绑'
       }
       return res
     }

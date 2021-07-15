@@ -17,22 +17,25 @@
       <template v-if="device!=='mobile'">
         <router-link
           to="/big-screen"
-          class="right-menu-item"
+          class="right-menu-item link"
         >
           {{ $t('navbar.bigScreen') }}
+
         </router-link>
-        <search
+        <!-- <search
           id="header-search"
           class="right-menu-item"
         />
 
-        <!-- <error-log class="errLog-container right-menu-item hover-effect" /> -->
+        <error-log class="errLog-container right-menu-item hover-effect" />
 
         <screenfull
           id="screenfull"
           class="right-menu-item hover-effect"
-        />
-
+          style="margin-right:40px"
+        /> -->
+        <span class="right-menu-item"><i class="el-icon-s-custom" />
+          欢迎您,{{ userInfo.nick_name }}</span>
         <!-- <el-tooltip :content="$t('navbar.size')" effect="dark" placement="bottom">
           <size-select id="size-select" class="right-menu-item hover-effect" />
         </el-tooltip> -->
@@ -96,15 +99,15 @@ import Search from '@/components/HeaderSearch'
 export default {
   components: {
     Breadcrumb,
-    Hamburger,
+    Hamburger
     // ErrorLog,
-    Screenfull,
+    // Screenfull,
     // SizeSelect,
     // LangSelect,
-    Search
+    // Search
   },
   computed: {
-    ...mapGetters(['sidebar', 'avatar', 'device'])
+    ...mapGetters(['sidebar', 'avatar', 'device', 'userInfo'])
   },
   methods: {
     toggleSideBar() {
@@ -120,6 +123,14 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.link {
+  color: $menuActiveText !important;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
 .navbar {
   height: 50px;
   overflow: hidden;

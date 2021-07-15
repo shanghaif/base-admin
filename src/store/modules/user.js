@@ -12,7 +12,7 @@ const state = {
   roles: [],
   menu: [],
   permissions: [],
-  userInfo: [],
+  userInfo: {},
   loginData: {}
 }
 
@@ -39,7 +39,7 @@ const mutations = {
     state.menu = menu
   },
   SET_USERINFO: (state, userInfo) => {
-    state.menu = userInfo
+    state.userInfo = userInfo
   },
   SET_LOGINDATA: (state, loginData) => {
     state.loginData = loginData
@@ -78,7 +78,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ un: username.trim(), pd: password }).then(res => {
         // const res = userData
-        const { token, menu, user, permissions, role} = res.data.result
+        const { token, menu, user, permissions, role } = res.data.result
         commit('SET_MENU', menu)
         commit('SET_PERMISSIONS', permissions)
         commit('SET_USERINFO', user)
@@ -158,6 +158,9 @@ const actions = {
         commit('SET_TOKEN', '')
         commit('SET_LOGINDATA', {})
         commit('SET_ROLES', [])
+        commit('SET_MENU', [])
+        commit('SET_PERMISSIONS', [])
+       
         removeToken()
         resetRouter()
         dispatch('tagsView/delAllViews', null, { root: true })
