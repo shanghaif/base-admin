@@ -1,8 +1,9 @@
 export default {
   route: {
-    dashboard: '首页',
+    dashboard: '统计分析',
     Device: '设备管理',
     AddDevice: '添加设备',
+    QueryDevice: '查询设备',
     AlarmManage: '告警管理',
     AlarmHistory: '告警历史',
     UserManage: '权限管理',

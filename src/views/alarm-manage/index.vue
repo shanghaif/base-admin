@@ -304,13 +304,14 @@ export default {
     async queryCompany() {
       const res = await company(1)
 
-      this.companyList = res.data.result.stations || []
+      this.companyList = (res.data.result && res.data.result.stations) || []
 
       const id_company = this.companyList.find(
         (v) => v.s_name === '云南分公司'
       ).uid
       const factoryResult = await factory(id_company, 1)
-      this.factoryList = factoryResult.data.result.stations || []
+      this.factoryList =
+        (factoryResult.data.result && factoryResult.data.result.stations) || []
       // this.factoryList = list.map((v) => {
       //   return { value: v.uid, label: v.s_name }
       // })

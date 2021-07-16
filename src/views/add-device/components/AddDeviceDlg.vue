@@ -423,8 +423,8 @@ export default {
     init() {
       zModelPage(this.queryParams)
         .then((res) => {
-          this.list = res.data.result.data || []
-          this.total = res.data.result.count || 0
+          this.list = (res.data.result && res.data.result.data) || []
+          this.total = (res.data.result && res.data.result.count) || 0
         })
         .catch((err) => {
           alert(err)

@@ -54,7 +54,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ un: username.trim(), pd: password }).then(res => {
         // const res = userData
-        const { token, menu, user, permissions, role} = res.data.result
+        const { token} = res.data.result
         commit('SET_LOGINDATA', userInfo)
         commit('SET_TOKEN', token)
         
@@ -78,7 +78,7 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ un: username.trim(), pd: password }).then(res => {
         // const res = userData
-        const { token, menu, user, permissions, role } = res.data.result
+        const { menu, user, permissions, role } = res.data.result
         commit('SET_MENU', menu)
         commit('SET_PERMISSIONS', permissions)
         commit('SET_USERINFO', user)

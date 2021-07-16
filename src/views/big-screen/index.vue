@@ -249,7 +249,7 @@ export default {
     queryInit() {
       company(1)
         .then((res) => {
-          this.companyList = res.data.result.stations || []
+          this.companyList = (res.data.result && res.data.result.stations) || []
 
           this.query()
         })
@@ -339,7 +339,7 @@ export default {
     async getStatus() {
       const res = await deviceStatus(this.factoryId)
       try {
-        this.statusList = res.data.result.infoMap
+        this.statusList = res.data.result && res.data.result.infoMap
       } catch (err) {
         this.$message('状态错误')
       }

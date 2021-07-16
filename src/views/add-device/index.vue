@@ -187,8 +187,9 @@
           />
           <el-table-column
             prop="s_name"
-            label="名称"
-            width="120"
+            label="设备名称"
+            class-name="n-wrap"
+            show-overflow-tooltip
           >
             <template slot-scope="scope">
 
@@ -474,7 +475,7 @@ export default {
         res = 'success'
       } else if (type === 0) {
         res = 'info'
-      } else if (type === -1) {
+      } else if (type === -2) {
         res = 'warning'
       }
       return res

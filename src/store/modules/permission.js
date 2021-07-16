@@ -41,6 +41,7 @@ export function filterAsyncRoutes(routes, roles) {
 // 定义全部的路由对应关系
 const routerMapComponents = {
   'add-device': () => import('@/views/add-device/index'),
+  'query-device': () => import('@/views/add-device/QueryDevice'),
   'alarm-history': () => import('@/views/alarm-manage/index'),
   'user-manage': () => import('@/views/permission-manage/AddUser'),
   'role-manage': () => import('@/views/permission-manage/AddRole')
@@ -48,6 +49,7 @@ const routerMapComponents = {
 const nameMap = {
   device: 'Device',
   'add-device': 'AddDevice',
+  'query-device': 'QueryDevice',
   'alarm': 'AlarmManage', // 告警管理
   'alarm-history': 'AlarmHistory', // 告警管理
   'permission': 'UserManage',
@@ -63,41 +65,7 @@ const iconMap = {
 // 递归将封装list
 const getList = function (menu) {
   const rootList = []
-  /* const arr = [
-    {
-      children: [
-        
-        {
-          path: 'add-thing'
-        }
-       
-      ],
-      path: 'device'
-    },
-    {
-      children: [
-        
-        {
-          path: 'alarm-history'
-        }
-       
-      ],
-      path: 'alarm-manage'
-    },
-    {
-      children: [
-        
-        {
-          path: 'add-user'
-        },
-        {
-          path: 'add-role'
-        }
-       
-      ],
-      path: 'user-manage'
-    }
-  ] */
+  menu[0].children.push({path: 'query-device'})
   menu.forEach(v => {
     const childrenList = []
     const childrens = v.children

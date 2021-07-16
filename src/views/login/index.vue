@@ -220,9 +220,12 @@ export default {
           this.$store
             .dispatch('user/login', params)
             .then(() => {
+              // this.$router.push({
+              //   path: this.redirect || '/',
+              //   query: this.otherQuery
+              // })
               this.$router.push({
-                path: this.redirect || '/',
-                query: this.otherQuery
+                path: '/big-screen'
               })
               this.loading = false
             })
