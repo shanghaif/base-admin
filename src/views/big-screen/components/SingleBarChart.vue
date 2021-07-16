@@ -241,24 +241,40 @@ export default {
           {
             // data: [40, 80, 20, 16, 70, 90, 20, 100],
             data: that.dataLine,
-            type: 'line',
+            type: 'bar',
             smooth: false,
             name: '处理数',
             // symbol: 'none',
             symbolSize: 10,
-            lineStyle: {
-              color: '#18BAD7',
-              width: 4,
-              shadowColor: 'rgba(0, 0, 0, 0.3)', // 设置折线阴影
-              shadowBlur: 15,
-              shadowOffsetY: 20
-            }
-            // markPoint: {
+            // lineStyle: {
+            //   color: '#18BAD7',
+            //   width: 20,
+            //   shadowColor: 'rgba(0, 0, 0, 0.3)', // 设置折线阴影
+            //   shadowBlur: 15,
+            //   shadowOffsetY: 20
+            // }
+            barWidth: '14px', // markPoint: {
             //       data: [
             //           {type: 'max', name: '最大值'},
             //           {type: 'min', name: '最小值'}
             //       ]
             //   },
+
+            itemStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: '#f53012' }, // 柱图渐变色
+                // {offset: 0.5, color: '#44C0C1'},                 //柱图渐变色
+                { offset: 1, color: '#d6560b' } // 柱图渐变色
+              ]),
+              barBorderRadius: [30, 30, 0, 0]
+            },
+            label: {
+              show: true,
+              fontSize: 12,
+              fontWeight: 'bold',
+              color: '#f53012',
+              position: 'top'
+            }
           }
         ]
       }

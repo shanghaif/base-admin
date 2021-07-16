@@ -232,6 +232,7 @@ body {
 .cell-tips-box {
   font-weight: bold;
   font-size: 20px;
+  color: #fff;
   &.red {
     .cur-num {
       color: $err;

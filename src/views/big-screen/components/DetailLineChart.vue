@@ -165,24 +165,11 @@ import * as echarts from 'echarts'
 import resize from './mixins/resize'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 // import { color } from 'echarts'
-import Button from 'iview/src/components/button'
-import DatePicker from 'iview/src/components/date-picker'
-import Modal from 'iview/src/components/modal'
-import Dropdown from 'iview/src/components/dropdown'
-import DropdownMenu from 'iview/src/components/dropdown-menu'
-import DropdownItem from 'iview/src/components/dropdown-item'
 
 const alarmColor = '#ff2f14'
 export default {
   name: 'DetailLineChart',
-  components: {
-    Button,
-    DatePicker,
-    Modal,
-    Dropdown,
-    DropdownMenu,
-    DropdownItem
-  },
+  components: {},
   mixins: [resize],
   props: {
     list: {
@@ -216,7 +203,7 @@ export default {
   data() {
     return {
       chart: null,
-      exportDialogVisible: true,
+      exportDialogVisible: false,
 
       option: null,
       timer: null,

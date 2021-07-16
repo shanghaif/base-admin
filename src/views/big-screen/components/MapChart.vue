@@ -166,7 +166,7 @@ export default {
       const regions = this.createRegions(this.companyList)
       const option = {
         // backgroundColor: '#363739',
-        center: [110.712251, 23.040609],
+        center: [103, 22],
         tooltip: {
           enterable: true,
           transitionDuration: 1,
@@ -219,10 +219,10 @@ export default {
           // roam: true,
           scaleLimit: {
             min: 1,
-            max: 2
+            max: 10
           },
 
-          zoom: 1.5,
+          zoom: 1.8,
           label: {
             show: false,
             color: '#fff',

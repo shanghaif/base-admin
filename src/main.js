@@ -20,7 +20,19 @@ import './permission' // permission control
 import './utils/error-log' // error log
 // import '@/utils/log'
 import * as filters from './filters' // global filters
-// import Checkbox from 'iview/src/components/checkbox'
+ 
+// 大屏暗黑主题使用ivew
+import { Button, DatePicker, Modal, Dropdown, DropdownMenu, DropdownItem, Select, OptionGroup, Option, Poptip} from 'iview'
+Vue.component('Button', Button)
+Vue.component('DatePicker', DatePicker)
+Vue.component('Modal', Modal)
+Vue.component('Dropdown', Dropdown)
+Vue.component('DropdownMenu', DropdownMenu)
+Vue.component('DropdownItem', DropdownItem)
+Vue.component('Select', Select)
+Vue.component('OptionGroup', OptionGroup)
+Vue.component('Option', Option)
+Vue.component('Poptip', Poptip)
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

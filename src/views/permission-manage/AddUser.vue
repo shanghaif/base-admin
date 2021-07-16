@@ -27,6 +27,12 @@
       />
       <el-table-column
         sortable
+        prop="nick_name"
+        label="昵称"
+        show-overflow-tooltip
+      />
+      <el-table-column
+        sortable
         prop="role_name"
         label="角色"
         show-overflow-tooltip
@@ -64,9 +70,10 @@
             type="primary"
             @click="addUser(scope.row,scope.$index)"
           >
-            编辑
+            <i class="el-icon-edit" />
+            <!-- 编辑 -->
           </el-button>
-          <el-popconfirm
+          <!-- <el-popconfirm
             title="确定删除该用户吗？"
             @confirm="delUser(scope.row,scope.$index)"
           >
@@ -79,7 +86,23 @@
               删除
 
             </el-button>
-          </el-popconfirm>
+          </el-popconfirm> -->
+          <Poptip
+            placement="bottom"
+            confirm
+            transfer
+            title="确定删除该用户吗？"
+            @on-ok="delUser(scope.row,scope.$index)"
+          >
+            <el-button
+              :disabled="!isShowBtn('delete')"
+              size="mini"
+              type="danger"
+              class="ml-10"
+            >
+              <i class="el-icon-delete" />
+            </el-button>
+          </Poptip>
         </template>
       </el-table-column>
     </el-table>

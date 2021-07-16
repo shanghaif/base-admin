@@ -235,10 +235,10 @@
                 type="primary"
                 @click="addNewDevice(scope.row,scope.$index)"
               >
-                <!-- <i class="el-icon-edit" /> -->
-                编辑
+                <i class="el-icon-edit" />
+                <!-- 编辑 -->
               </el-button>
-              <el-popconfirm
+              <!-- <el-popconfirm
                 title="确定删除该物模型吗？"
                 @confirm="delDevice(scope.row,scope.$index)"
               >
@@ -248,11 +248,27 @@
                   size="mini"
                   type="danger"
                 >
-                  <!-- <i class="el-icon-delete" /> -->
+                  
                   删除
 
                 </el-button>
-              </el-popconfirm>
+              </el-popconfirm> -->
+              <Poptip
+                placement="bottom"
+                confirm
+                transfer
+                title="您确认删除这条内容吗？"
+                @on-ok="delDevice(scope.row,scope.$index)"
+              >
+                <el-button
+                  :disabled="!isShowBtnDvice('delete')"
+                  size="mini"
+                  type="danger"
+                  class="ml-10"
+                >
+                  <i class="el-icon-delete" />
+                </el-button>
+              </Poptip>
             </template>
           </el-table-column>
         </el-table>
@@ -577,9 +593,13 @@ export default {
     queryCountDevice() {
       countDevice(this.queryDeviceParams)
         .then((res) => {
-          this.tableData = res.data.result.devices || []
-          this.total = res.data.result.devices_count
-          this.rightTopInfo = res.data.result.info
+          this.tableData = (res.data.result && res.data.result.devices) || []
+          this.total = (res.data.result && res.data.result.devices_count) || 0
+          this.rightTopInfo = (res.data.result && res.data.result.info) || {
+            devices_count: 0,
+            devices_offline_count: 0,
+            devices_online_count: 0
+          }
         })
         .catch((err) => {
           this.$message({ type: 'error', message: err })

@@ -104,6 +104,11 @@
 
             <el-tag plain>{{ cell.s_name }}</el-tag>
           </div>
+          <el-tag
+            v-if="scope.row.stations.length < 1"
+            plain
+            type="info"
+          >无权限</el-tag>
         </template>
       </el-table-column>
       <el-table-column
@@ -117,9 +122,10 @@
             type="primary"
             @click="addRole(scope.row,scope.$index)"
           >
-            编辑
+            <i class="el-icon-edit" />
+            <!-- 编辑 -->
           </el-button>
-          <el-popconfirm
+          <!-- <el-popconfirm
             title="确定删除该角色吗？"
             @confirm="delRole(scope.row,scope.$index)"
           >
@@ -133,7 +139,23 @@
               删除
 
             </el-button>
-          </el-popconfirm>
+          </el-popconfirm> -->
+          <Poptip
+            placement="bottom"
+            confirm
+            transfer
+            title="确定删除该角色吗？"
+            @on-ok="delRole(scope.row,scope.$index)"
+          >
+            <el-button
+              :disabled="!isShowBtn('delete')"
+              size="mini"
+              type="danger"
+              class="ml-10"
+            >
+              <i class="el-icon-delete" />
+            </el-button>
+          </Poptip>
         </template>
       </el-table-column>
     </el-table>
@@ -419,9 +441,10 @@ export default {
             })
             this.query()
           } else {
+            const { message } = res.data.error
             this.$message({
               type: 'error',
-              message: `删除角色失败`
+              message
             })
           }
         })

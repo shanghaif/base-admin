@@ -7,7 +7,7 @@
       <span class="update-text">更新频率：</span>
 
       <div class="content-select">
-        <el-select
+        <!-- <el-select
           v-model="selectFreshTime"
           placeholder="请选择"
           class="screen-select"
@@ -15,11 +15,23 @@
         >
           <el-option
             v-for="item in cellFreshTimeOptions"
-            :key="item.value"
+            :key="'a' + item.value"
             :label="item.label"
             :value="item.value"
           />
-        </el-select>
+        </el-select> -->
+        <Select
+          v-model="selectFreshTime"
+          placeholder="请选择"
+          filterable
+          @on-change="change"
+        >
+          <Option
+            v-for="item in cellFreshTimeOptions"
+            :key="'b' + item.value"
+            :value="item.value"
+          >{{ item.label }}</Option>
+        </Select>
       </div>
     </div>
   </div>
@@ -28,7 +40,6 @@
 <script>
 export default {
   name: 'Header',
-  components: {},
   props: {
     step: {
       type: Number,
@@ -39,8 +50,12 @@ export default {
     return {
       updateTime: this.$dayjs().format('YYYY/MM/DD HH:mm:ss'),
 
-      selectFreshTime: 0,
-      cellFreshTimeOptions: [{ value: 15 * 60 * 1000, label: '15分钟' }]
+      selectFreshTime: 15 * 60 * 1000,
+      cellFreshTimeOptions: [
+        { value: 15 * 60 * 1000, label: '15分钟' },
+        { value: 30 * 60 * 1000, label: '30分钟' },
+        { value: 60 * 60 * 1000, label: '1小时' }
+      ]
     }
   },
   computed: {},

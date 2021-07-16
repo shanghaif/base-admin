@@ -18,10 +18,7 @@
               </div>
             </div>
 
-            <electrolyzer
-              :list="list"
-              @clickPoint="clickPoint"
-            />
+            <electrolyzer @clickPoint="clickPoint" />
 
           </div>
           <div class="detail-item detail-item-center">
@@ -246,22 +243,9 @@ import Electrolyzer from './components/Electrolyzer'
 import DetailLineChart from './components/DetailLineChart'
 import Header from './components/Header'
 import DetailPoint from './components/DetailPoint'
-
 import _map from 'lodash/map'
 import sortBy from 'lodash/sortBy'
-
-import {
-  company,
-  factory,
-  areaPage,
-  cell,
-  devicePoint,
-  deviceHistory,
-  handelAlarm,
-  deviceInfo,
-  exportPointInfo,
-  deviceStatus
-} from '@/api/station'
+import { devicePoint, deviceHistory, exportPointInfo } from '@/api/station'
 
 function createCellList(len) {
   const n = len
@@ -307,90 +291,6 @@ export default {
       updateTime: this.$dayjs().format('YYYY/MM/DD hh:mm:ss'),
       pointList: [],
 
-      cellFreshTimeOptions: [
-        { value: '10秒', label: '10秒' },
-        { value: '30秒', label: '30秒' },
-        { value: '1分钟', label: '1分钟' },
-        { value: '5分钟', label: '5分钟' },
-        { value: '10分钟', label: '10分钟' }
-      ],
-
-      list1: [
-        {
-          id: '10000',
-          name: '电解槽1',
-          type: 'warning',
-          dot: 168,
-          temperatureDot: 6,
-          trendDot: 2,
-          unusualDot: 1
-        },
-        {
-          id: '10001',
-          name: '电解槽2',
-          type: 'defual',
-          dot: 168,
-          temperatureDot: 6,
-          trendDot: 2,
-          unusualDot: 1
-        },
-        {
-          id: '10002',
-          name: '电解槽3',
-          type: 'warning',
-          dot: 168,
-          temperatureDot: 6,
-          trendDot: 2,
-          unusualDot: 1
-        },
-        {
-          id: '10003',
-          name: '电解槽4',
-          type: 'off',
-          dot: 168,
-          temperatureDot: 0,
-          trendDot: 0,
-          unusualDot: 1
-        },
-        {
-          id: '10004',
-          name: '电解槽5',
-          type: 'off',
-          dot: 168,
-          temperatureDot: 0,
-          trendDot: 0,
-          unusualDot: 0
-        }
-      ],
-      list: [
-        {
-          id: '10000',
-          name: '电解槽1',
-          type: 'yellow',
-          dot: 168,
-          temperatureDot: 0,
-          trendDot: 0,
-          unusualDot: 1
-        },
-        {
-          id: '10001',
-          name: '电解槽2',
-          type: 'defual',
-          dot: 168,
-          temperatureDot: 6,
-          trendDot: 0,
-          unusualDot: 1
-        },
-        {
-          id: '10002',
-          name: '电解槽3',
-          type: 'warning',
-          dot: 168,
-          temperatureDot: 0,
-          trendDot: 2,
-          unusualDot: 0
-        }
-      ],
       selectType: '',
       selectFreshTime: '',
       selectTime: '',
@@ -426,13 +326,6 @@ export default {
     ...mapState({
       alarmItem: (state) => state.station.alarmItem
     }),
-    averageTemperature() {
-      let sum = 0
-      for (const key in this.temperatureObj) {
-        sum += this.temperatureObj[key]
-      }
-      return sum / 3
-    },
 
     averagePct() {
       return this.averageTemp > 0
@@ -448,13 +341,7 @@ export default {
     lowPct() {
       return this.lowTemp > 0 ? (this.lowTemp * 100) / this.heigthTemp : 0
     },
-    temperatureObj() {
-      const obj = {}
-      obj.hight = 1000
-      obj.low = 300
-      obj.now = 800
-      return obj
-    },
+
     heigthTemp() {
       return Math.max(...this.piontHistoryList.map((v) => v.fv), 0)
     },
@@ -519,9 +406,9 @@ export default {
         window.navigator.msSaveOrOpenBlob(blob, fileName)
       } else {
         /* 火狐谷歌的文件下载方式 */
-        var blob = new Blob([data])
-        var downloadElement = document.createElement('a')
-        var href = window.URL.createObjectURL(blob)
+        const blob = new Blob([data])
+        const downloadElement = document.createElement('a')
+        const href = window.URL.createObjectURL(blob)
         downloadElement.href = href
         downloadElement.download = fileName
         document.body.appendChild(downloadElement)
@@ -538,21 +425,10 @@ export default {
         sTime: arr[0],
         eTime: arr[1]
       }
-      // var l =
-      //   'http://10.53.31.114:9527/api/data/export?tid=temperature@run-50.exe&begin_time=2021-06-01%2015:48&end_time=2021-06-21%2016:48'
-      // console.log('111111111')
-      // window.location.href = l
+
       exportPointInfo(params)
         .then((res) => {
           this.isExcel(res)
-
-          // if (res.result) {
-          //   this.$message({ type: 'error', message: res.result })
-          // } else {
-          //   this.isExcel(res)
-          // }
-          // type 为需要导出的文件类型，此处为xls表格类型
-
           this.$refs.DetailLineChart.hideExport()
         })
         .catch((err) => {
@@ -581,9 +457,7 @@ export default {
     },
     init() {
       // 第一次进入页面默认查询时间
-      // this.queryParams.sTime =
-      //   this.$dayjs().subtract(30, 'day').format('YYYY-MM-DD') + ' 00:00'
-      // this.queryParams.eTime = this.$dayjs().format('YYYY-MM-DD') + ' 23:59'
+
       this.queryParams.sTime =
         this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 00:00'
       this.queryParams.eTime =
@@ -626,10 +500,7 @@ export default {
       const pointListItem2 = newArr2.map((v, i) => {
         return { pointList: v }
       })
-      // if(isSingle){
 
-      // }
-      // debugger
       this.pointList = [{ arr: pointListItem1 }, { arr: pointListItem2 }]
     },
     queryPiont() {
@@ -654,29 +525,6 @@ export default {
           this.$message(err)
         })
     },
-    // async queryCell() {
-    //   try {
-    //     // 电解槽
-    //     const cellResult = await cellInfo(this.alarmItem.AreaID, 1)
-    //     const list = cellResult.data.result.stations
-    //     this.list = list.map((v) => {
-    //       return {
-    //         ...v,
-    //         ...{
-    //           id: v.uid,
-    //           name: v.s_name,
-    //           type: 'yellow',
-    //           dot: 88888,
-    //           temperatureDot: 0,
-    //           trendDot: 0,
-    //           unusualDot: 1
-    //         }
-    //       }
-    //     })
-    //   } catch (err) {
-    //     this.$message('电解槽错误')
-    //   }
-    // },
 
     customColorMethod(percentage) {
       console.log(percentage)

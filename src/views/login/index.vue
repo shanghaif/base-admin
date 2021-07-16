@@ -169,6 +169,17 @@ export default {
   },
   created() {
     // window.addEventListener('storage', this.afterQRScan)
+    const that = this
+    document.onkeydown = function (e) {
+      e = window.event || e
+      if (
+        that.$route.path === '/login' &&
+        (e.code === 'Enter' || e.code === 'enter')
+      ) {
+        // 验证在登录界面和按得键是回车键enter
+        that.handleLogin() // 登录函数
+      }
+    }
   },
   mounted() {
     if (this.loginForm.username === '') {

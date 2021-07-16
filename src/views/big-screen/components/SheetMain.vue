@@ -3,7 +3,11 @@
     <div class="chart-box-title big">云南分公司 {{ currentFactory.s_name }}</div>
     <div class="tip">
       <span class="time">告警信息汇总 {{ newDtate }}</span>
-      <span class="link">告警信息日志 <i class="el-icon-arrow-right go-link" /></span>
+      <span
+        class="link"
+        @click="goAlarm"
+      >告警信息日志
+        <i class="el-icon-arrow-right go-link" /></span>
     </div>
     <div class="cells">
       <!-- <div
@@ -168,7 +172,12 @@ export default {
       return sum
     }
   },
-  methods: {}
+  methods: {
+    goAlarm() {
+      debugger
+      this.$router.push({ name: 'AlarmHistory' })
+    }
+  }
 }
 </script>
 

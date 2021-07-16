@@ -38,6 +38,7 @@
           </el-button>
 
         </el-button-group>
+        <!-- @current-change="handleCurrentChange" -->
 
         <el-table
           :data="list"
@@ -46,7 +47,6 @@
           :stripe="true"
           height="400"
           highlight-current-row
-          @current-change="handleCurrentChange"
         >
 
           <el-table-column
@@ -98,7 +98,7 @@
                 title="编辑"
                 @click="editThings(scope.row,scope.$index)"
               ><i class="el-icon-edit" /></el-button>
-              <el-popconfirm
+              <!-- <el-popconfirm
                 title="确定删除该物模型吗？"
                 @confirm="handleDelete(scope.row,scope.$index)"
               >
@@ -113,7 +113,23 @@
                   <i class="el-icon-delete" />
 
                 </el-button>
-              </el-popconfirm>
+              </el-popconfirm> -->
+              <Poptip
+                placement="bottom"
+                confirm
+                transfer
+                title="确定删除该物模型吗？"
+                @on-ok="handleDelete(scope.row,scope.$index)"
+              >
+                <el-button
+                  :disabled="!isShowBtn('delete')"
+                  size="mini"
+                  type="danger"
+                  class="ml-10"
+                >
+                  <i class="el-icon-delete" />
+                </el-button>
+              </Poptip>
             </template>
           </el-table-column>
         </el-table>
@@ -137,7 +153,7 @@
       >
         <div
           class="device-dlg-title"
-          style="text-align:left"
+          style="text-align:right;width:100px;margin-bottom:10px;padding-right:10px"
         >点位信息</div>
 
         <el-form
@@ -219,11 +235,12 @@
         slot="footer"
         class="dialog-footer"
       >
-        <el-button @click="dialogVisible = false">取 消</el-button>
+        <el-button @click="dialogVisible = false">关闭</el-button>
+        <!-- <el-button @click="dialogVisible = false">保存</el-button> -->
         <el-button
           type="primary"
           @click="submitForm('ruleForm')"
-        >确 定</el-button>
+        >新增</el-button>
       </span>
     </el-dialog>
   </div>

@@ -40,30 +40,30 @@ export function filterAsyncRoutes(routes, roles) {
 
 // 定义全部的路由对应关系
 const routerMapComponents = {
-  'add-thing': () => import('@/views/add-device/index'),
+  'add-device': () => import('@/views/add-device/index'),
   'alarm-history': () => import('@/views/alarm-manage/index'),
-  'add-user': () => import('@/views/permission-manage/AddUser'),
-  'add-role': () => import('@/views/permission-manage/AddRole')
+  'user-manage': () => import('@/views/permission-manage/AddUser'),
+  'role-manage': () => import('@/views/permission-manage/AddRole')
 }
 const nameMap = {
   device: 'Device',
-  'add-thing': 'AddDevice',
-  'alarm-manage': 'AlarmManage', // 告警管理
+  'add-device': 'AddDevice',
+  'alarm': 'AlarmManage', // 告警管理
   'alarm-history': 'AlarmHistory', // 告警管理
-  'user-manage': 'UserManage',
-  'add-user': 'AddUser',
-  'add-role': 'AddRole'
+  'permission': 'UserManage',
+  'user-manage': 'AddUser',
+  'role-manage': 'AddRole'
 }
 const iconMap = {
   device: 'table',
-  'alarm-manage': 'el-icon-message-solid',
-  'user-manage': 'el-icon-s-custom'
+  'alarm': 'el-icon-message-solid',
+  'permission': 'el-icon-s-custom'
 }
 
 // 递归将封装list
 const getList = function (menu) {
-  var rootList = []
-  const arr = [
+  const rootList = []
+  /* const arr = [
     {
       children: [
         
@@ -97,9 +97,10 @@ const getList = function (menu) {
       ],
       path: 'user-manage'
     }
-  ]
-  arr.forEach(v => {
+  ] */
+  menu.forEach(v => {
     const childrenList = []
+    const childrens = v.children
     const {path} = v
     const pNode = {
       path: `/${path}`,
@@ -114,11 +115,11 @@ const getList = function (menu) {
       }
       
     }
-    if (v.children) {
-      v.children.forEach(item => {
+    if (childrens) {
+      childrens.forEach(item => {
         const cPath = item.path
         const cNode = {
-          path: `/${cPath}`,
+          path: `${cPath}`,
           component: routerMapComponents[cPath],
           name: nameMap[cPath],
           meta: {

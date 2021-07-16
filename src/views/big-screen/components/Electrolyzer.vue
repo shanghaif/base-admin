@@ -2,7 +2,7 @@
   <div class="ele-wrap">
     <div class="content-filter">
       <div class="content-select">
-        <el-select
+        <!-- <el-select
           v-model="selectType"
           placeholder="所有状态"
           class="screen-select"
@@ -14,10 +14,22 @@
             :label="item.label"
             :value="item.value"
           />
-        </el-select>
+        </el-select> -->
+        <Select
+          v-model="selectType"
+          placeholder="所有状态"
+          filterable
+          @on-change="getType"
+        >
+          <Option
+            v-for="item in cellTypeOptions"
+            :key="item.value + '所有状态'"
+            :value="item.value"
+          >{{ item.label }}</Option>
+        </Select>
       </div>
       <div class="content-search">
-        <el-select
+        <!-- <el-select
           v-model="searchCell"
           filterable
           remote
@@ -34,7 +46,20 @@
             :label="item.label"
             :value="item.value"
           />
-        </el-select>
+        </el-select> -->
+        <Select
+          v-model="searchCell"
+          placeholder="搜索电解槽"
+          filterable
+          @on-change="getSearch"
+        >
+          <Option
+            v-for="item in searchOptions"
+            :key="item.value + '搜索电解槽'"
+            :value="item.value"
+          >{{ item.label }}</Option>
+        </Select>
+
       </div>
     </div>
     <div
@@ -64,7 +89,7 @@
           <div class="cell-types">
             <div class="cell-type">
               <div class="num def">{{ source.dot }}</div>
-              <div class="num-text">总点位数</div>
+              <div class="num-text">在线点位</div>
             </div>
             <div class="cell-type">
               <div
@@ -82,7 +107,7 @@
               >
                 {{ source.trendDot }}
               </div>
-              <div class="num-text">趋势告警</div>
+              <div class="num-text">趋势预警</div>
             </div>
             <div class="cell-type">
               <div
@@ -91,7 +116,7 @@
               >
                 {{ source.unusualDot }}
               </div>
-              <div class="num-text">异常点位</div>
+              <div class="num-text">异常设备</div>
             </div>
           </div>
         </div>
@@ -108,28 +133,16 @@ import activeImg from '@/assets/images/cell_selected.png'
 import redImg from '@/assets/images/cell_warning.png'
 import yellowImg from '@/assets/images/cell_yellow.png'
 import { cellInfo } from '@/api/station'
-// import _map from 'lodash/map'
 
-function createData(len) {
-  const arr = []
-  while (len--) {
-    const obj = {
-      id: len,
-      name: `电解槽${len}`,
-      type: 'warning',
-      dot: 168,
-      temperatureDot: 6,
-      trendDot: 2,
-      unusualDot: 1
-    }
-    arr.push(obj)
-  }
-  return arr
-}
+// import { Select, Option } from 'iview/src/components/select'
+// import _map from 'lodash/map'
 
 export default {
   name: 'Electrolyzer',
-
+  components: {
+    // Select,
+    // Option
+  },
   props: {
     // list: {
     //   type: Array,
@@ -156,8 +169,8 @@ export default {
       cellTypeOptions: [
         { value: 'all', label: '所有状态' },
         { value: 't', label: '温度告警' },
-        { value: 'r', label: '趋势告警' },
-        { value: 'u', label: '异常点位' }
+        { value: 'r', label: '趋势预警' },
+        { value: 'u', label: '异常设备' }
       ],
       cacheList: [],
       imgUrl: null,
@@ -165,13 +178,7 @@ export default {
       activeImg,
       redImg,
       yellowImg,
-      curCell: '10000',
-      textObj: {
-        dot: '总点位数',
-        temperatureDot: '温度告警',
-        trendDot: '趋势告警',
-        unusualDot: '异常点位'
-      }
+      curCell: '10000'
     }
   },
   computed: {

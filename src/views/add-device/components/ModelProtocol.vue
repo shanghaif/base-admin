@@ -48,8 +48,8 @@
               type="primary"
               @click="editProtocol(scope.row,scope.$index)"
             >
-              <!-- <i class="el-icon-edit" /> -->
-              编辑
+              <i class="el-icon-edit" />
+              <!-- 编辑 -->
             </el-button>
             <!-- <el-popconfirm
               title="确定删除该协议吗？"
