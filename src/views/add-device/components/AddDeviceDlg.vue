@@ -240,7 +240,7 @@
         <el-button
           type="primary"
           @click="submitForm('ruleForm')"
-        >新增</el-button>
+        >确认{{ titleType }}</el-button>
       </span>
     </el-dialog>
   </div>
@@ -487,17 +487,17 @@ export default {
     handleDelete(row, index) {
       delModel(row.uid)
         .then((res) => {
-          debugger
-          if (res.status === 200 && res.data.result === null) {
+          if (res.data.result) {
             this.$message({
               type: 'success',
               message: '删除成功!'
             })
             this.init()
           } else {
+            const { message } = res.data.error
             this.$message({
               type: 'error',
-              message: '删除失败!'
+              message
             })
           }
         })

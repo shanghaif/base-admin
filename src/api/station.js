@@ -229,4 +229,11 @@ export function countDevice(params) {
     params
   })
 }
+export function Log(params) { 
+  return request({
+    url: `api/log`,
+    method: 'get',
+    params
+  })
+}
 

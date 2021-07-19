@@ -44,6 +44,7 @@
           @change="changeDate"
         /> -->
         <Date-picker
+          :clearable="false"
           :value="date"
           type="daterange"
           :options="pickerOptions"
@@ -99,6 +100,7 @@
                 />
               </el-date-picker> -->
               <Date-picker
+                :clearable="false"
                 :value="exportDate"
                 type="daterange"
                 :options="pickerOptions"

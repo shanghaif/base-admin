@@ -404,7 +404,10 @@ export default {
         this.getAllTree()
       }, 1000)
     },
-
+    getTreeData(arr) {
+      const list = []
+      return list
+    },
     formDlgConfirm(obj) {
       // if (this.isNew) {
       //   console.log('123 :>> ', 123)

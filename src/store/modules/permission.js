@@ -44,7 +44,9 @@ const routerMapComponents = {
   'query-device': () => import('@/views/add-device/QueryDevice'),
   'alarm-history': () => import('@/views/alarm-manage/index'),
   'user-manage': () => import('@/views/permission-manage/AddUser'),
-  'role-manage': () => import('@/views/permission-manage/AddRole')
+  'role-manage': () => import('@/views/permission-manage/AddRole'),
+  'log': () => import('@/views/alarm-manage/Log'),
+  'data-device': () => import('@/views/data-manage/index')
 }
 const nameMap = {
   device: 'Device',
@@ -54,17 +56,25 @@ const nameMap = {
   'alarm-history': 'AlarmHistory', // 告警管理
   'permission': 'UserManage',
   'user-manage': 'AddUser',
-  'role-manage': 'AddRole'
+  'role-manage': 'AddRole',
+  'data-manage': 'dataManage',
+  'data-device': 'dataDevice',
+  'log-manage': 'logManage',
+  'log': 'Log'
 }
 const iconMap = {
   device: 'table',
   'alarm': 'el-icon-message-solid',
-  'permission': 'el-icon-s-custom'
+  'permission': 'el-icon-s-custom',
+  'log-manage': 'el-icon-s-opportunity',
+  'data-manage': 'el-icon-s-data'
 }
 
 // 递归将封装list
 const getList = function (menu) {
   const rootList = []
+  menu.push({path: 'log-manage', children: [{path: 'log'}]})
+  menu.push({path: 'data-manage', children: [{path: 'data-device'}]})
   menu[0].children.push({path: 'query-device'})
   menu.forEach(v => {
     const childrenList = []

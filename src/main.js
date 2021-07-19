@@ -20,7 +20,8 @@ import './permission' // permission control
 import './utils/error-log' // error log
 // import '@/utils/log'
 import * as filters from './filters' // global filters
- 
+import VueSocketIO from 'vue-socket.io'
+
 // 大屏暗黑主题使用ivew
 import { Button, DatePicker, Modal, Dropdown, DropdownMenu, DropdownItem, Select, OptionGroup, Option, Poptip} from 'iview'
 Vue.component('Button', Button)
@@ -33,6 +34,8 @@ Vue.component('Select', Select)
 Vue.component('OptionGroup', OptionGroup)
 Vue.component('Option', Option)
 Vue.component('Poptip', Poptip)
+
+
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api
@@ -46,8 +49,14 @@ Vue.component('Poptip', Poptip)
 //   mockXHR()
 // }
 // Vue.use(iView)
-Vue.prototype.$dayjs = dayjs// 可以全局使用dayjs
-// Vue.use(Checkbox)
+ 
+// Vue.use(new VueSocketIO({
+//   debug: true,
+//   connection: process.env.VUE_APP_SOCKET_API,
+//   // connection: 'ws://localhost:9555',
+//   options: { path: '/ws/', autoConnect: false, time: 3000, transports: ['websocket', 'xhr-polling', 'jsonp-polling']}
+// }))
+Vue.prototype.$dayjs = dayjs// vue原型挂载dayjs
 Vue.use(Element, {
   size: Cookies.get('size') || 'small', // set element-ui default size
   i18n: (key, value) => i18n.t(key, value)

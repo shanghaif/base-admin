@@ -86,6 +86,7 @@ import SheetMain from './components/SheetMain'
 import UnusualList from './components/UnusualList'
 import Header from './components/Header'
 import { screenSize } from '@/utils'
+import { Socket } from '@/utils/socket'
 import {
   company,
   factory,
@@ -130,6 +131,7 @@ export default {
 
   data() {
     return {
+      wbSocket: null,
       company: '',
       rowKey: 0,
       step: 60 * 15 * 1000,
@@ -182,6 +184,7 @@ export default {
       ]
     }
   },
+
   computed: {
     ...mapState({
       currentFactory: (state) => state.station.currentFactory
@@ -211,9 +214,15 @@ export default {
   },
   created() {
     this.init()
+    // this.newInit()
   },
   mounted() {
     // screenSize(this.$refs.editor)
+    this.wbSocket = new Socket({ url: process.env.VUE_APP_SOCKET_API })
+    this.wbSocket.onmessage((data) => {
+      console.log('data :>> ', data)
+    })
+    console.log('this.$ :>> ', this.$socket)
   },
 
   beforeDestroy() {
@@ -234,18 +243,7 @@ export default {
       this.step = step
       this.init()
     },
-    async handelAlarmQuery() {
-      if (this.factoryList.length > 0) {
-        try {
-          // 分区
 
-          const res = await handelAlarm(this.factoryId)
-          this.alarmData = res.data.result
-        } catch (err) {
-          this.$message('处理告警查询错误')
-        }
-      }
-    },
     queryInit() {
       company(1)
         .then((res) => {
@@ -257,11 +255,18 @@ export default {
           this.$message(err)
         })
     },
+
     init() {
       this.queryInit()
       this.timer = setTimeout(() => {
         this.queryInit()
       }, this.step)
+    },
+    newInit() {
+      this.queryCompany()
+      this.queryFactory()
+      this.queryArea()
+      this.queryHandelAlarm()
     },
     async refresh() {
       try {
@@ -269,12 +274,75 @@ export default {
 
         const areaResult = await areaPage(this.factoryId)
         this.areaList = areaResult.data.result || []
-        this.getStatus(this.factoryId)
-        this.handelAlarmQuery()
+        // this.queryDeviceStatus(this.factoryId)
+        this.queryHandelAlarm()
       } catch (err) {
         this.$message('分区错误')
       }
+
+      // this.queryArea()
+      // this.queryHandelAlarm()
     },
+    async queryCompany() {
+      try {
+        const res = await company(1)
+        debugger
+        this.companyList = (res.data.result && res.data.result.stations) || []
+      } catch (err) {
+        this.$message('工厂错误')
+      }
+    },
+    async queryFactory() {
+      if (this.companyList.length > 0) {
+        try {
+          // 工厂
+          const id_company = this.companyList.find(
+            (v) => v.s_name === '云南分公司'
+          ).uid
+          const factoryResult = await factory(id_company, 1)
+          this.factoryList = factoryResult.data.result.stations || []
+          const len = this.factoryList.length
+
+          const hasData = len > 1 ? this.factoryList[1] : this.factoryList[0]
+          this.SET_FACTORY(hasData)
+          setCurrentFactory(hasData)
+        } catch (err) {
+          this.$message('工厂错误')
+        }
+      }
+    },
+    async queryArea() {
+      if (this.factoryList.length > 0) {
+        try {
+          // 分区
+
+          const areaResult = await areaPage(this.factoryId)
+          this.areaList = areaResult.data.result || []
+        } catch (err) {
+          this.$message('分区错误')
+        }
+      }
+    },
+    async queryHandelAlarm() {
+      if (this.factoryList.length > 0) {
+        try {
+          // 分区
+
+          const res = await handelAlarm(this.factoryId)
+          this.alarmData = res.data.result
+        } catch (err) {
+          this.$message('处理告警查询错误')
+        }
+      }
+    },
+    // async queryDeviceStatus() {
+    //   try {
+    //     const res = await deviceStatus(this.factoryId)
+    //     this.statusList = (res.data.result && res.data.result.infoMap) || []
+    //   } catch (err) {
+    //     this.$message('状态错误')
+    //   }
+    // },
     // 公司查询
     async query() {
       // try {
@@ -307,7 +375,7 @@ export default {
 
           const areaResult = await areaPage(this.factoryId)
           this.areaList = areaResult.data.result || []
-          this.getStatus(this.factoryId)
+          // this.queryDeviceStatus(this.factoryId)
         } catch (err) {
           this.$message('分区错误')
         }
@@ -334,16 +402,9 @@ export default {
       //     this.$message('设备错误')
       //   }
       // }
-      this.handelAlarmQuery()
+      this.queryHandelAlarm()
     },
-    async getStatus() {
-      const res = await deviceStatus(this.factoryId)
-      try {
-        this.statusList = res.data.result && res.data.result.infoMap
-      } catch (err) {
-        this.$message('状态错误')
-      }
-    },
+
     selectFactory(item) {
       this.company = item.s_name
       this.SET_FACTORY(item)

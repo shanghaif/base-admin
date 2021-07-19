@@ -18,7 +18,8 @@ const name = defaultSettings.title || '新视智科' // page title
 // You can change the port by the following method:
 // port = 9527 npm run dev OR npm run dev --port = 9527
 const port = process.env.port || process.env.npm_config_port || 9555 // dev port
-
+const baseUrl = process.env.VUE_APP_BASE_API
+const socketUrl = process.env.VUE_APP_SOCKET_API
 // cdn预加载使用
 const externals = {
   'vue': 'Vue',
@@ -76,15 +77,17 @@ module.exports = {
     proxy: {
       '/api': { // 此处要与 /services/api.js 中的 API_PROXY_PREFIX 值保持一致
         // target: process.env.VUE_APP_TYPE === 'edge' ? "http://127.0.0.1:16666" : "http://127.0.0.1:18866",
-        target: 'http://10.53.31.114:18866',
+        // target: 'http://10.53.31.114:18866',
+        target: baseUrl,
         // target: 'http://127.0.0.1:18866',
         changeOrigin: true,
         ws: true
       },
       '/ws': {
         // target: process.env.VUE_APP_TYPE === 'edge' ? "ws://127.0.0.1:16666" : "ws://127.0.0.1:18866",
-        target: 'ws://10.53.31.114:18866',
+        // target: 'ws://10.53.31.114:18866',
         // target: 'ws://127.0.0.1:18866',
+        target: socketUrl,
         changeOrigin: true,
         ws: true
       }

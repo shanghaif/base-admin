@@ -67,11 +67,16 @@
         :stripe="true"
         @selection-change="handleSelectionChange"
       >
-        <el-table-column
+        <!-- <el-table-column
           type="selection"
           width="55"
+        /> -->
+        <el-table-column
+          sortable
+          prop="model_name"
+          label="模型名称"
+          show-overflow-tooltip
         />
-
         <el-table-column
           sortable
           prop="company"
