@@ -7,6 +7,7 @@
       :close-on-click-modal="false"
       :modal="false"
       top="10vh"
+      @closed="hide"
     >
 
       <el-form
@@ -39,46 +40,67 @@
             :disabled="!isNew"
           />
         </el-form-item>
-        <el-form-item label="温度告警范围">
-          <el-col :span="6">
+
+        <div class="rage-box">
+
+          <el-form-item
+            prop="temperature_low"
+            label="温度告警范围"
+          >
+
             <el-input
               v-model="saveParams.temperature_low"
+              v-num
               autocomplete="off"
-            />
-          </el-col>
-          <el-col
-            class="line"
-            :span="1"
-            style="text-align:center"
-          >-</el-col>
-          <el-col :span="6">
+            >
+              <template slot="append">最小值</template>
+            </el-input>
+
+          </el-form-item>
+          <el-form-item
+            label=""
+            prop="temperature_high"
+          >
 
             <el-input
               v-model="saveParams.temperature_high"
+              v-num
               autocomplete="off"
-            />
-          </el-col>
-        </el-form-item>
-        <el-form-item label="温度趋势范围">
-          <el-col :span="6">
+            >
+              <template slot="append">最大值</template>
+            </el-input>
+          </el-form-item>
+        </div>
+        <div class="rage-box">
+
+          <el-form-item
+            prop="rate_low"
+            label="温度趋势范围"
+          >
+
             <el-input
               v-model="saveParams.rate_low"
+              v-num
               autocomplete="off"
-            />
-          </el-col>
-          <el-col
-            class="line"
-            :span="1"
-            style="text-align:center"
-          >-</el-col>
-          <el-col :span="6">
+            >
+              <template slot="append">最小值</template>
+            </el-input>
+
+          </el-form-item>
+          <el-form-item
+            label=""
+            prop="rate_high"
+          >
 
             <el-input
               v-model="saveParams.rate_high"
+              v-num
               autocomplete="off"
-            />
-          </el-col>
-        </el-form-item>
+            >
+              <template slot="append">最大值</template>
+            </el-input>
+          </el-form-item>
+        </div>
 
         <el-form-item
           label="说明"
@@ -136,24 +158,14 @@ export default {
         { label: '煤炭', value: '煤炭' }
       ],
       rules: {
-        name: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-          {
-            min: 1,
-            max: 100,
-            message: '长度在 1 到 100 个字符',
-            trigger: 'blur'
-          }
+        temperature_low: [
+          { required: true, message: '请输入数值', trigger: 'blur' }
         ],
-        uid: [
-          { required: true, message: '请输入名称', trigger: 'blur' },
-          {
-            min: 1,
-            max: 100,
-            message: '长度在 1 到 100 个字符',
-            trigger: 'blur'
-          }
-        ]
+        temperature_high: [
+          { required: true, message: '请输入数值', trigger: 'blur' }
+        ],
+        rate_low: [{ required: true, message: '请输入数值', trigger: 'blur' }],
+        rate_high: [{ required: true, message: '请输入数值', trigger: 'blur' }]
       }
     }
   },
@@ -212,11 +224,24 @@ export default {
         }
       })
     },
-    show(item) {
+    show() {
       this.dialogVisible = true
+    },
+    hide() {
+      this.dialogVisible = false
+      this.$refs.ruleForm.clearValidate()
     }
   }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.el-form-item {
+  &.left-label {
+    width: 70%;
+  }
+  &.no-label {
+    width: 30%;
+  }
+}
+</style>

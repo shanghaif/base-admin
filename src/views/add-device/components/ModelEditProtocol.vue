@@ -7,6 +7,7 @@
       :close-on-click-modal="false"
       :modal="false"
       top="5vh"
+      @closed="hide"
     >
 
       <el-form
@@ -121,8 +122,10 @@ export default {
     show() {
       this.dialogVisible = true
     },
+
     hide() {
       this.dialogVisible = false
+      this.$refs.ruleForm.clearValidate()
     }
   }
 }

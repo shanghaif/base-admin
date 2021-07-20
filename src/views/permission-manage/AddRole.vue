@@ -2,7 +2,7 @@
   <el-card>
     <div>
       <el-button
-        :disabled="!isShowBtn('add')"
+        v-if="isShowBtn('add')"
         type="primary"
         @click="addRole()"
       >增加角色</el-button>
@@ -112,12 +112,13 @@
         </template>
       </el-table-column>
       <el-table-column
+        v-if="isShowBtn('edit') || isShowBtn('delete')"
         label="操作"
         width="160"
       >
         <template slot-scope="scope">
           <el-button
-            :disabled="!isShowBtn('edit')"
+            v-if="isShowBtn('edit')"
             size="mini"
             type="primary"
             @click="addRole(scope.row,scope.$index)"
@@ -131,7 +132,7 @@
           >
             <el-button
               slot="reference"
-              :disabled="!isShowBtn('delete')"
+              v-if="!isShowBtn('delete')"
               size="mini"
               type="danger"
               style="margin-left:10px"
@@ -148,7 +149,7 @@
             @on-ok="delRole(scope.row,scope.$index)"
           >
             <el-button
-              :disabled="!isShowBtn('delete')"
+              v-if="isShowBtn('delete')"
               size="mini"
               type="danger"
               class="ml-10"

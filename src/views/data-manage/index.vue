@@ -37,6 +37,7 @@
           />
 
           <el-button
+            :disabled="!radio"
             type="primary"
             @click="openExportDlg"
           >
@@ -234,6 +235,9 @@ export default {
         })
     },
     openExportDlg() {
+      if (!this.radio) {
+        this.$message({ type: 'error', message: '请选择选择设备', time: 6000 })
+      }
       this.$refs.ExportFilter.show()
     },
     cascaderChange(arr) {

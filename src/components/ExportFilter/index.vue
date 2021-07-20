@@ -15,7 +15,7 @@
             <div class="filter-item-content">
 
               <div class="content-crumbs">
-                <div class="content-crumb">{{ item.s_name }}</div>
+                <div class="content-crumb">{{ item && item.s_name }}</div>
 
               </div>
             </div>
@@ -115,8 +115,10 @@ export default {
       this.dialogVisible = false
     },
     changeExportDate(arr) {
-      this.exportDate[0] = this.$dayjs(arr[0]).format('YYYY-MM-DD')
-      this.exportDate[1] = this.$dayjs(arr[1]).format('YYYY-MM-DD')
+      if (arr) {
+        this.exportDate[0] = this.$dayjs(arr[0]).format('YYYY-MM-DD')
+        this.exportDate[1] = this.$dayjs(arr[1]).format('YYYY-MM-DD')
+      }
     },
     isExcel(res) {
       let fileName = ''

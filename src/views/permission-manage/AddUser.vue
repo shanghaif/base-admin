@@ -2,7 +2,7 @@
   <el-card>
     <div>
       <el-button
-        :disabled="!isShowBtn('add')"
+        v-if="isShowBtn('add')"
         type="primary"
         @click="addUser()"
       >增加用户</el-button>
@@ -60,12 +60,13 @@
       </el-table-column> -->
 
       <el-table-column
+        v-if="isShowBtn('delete') || isShowBtn('edit')"
         label="操作"
         width="160"
       >
         <template slot-scope="scope">
           <el-button
-            :disabled="!isShowBtn('edit')"
+            v-if="isShowBtn('edit')"
             size="mini"
             type="primary"
             @click="addUser(scope.row,scope.$index)"
@@ -88,6 +89,7 @@
             </el-button>
           </el-popconfirm> -->
           <Poptip
+            v-if="isShowBtn('delete')"
             placement="bottom"
             confirm
             transfer
@@ -95,7 +97,7 @@
             @on-ok="delUser(scope.row,scope.$index)"
           >
             <el-button
-              :disabled="!isShowBtn('delete')"
+              v-if="isShowBtn('delete')"
               size="mini"
               type="danger"
               class="ml-10"

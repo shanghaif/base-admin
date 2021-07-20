@@ -1,7 +1,7 @@
 <template>
   <div>
     <el-dialog
-      title="接入协议"
+      title="协议接入"
       :visible.sync="dialogVisible"
       width="50%"
       :close-on-click-modal="false"
@@ -38,12 +38,13 @@
           label="名称"
         />
         <el-table-column
+          v-if="isShowBtn('edit')"
           label="操作"
           width="100"
         >
           <template slot-scope="scope">
             <el-button
-              :disabled="!isShowBtn('edit')"
+              v-if="isShowBtn('edit')"
               size="mini"
               type="primary"
               @click="editProtocol(scope.row,scope.$index)"

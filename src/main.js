@@ -13,7 +13,7 @@ import '@/styles/index.scss' // global css
 import App from './App'
 import store from './store'
 import router from './router'
-
+import directives from './directive'
 import i18n from './lang' // internationalization
 import './icons' // icon
 import './permission' // permission control
@@ -56,6 +56,7 @@ Vue.component('Poptip', Poptip)
 //   // connection: 'ws://localhost:9555',
 //   options: { path: '/ws/', autoConnect: false, time: 3000, transports: ['websocket', 'xhr-polling', 'jsonp-polling']}
 // }))
+directives.map(item => { Vue.use(item) })
 Vue.prototype.$dayjs = dayjs// vue原型挂载dayjs
 Vue.use(Element, {
   size: Cookies.get('size') || 'small', // set element-ui default size

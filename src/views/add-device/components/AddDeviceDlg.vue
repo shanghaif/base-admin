@@ -3,8 +3,9 @@
     <el-dialog
       :title="`${titleType}设备`"
       :visible.sync="dialogVisible"
-      width="60%"
+      :width="newDevice ? '60%' : '40%'"
       :close-on-click-modal="false"
+      @closed="closed"
     >
       <ModelThings
         ref="ModelThings"
@@ -29,7 +30,7 @@
             协议接入
           </el-button>
           <el-button
-            :disabled="!isShowBtn('add')"
+            v-if="isShowBtn('add')"
             type="primary"
             size="mini"
             @click="addThings()"
@@ -87,12 +88,13 @@
           />
 
           <el-table-column
+            v-if="isShowBtn('edit') || isShowBtn('delete')"
             label="操作"
             width="120"
           >
             <template slot-scope="scope">
               <el-button
-                :disabled="!isShowBtn('edit')"
+                v-if="isShowBtn('edit')"
                 size="mini"
                 type="primary"
                 title="编辑"
@@ -122,7 +124,7 @@
                 @on-ok="handleDelete(scope.row,scope.$index)"
               >
                 <el-button
-                  :disabled="!isShowBtn('delete')"
+                  v-if="isShowBtn('delete')"
                   size="mini"
                   type="danger"
                   class="ml-10"
@@ -200,6 +202,7 @@
           >
             <el-input
               v-model="form.value"
+              v-num
               autocomplete="off"
               clearable
             />
@@ -370,6 +373,9 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    closed() {
+      this.$refs.ruleForm.resetFields()
+    },
     isShowBtn(str) {
       return this.isPermissions.includes(str)
     },

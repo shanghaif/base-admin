@@ -10,6 +10,7 @@
           tooltip-effect="dark"
           style="width: 100%"
           :stripe="true"
+          max-height="600px"
         >
           <!-- <el-table-column
             type="selection"
@@ -67,8 +68,10 @@
           <el-pagination
             :hide-on-single-page="total < 10"
             background
-            layout="total, prev, pager, next"
+            :page-sizes="[10, 100, 200, 500]"
+            layout="total, sizes, prev, pager, next, jumper"
             :total="total"
+            @size-change="handleSizeChange"
             @current-change="changePage"
           />
         </div>
@@ -128,6 +131,11 @@ export default {
     },
     changePage(page) {
       this.queryParams.page = page
+      this.query()
+    },
+    handleSizeChange(size) {
+      this.queryParams.page = 1
+      this.queryParams.size = size
       this.query()
     },
     typeFunc(type) {

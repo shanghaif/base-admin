@@ -105,7 +105,7 @@
             搜索
           </el-button> -->
           <el-button
-            :disabled="!isShowBtnDvice('add') || queryDeviceParams.level !== 3"
+            v-if="isShowBtnDvice('add') && queryDeviceParams.level === 3"
             type="primary"
             @click="addNewDevice()"
           >增加设备</el-button>
@@ -232,12 +232,13 @@
           </el-table-column>
 
           <el-table-column
+            v-if="isShowBtnDvice('delete') || isShowBtnDvice('edit')"
             label="操作"
             width="160"
           >
             <template slot-scope="scope">
               <el-button
-                :disabled="!isShowBtnDvice('edit')"
+                v-if="isShowBtnDvice('edit')"
                 size="mini"
                 type="primary"
                 @click="addNewDevice(scope.row,scope.$index)"
@@ -268,7 +269,7 @@
                 @on-ok="delDevice(scope.row,scope.$index)"
               >
                 <el-button
-                  :disabled="!isShowBtnDvice('delete')"
+                  v-if="isShowBtnDvice('delete')"
                   size="mini"
                   type="danger"
                   class="ml-10"
