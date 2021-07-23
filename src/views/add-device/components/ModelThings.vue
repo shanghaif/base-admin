@@ -52,6 +52,7 @@
               v-model="saveParams.temperature_low"
               v-num
               autocomplete="off"
+              @input="handleChange('temperature_low')"
             >
               <template slot="append">最小值</template>
             </el-input>
@@ -66,6 +67,7 @@
               v-model="saveParams.temperature_high"
               v-num
               autocomplete="off"
+              @input="handleChange('temperature_high')"
             >
               <template slot="append">最大值</template>
             </el-input>
@@ -75,13 +77,14 @@
 
           <el-form-item
             prop="rate_low"
-            label="温度趋势范围"
+            label="趋势预警范围"
           >
 
             <el-input
               v-model="saveParams.rate_low"
               v-num
               autocomplete="off"
+              @input="handleChange('rate_low')"
             >
               <template slot="append">最小值</template>
             </el-input>
@@ -96,6 +99,7 @@
               v-model="saveParams.rate_high"
               v-num
               autocomplete="off"
+              @input="handleChange('rate_high')"
             >
               <template slot="append">最大值</template>
             </el-input>
@@ -147,6 +151,38 @@ export default {
     }
   },
   data() {
+    var validateTemperature_low = (rule, value, callback) => {
+      const one = Number(value)
+      const max = Number(this.saveParams.temperature_high)
+      if (!max || one < max) {
+        return callback()
+      }
+      return callback(new Error('输入值不得大于最大值'))
+    }
+    var validateTemperature_high = (rule, value, callback) => {
+      const one = Number(value)
+      const min = Number(this.saveParams.temperature_low)
+      if (!min || one > min) {
+        return callback()
+      }
+      return callback(new Error('输入值不得小于最小值'))
+    }
+    var rate_low = (rule, value, callback) => {
+      const one = Number(value)
+      const max = Number(this.saveParams.rate_high)
+      if (!max || one < max) {
+        return callback()
+      }
+      return callback(new Error('输入值不得大于最大值'))
+    }
+    var rate_high = (rule, value, callback) => {
+      const one = Number(value)
+      const min = Number(this.saveParams.rate_low)
+      if (!min || one > min) {
+        return callback()
+      }
+      return callback(new Error('输入值不得小于最小值'))
+    }
     return {
       saveParams: {},
       dialogVisible: false,
@@ -159,13 +195,21 @@ export default {
       ],
       rules: {
         temperature_low: [
-          { required: true, message: '请输入数值', trigger: 'blur' }
+          { required: true, message: '请输入数值', trigger: 'blur' },
+          { validator: validateTemperature_low, trigger: 'blur' }
         ],
         temperature_high: [
-          { required: true, message: '请输入数值', trigger: 'blur' }
+          { required: true, message: '请输入数值', trigger: 'blur' },
+          { validator: validateTemperature_high, trigger: 'blur' }
         ],
-        rate_low: [{ required: true, message: '请输入数值', trigger: 'blur' }],
-        rate_high: [{ required: true, message: '请输入数值', trigger: 'blur' }]
+        rate_low: [
+          { required: true, message: '请输入数值', trigger: 'blur' },
+          { validator: rate_low, trigger: 'blur' }
+        ],
+        rate_high: [
+          { required: true, message: '请输入数值', trigger: 'blur' },
+          { validator: rate_high, trigger: 'blur' }
+        ]
       }
     }
   },
@@ -194,18 +238,13 @@ export default {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
   },
   methods: {
+    handleChange(prop) {
+      this.$refs.ruleForm.validateField(prop)
+    },
+
     submitForm(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          // this.saveParams.rate_high = Number(this.saveParams.rate_high)
-          // this.saveParams.rate_low = Number(this.saveParams.rate_low)
-          // this.saveParams.temperature_high = Number(
-          //   this.saveParams.temperature_high
-          // )
-          // this.saveParams.temperature_low = Number(
-          //   this.saveParams.temperature_low
-          // )
-
           tmodelNew(this.saveParams, this.isNew)
             .then((res) => {
               this.$message({

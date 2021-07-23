@@ -24,7 +24,7 @@
     "dayjs": "^1.10.5",
     "driver.js": "0.9.5",
     "dropzone": "5.5.1",
-    "echarts": "^5.1.1",
+    "echarts": "^4.9.0",
     "element-ui": "^2.15.2",
     "file-saver": "2.0.1",
     "fuse.js": "3.4.4",

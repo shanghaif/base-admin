@@ -12,7 +12,7 @@
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex'
 
-import * as echarts from 'echarts/core'
+import echarts from 'echarts'
 import resize from './mixins/resize'
 import '@/assets/china'
 var XAData = [

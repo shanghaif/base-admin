@@ -74,6 +74,8 @@ export default {
         res = '离线'
       } else if (val === 'rate_high') {
         res = '趋势预警'
+      } else if (val === 'abnormal') {
+        res = '异常'
       }
       return res
     }
@@ -164,6 +166,7 @@ export default {
       const obj = {}
       obj.hot = val === 'temperature_high'
       obj.error = val === 'rate_high'
+      obj.error = val === 'abnormal'
       obj.warning = val === 'b'
       return obj
     },

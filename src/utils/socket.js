@@ -1,12 +1,10 @@
-import { Heart } from './heart'
-
-
 // import { Socket } from 'socket-heart'
 // let options = {
 //   ....
 // }
 // this.wbSocket = new Socket(options)
 // this.wbSocket.onmessage((data) => {})
+import { Heart } from './heart'
 export class Socket extends Heart {
   ws = null
 
@@ -108,13 +106,19 @@ export class Socket extends Heart {
   onmessage (callback) {
     this.ws.onmessage = (event) => {
       // 收到任何消息，重新开始倒计时心跳检测
+      let data 
+      try {
+        data = JSON.parse(event.data)
+      } catch (err) {
+        data = null
+      }
       super.reset().start(() => {
         this.send(this.OPTIONS.heartMsg)
       })
       if (typeof callback === 'function') {
-        callback(event.data)
+        callback(data)
       } else {
-        (typeof this.OPTIONS.messageCb === 'function') && this.OPTIONS.messageCb(event.data)
+        (typeof this.OPTIONS.messageCb === 'function') && this.OPTIONS.messageCb(data)
       }
     }
   }

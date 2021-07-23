@@ -46,6 +46,7 @@
 
             <single-bar-chart
               id="line_l"
+              :key="'single-bar-chart' + rowKey"
               :data="alarmData"
             />
           </div>
@@ -64,7 +65,10 @@
 
         </div>
         <div class="item right">
-          <unusual-list ref="UnusualList" />
+          <unusual-list
+            ref="UnusualList"
+            :key="'unusual-list' + rowKey"
+          />
 
           <AlarmChart id="line_r" />
 
@@ -86,6 +90,7 @@ import SheetMain from './components/SheetMain'
 import UnusualList from './components/UnusualList'
 import Header from './components/Header'
 import { screenSize } from '@/utils'
+// import Socket from '@/utils/webSocket'
 import { Socket } from '@/utils/socket'
 import {
   company,
@@ -131,7 +136,7 @@ export default {
 
   data() {
     return {
-      wbSocket: null,
+      wbSocketUnusualList: null,
       company: '',
       rowKey: 0,
       step: 60 * 15 * 1000,
@@ -218,11 +223,7 @@ export default {
   },
   mounted() {
     // screenSize(this.$refs.editor)
-    this.wbSocket = new Socket({ url: process.env.VUE_APP_SOCKET_API })
-    this.wbSocket.onmessage((data) => {
-      console.log('data :>> ', data)
-    })
-    console.log('this.$ :>> ', this.$socket)
+    this.sendSocketUnusualList()
   },
 
   beforeDestroy() {
@@ -239,6 +240,21 @@ export default {
       SET_FACTORY: 'station/SET_FACTORY',
       SET_CELL: 'station/SET_CELL'
     }),
+    sendSocketUnusualList() {
+      const url =
+        process.env.VUE_APP_SOCKET_API +
+        '/api/ws/alarm' +
+        `?tid=${this.currentFactory.uid}`
+      // this.wbSocketUnusualList = new Socket(url)
+      // this.wbSocketUnusualList.onmessage((data) => {
+      //   console.log('data :>> ', data)
+      // })
+
+      this.wbSocketUnusualList = new Socket({ url })
+      this.wbSocketUnusualList.onmessage((data) => {
+        console.log('data :>> ', JSON.parse(data))
+      })
+    },
     changeStep(step) {
       this.step = step
       this.init()
@@ -286,7 +302,6 @@ export default {
     async queryCompany() {
       try {
         const res = await company(1)
-        debugger
         this.companyList = (res.data.result && res.data.result.stations) || []
       } catch (err) {
         this.$message('工厂错误')

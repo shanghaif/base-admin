@@ -42,7 +42,8 @@
 
         <div
           :id="id"
-          :class="className"
+          class="chart"
+          :class="{'no-data':list.length < 1}"
           :style="{height:height,width:width}"
         />
         <div
@@ -107,8 +108,7 @@ export default {
       exportDialogVisible: false,
 
       value: Math.random() * 100,
-      // step:  60 * 1000 // 1分钟
-      step: 8 * 60 * 1000,
+      step: 8 * 1000,
       option: null,
       timer: null,
       // warningVal: 250,
@@ -156,6 +156,7 @@ export default {
 
     hasAlarm() {
       return this.alarmList.length > 0
+      // return this.list.length > 0
     },
     xData() {
       return this.list.map((v) => {
@@ -569,6 +570,22 @@ export default {
       }
     }
   }
+  // .chart {
+  //   position: relative;
+
+  //   &.no-data {
+  //     &::before {
+  //       content: '暂无数据';
+  //       position: absolute;
+  //       margin: 0;
+  //       height: 100%;
+  //       width: 100%;
+  //       @include flex();
+  //       background: rgba(255, 255, 255, 0.1);
+  //       color: #ccc;
+  //     }
+  //   }
+  // }
   .detail-chart-box {
     @include flex(space-between, center);
     flex-direction: column;

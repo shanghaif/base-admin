@@ -104,6 +104,28 @@ export const constantRoutes = [
       
       index: 2
     }
+  },
+  {
+    
+    path: '/home',
+    component: () => import('@/views/Home'),
+    hidden: true,
+
+    meta: {
+      
+      index: 2
+    }
+  },
+  {
+    
+    path: '/detail',
+    component: () => import('@/views/Detail'),
+    hidden: true,
+
+    meta: {
+      
+      index: 2
+    }
   }
   // {
   //   path: '/permission',

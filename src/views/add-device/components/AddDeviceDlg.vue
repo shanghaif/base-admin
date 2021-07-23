@@ -461,10 +461,10 @@ export default {
           name: '新增',
           uid: 'm_' + nanoid(),
           desc: '',
-          rate_high: 100,
-          rate_low: 30,
-          temperature_high: 300,
-          temperature_low: 200
+          rate_high: '',
+          rate_low: '',
+          temperature_high: '',
+          temperature_low: ''
         }
       }
       this.$refs.ModelThings.show()

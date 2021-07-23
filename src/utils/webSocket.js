@@ -1,19 +1,20 @@
 import { MessageBox, Message } from 'element-ui'
 
-class WebSocketClass {
-  constructor() {
+class Socket {
+  constructor(url) {
     this.instance = null
+    this.url = url
     this.connect()
   }
   static getInstance() {
     if (!this.instance) {
-      this.instance = new WebSocketClass()
+      this.instance = new Socket()
     }
     return this.instance
   }
 
   connect() {
-    this.ws = new WebSocket('ws://xxxx')
+    this.ws = new WebSocket(this.url)
     this.ws.onopen = e => {
       this.status = 'open'
       Message('连接成功')
@@ -80,4 +81,4 @@ class WebSocketClass {
   }
 }
 
-export default new WebSocketClass()
+export default Socket

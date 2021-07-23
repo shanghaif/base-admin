@@ -3,7 +3,8 @@
     <div class="">
 
       <div class="filter-container">
-        <el-input
+        <StationTree @select="selectTree" />
+        <!-- <el-input
           v-model="filterParams.device"
           placeholder="请输入设备名称"
           style="width: 160px; margin-right: 10px"
@@ -39,7 +40,7 @@
             :value="item.value"
           />
 
-        </el-select>
+        </el-select> -->
         <el-button
           class="filter-item"
           type="primary"
@@ -61,6 +62,7 @@
 
       <el-table
         ref="multipleTable"
+        v-loading="loading"
         :data="tableData"
         tooltip-effect="dark"
         style="width: 100%"
@@ -169,9 +171,10 @@ import {
   editThings,
   deviceStatus
 } from '@/api/station'
+import StationTree from '@/components/stationTree'
 export default {
   name: 'QueryDevice',
-  components: {},
+  components: { StationTree },
 
   filters: {
     statusFilter(type) {
@@ -188,6 +191,7 @@ export default {
   data() {
     return {
       total: 1,
+      loading: false,
 
       tableData: [],
       companyList: [],
@@ -217,8 +221,8 @@ export default {
   created() {
     // 生命周期钩子：组件实例创建完成，属性已绑定，但 DOM 还未生成，el 属性还不存在
     // 初始化渲染页面
-    this.queryCompany()
-    this.queryCountDevice()
+    // this.queryCompany()
+    // this.queryCountDevice()
   },
 
   mounted() {
@@ -226,6 +230,13 @@ export default {
   },
 
   methods: {
+    selectTree(arr) {
+      // this.queryDeviceParams.arr
+      this.queryDeviceParams.page = 1
+      this.queryDeviceParams.level = 3
+
+      this.queryDeviceParams.uid = arr[3]
+    },
     changePage(page) {
       this.queryDeviceParams.page = page
       this.queryCountDevice()
@@ -243,15 +254,19 @@ export default {
       console.log('item :>> ', item)
     },
     handleFilter() {
-      console.log('item :>> ', 123)
+      this.queryCountDevice()
     },
     queryCountDevice() {
+      this.loading = true
       countDevice(this.queryDeviceParams)
         .then((res) => {
           this.tableData = (res.data.result && res.data.result.devices) || []
           this.total = (res.data.result && res.data.result.devices_count) || 0
+          this.loading = false
         })
         .catch((err) => {
+          this.loading = false
+
           this.$message({ type: 'error', message: err })
         })
     },
@@ -270,4 +285,8 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.filter-container {
+  @include flex(flex-start, center);
+}
+</style>

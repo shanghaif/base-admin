@@ -9,6 +9,9 @@ import './styles/element-variables.scss'
 // import './styles/my-ivew-theme.less'
 import 'iview/dist/styles/iview.css' // ivew
 import '@/styles/index.scss' // global css
+import '@/assets/style.css'
+import iconfont from '@/assets/iconfont/iconfont.css'
+
 
 import App from './App'
 import store from './store'
@@ -21,6 +24,9 @@ import './utils/error-log' // error log
 // import '@/utils/log'
 import * as filters from './filters' // global filters
 import VueSocketIO from 'vue-socket.io'
+import echarts from 'echarts'
+// import echarts from 'echarts'
+import util from '@/util'
 
 // 大屏暗黑主题使用ivew
 import { Button, DatePicker, Modal, Dropdown, DropdownMenu, DropdownItem, Select, OptionGroup, Option, Poptip} from 'iview'
@@ -58,6 +64,9 @@ Vue.component('Poptip', Poptip)
 // }))
 directives.map(item => { Vue.use(item) })
 Vue.prototype.$dayjs = dayjs// vue原型挂载dayjs
+Vue.prototype.$echarts = echarts
+Vue.prototype.util = util
+
 Vue.use(Element, {
   size: Cookies.get('size') || 'small', // set element-ui default size
   i18n: (key, value) => i18n.t(key, value)
@@ -75,5 +84,6 @@ new Vue({
   router,
   store,
   i18n,
+  iconfont,
   render: h => h(App)
 })

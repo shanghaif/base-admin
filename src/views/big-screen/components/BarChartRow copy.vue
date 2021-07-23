@@ -30,7 +30,7 @@
   <!-- </div> -->
 </template>
 <script>
-import * as echarts from 'echarts/core'
+import echarts from 'echarts'
 import resize from './mixins/resize'
 import groupBy from 'lodash/groupBy'
 
