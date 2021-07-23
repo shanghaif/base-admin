@@ -1,6 +1,6 @@
 <template>
   <div id="info">
-    <div class="title">{{ company }} {{ factory }}</div>
+    <div class="title">{{ company }} {{ currentFactory.s_name }}</div>
     <div class="sub">告警信息统计时间: {{ date }}
       <b @click="logClick()">告警信息日志<span class="iconfont icon-arrow" /></b>
     </div>
@@ -40,16 +40,44 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapMutations } from 'vuex'
+
 export default {
+  name: 'Info',
+  props: {
+    obj: {
+      type: Object,
+      default() {
+        return {}
+      }
+    }
+  },
   data() {
     return {
       company: '云南分公司',
-      factory: '电解铝二厂',
       date: '',
       bath: { total: 0, online: 0, running: 0, alarm: 0 },
-      rate: { online: 0, running: 0, alarm: 0 }
+      rate: { online: 0, running: 0, alarm: 0 },
+      currentObj: {}
     }
   },
+  computed: {
+    ...mapState({
+      currentFactory: (state) => state.station.currentFactory
+    })
+  },
+  watch: {
+    obj: {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          this.currentObj = newVal
+          this.getRate()
+        }
+      },
+      deep: true
+    }
+  },
+
   mounted() {
     // 随机数据
     const d = new Date()
@@ -68,6 +96,18 @@ export default {
     this.updateColor()
   },
   methods: {
+    getRate() {
+      const total = this.currentObj.all_bath
+      const alarm = this.currentObj.alarm_bath
+      const running = this.currentObj.run_bath
+      const online = this.currentObj.online_bath
+      this.bath = { total, online, running, alarm }
+      this.rate = {
+        online: ((online * 100) / total).toFixed(0),
+        running: ((running * 100) / total).toFixed(0),
+        alarm: ((alarm * 100) / total).toFixed(0)
+      }
+    },
     updateColor() {
       const colorOnline = 'hsla(250, 80%, 44%, 1)'
       this.$refs.ring_online.style.background =

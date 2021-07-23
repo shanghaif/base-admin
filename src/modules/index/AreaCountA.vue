@@ -1,10 +1,13 @@
 <template>
-  <div class="module-a">
+  <div
+    id="module"
+    class="module-a"
+  >
     <div class="title">分区概况</div>
-    <div class="sub">{{ count === 1 ? '二' : '' }}分区电解槽数</div>
+    <div class="sub">二分区电解槽数</div>
     <div class="chart">
       <div
-        v-if="count === 0"
+        v-if="isEmpty"
         class="info"
       >
         <Status
@@ -13,21 +16,21 @@
         />
       </div>
       <div
-        v-else-if="count === 1"
+        v-else-if="isSingle"
         class="info"
       >
         <div class="info-item">
-          <div class="info-item-num total">{{ areaData.total[0] }}</div>
+          <div class="info-item-num total">{{ currentObj.all_bath }}</div>
           总电解槽
         </div>
         <div class="info-item">
-          <div class="info-item-num online">{{ areaData.online[0] }}</div>
+          <div class="info-item-num online">{{ currentObj.online_bath }}</div>
           在线电解槽
         </div>
       </div>
       <div
         v-else
-        id="area-count-a"
+        :id="id"
       />
     </div>
   </div>
@@ -36,55 +39,85 @@
 <script>
 import Status from '@/components/Status'
 export default {
+  name: 'AreaCountA',
   components: {
     Status
   },
-  props: { count: Number },
+  props: {
+    id: {
+      type: String,
+      default: 'area-count-a'
+    },
+    obj: {
+      type: Object,
+      default() {
+        return {}
+      }
+    }
+  },
   data() {
     return {
-      areaData: {}
+      chart: null,
+
+      areaData: {},
+      currentObj: {},
+      axisData: [],
+      onLineData: [],
+      allData: []
+    }
+  },
+  computed: {
+    isSingle() {
+      return this.currentObj.area_infos && this.currentObj.area_infos.length < 1
+    },
+    isSeveral() {
+      return this.currentObj.area_infos && this.currentObj.area_infos.length > 1
+    },
+    isEmpty() {
+      return !this.currentObj.area_infos
+    }
+  },
+  watch: {
+    obj: {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          this.currentObj = newVal
+          // setTimeout(() => {
+          //   this.draw()
+          // }, 100)
+          this.$nextTick(() => {
+            this.draw()
+          })
+        }
+      },
+      deep: true
     }
   },
   mounted() {
-    this.randomData()
+    // this.randomData()
   },
   methods: {
-    randomData() {
-      // 随机数据
-      this.areaData = {}
-      const name = []
-      const total = []
-      const online = []
-      const nameList = [
-        '一',
-        '二',
-        '三',
-        '四',
-        '五',
-        '六',
-        '七',
-        '八',
-        '九',
-        '十',
-        '十一',
-        '十二'
-      ]
-      for (let i = 0; i < this.count; i++) {
-        name.push(nameList[i] + '分区')
-        total.push(Math.floor(Math.random() * 30 + 90))
-        online.push(total[i] - Math.floor(Math.random() * 40))
-      }
-      this.$set(this.areaData, 'name', name)
-      this.$set(this.areaData, 'total', total)
-      this.$set(this.areaData, 'online', online)
-      this.$nextTick(() => {
-        if (this.count > 1) {
-          this.draw()
-        }
-      })
+    getxAxisData(list) {
+      const arr1 = []
+      const arr2 = []
+      const arr3 = []
+
+      list &&
+        list.map((v) => {
+          arr1.push(v.name)
+          arr2.push(v.all_bath)
+          arr3.push(v.online_bath)
+        })
+      this.axisData = arr1
+      this.allData = arr2
+
+      this.onLineData = arr3
     },
+
     draw() {
-      this.chart = this.$echarts.init(document.getElementById('area-count-a'), {
+      const that = this
+      this.getxAxisData(this.currentObj.area_infos)
+      this.chart = this.$echarts.init(document.getElementById(that.id), {
         renderer: 'svg'
       })
 
@@ -93,7 +126,6 @@ export default {
       const colorTotal2 = colorTotal.slice(0, -2) + '0.3)'
       const colorOnline = 'hsla(190, 80%, 48%, 1)'
       const colorOnline2 = colorOnline.slice(0, -2) + '0.3)'
-
       this.chart.setOption({
         grid: { borderWidth: 0, top: 50, left: 10, right: 10, bottom: 20 },
         legend: {
@@ -126,7 +158,7 @@ export default {
         },
         xAxis: {
           type: 'category',
-          data: this.areaData.name,
+          data: that.axisData,
           axisLine: { lineStyle: { color: 'hsla(0, 100%, 100%, 0.1)' } },
           axisTick: { show: false },
           axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } }
@@ -167,7 +199,7 @@ export default {
                 false
               )
             },
-            data: this.areaData.total
+            data: that.allData
           },
           {
             name: '在线电解槽',
@@ -203,7 +235,8 @@ export default {
                 false
               )
             },
-            data: this.areaData.online
+            // data: this.areaData.online
+            data: that.onLineData
           }
         ]
       })
@@ -213,7 +246,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.module-a {
+#module {
   position: relative;
   height: calc(22% + 22.66px);
 }

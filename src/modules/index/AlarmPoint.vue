@@ -3,88 +3,208 @@
     <div class="title">告警点位温度曲线</div>
     <div class="info">
       <div class="left">
-        <div class="position">{{ area }} / {{ bath }}</div>
-        <div class="msg alarm-b">{{ point }}: 温度告警</div>
+        <div class="position">{{ currentAlarmObj.Area }} / {{ currentAlarmObj.Bath }}</div>
+        <div class="msg alarm-b">{{ currentAlarmObj.t_id }}: {{ currentAlarmObj.alarm_name }}</div>
       </div>
       <div class="right">
         <div class="temp-text">当前温度</div>
-        <div class="temp alarm-b">{{ temp }}</div>
+        <div
+          class="temp alarm-b "
+          :class="{'alarm-b':nowTemp>warningVal}"
+        >{{ nowTemp }}</div>
       </div>
     </div>
     <div class="chart">
       <div id="alarm-point" />
-      <div class="iconfont icon-arrow left" />
-      <div class="iconfont icon-arrow right" />
+      <div
+        v-show="alarmListIndex !== 0 && hasAlarm"
+        class="iconfont icon-arrow left"
+        @click="clickArrow(0)"
+      />
+      <div
+        v-show="alarmListIndex !== alarmList.length - 1 && hasAlarm"
+        class="iconfont icon-arrow right"
+        @click="clickArrow(1)"
+      />
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
+import { deviceHistory, devicePoint } from '@/api/station'
+import sortBy from 'lodash/sortBy'
+
 export default {
   name: 'AlarmPoint',
-  props: {
-    data: {
-      type: Object,
-      default() {
-        return {}
+
+  data() {
+    return {
+      tempMin: 300,
+
+      chart: null,
+      alarmListIndex: 0,
+      exportDialogVisible: false,
+
+      value: Math.random() * 100,
+      step: 8 * 1000,
+      option: null,
+      timer: null,
+      // warningVal: 250,
+      // xData: [],
+      newList: [],
+      checkedTemp: [],
+      Temps: ['原始温度数据', '最高温度', '最低温度', '平均温度'],
+      now: 0,
+      date: '',
+      exportDate: [],
+      allPointList: [
+        {
+          tid: '',
+          value: 0
+        }
+      ],
+      list: [
+        // {
+        //   fv: 0,
+        //   pick_time: '',
+        //   pid: '',
+        //   tid: ''
+        // }
+      ],
+
+      queryParams: {
+        sTime: '',
+        eTime: '',
+        id: ''
       }
     }
   },
-  data() {
-    return {
-      area: '三分区',
-      bath: '电解槽1000',
-      point: 'run@347682.exe',
-      temp: 347.65,
-      tempData: [],
-      legendList: [],
-      tempHigh: 340,
-      tempMin: 999,
-      currentData: {}
+  computed: {
+    ...mapState({
+      alarmList: (state) => state.station.alarmList
+    }),
+    ...mapGetters(['warningVal', 'unusualVal']),
+
+    currentAlarmObj: {
+      get() {
+        return (
+          (this.alarmList.length > 0 &&
+            this.alarmList[this.alarmListIndex]) || { Area: '' }
+        )
+      },
+      set(v) {}
+    },
+
+    hasAlarm() {
+      return this.alarmList.length > 0
+      // return this.list.length > 0
+    },
+    xData() {
+      return this.list.map((v) => {
+        this.tempMin = this.tempMin < v.fv ? this.tempMin : v.fv
+
+        const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm:ss')
+        return { value: [time, v.fv] }
+      })
+    },
+    nowTemp() {
+      const obj = this.allPointList.find(
+        (v) => v.tid === this.currentAlarmObj.t_id
+      )
+      return obj ? obj.value : 0
+    },
+    averageTemp() {
+      const sum = this.list.reduce((pre, cur) => {
+        return cur.fv + pre
+      }, 0)
+      const res = sum ? (sum / this.list.length).toFixed(1) : 0
+      return Number(res)
     }
   },
   watch: {
-    data: {
-      handler: function (newVal, oldVal) {
-        if (newVal) {
-          this.currentData = Object.assign({}, newVal)
+    alarmList: {
+      handler(newName, oldName) {
+        clearInterval(this.timer)
+
+        // this.newList = [...newName]
+        if (newName.length > 0) {
+          this.init()
+          this.timer = setInterval(() => {
+            this.loop()
+          }, this.step)
+        } else {
+          this.list = []
+          this.initChart()
         }
       },
       deep: true
     }
   },
-  mounted() {
-    this.legendList = this.getAreaNames()
-    // 随机数据
-    // let data = []
-    for (let i = 0; i < 100; i++) {
-      const time =
-        i === 0 ? new Date() : new Date(this.tempData[i - 1].value[0] - 600000)
-      const temp =
-        i === 0
-          ? this.temp
-          : Math.floor(
-            this.tempData[i - 1].value[1] * 100 + Math.random() * 1000 - 550
-          ) / 100
-      this.tempMin = this.tempMin < temp ? this.tempMin : temp
-      this.$set(this.tempData, i, { value: [time, temp] })
-    }
-    this.$nextTick(() => {
-      this.draw()
-    })
+  beforeDestroy() {
+    clearInterval(this.timer)
   },
+  mounted() {},
   methods: {
-    getAreaNames() {
-      const arr = []
-      const list = this.currentData.area_infos
-      list &&
-        list.map((v) => {
-          arr.push(v['name'])
-        })
-      return arr
+    init() {
+      // this.currentAlarmObj = this.alarmList[0]
+      this.queryParams.sTime =
+        this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
+        ' 00:00'
+      this.queryParams.eTime =
+        this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
+        ' 23:59'
+
+      this.queryPiont()
+      this.queryPiontHistory()
     },
-    draw() {
+    clickArrow(isAdd) {
+      if (!this.hasAlarm) {
+        return
+      }
+      if (isAdd) {
+        this.alarmListIndex++
+      } else {
+        this.alarmListIndex--
+      }
+      this.init()
+    },
+    loop() {
+      this.alarmListIndex++
+      if (this.alarmListIndex === this.alarmList.length) {
+        this.alarmListIndex = 0
+      } else if (this.alarmListIndex === -1) {
+        this.alarmListIndex = this.alarmList.length - 1
+      }
+      this.init()
+    },
+    queryPiont() {
+      devicePoint(this.currentAlarmObj.BathID)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.allPointList = arr
+          // this.setFuncOfpoint()
+        })
+        .catch((err) => {
+          this.$message(err)
+        })
+    },
+    queryPiontHistory(date) {
+      this.queryParams.id = this.currentAlarmObj.t_id
+      deviceHistory(this.queryParams)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.list = sortBy(arr, (v) => v.pick_time)
+          this.initChart()
+        })
+        .catch((err) => {
+          this.$message(err)
+        })
+    },
+    initChart() {
       const that = this
+      this.now = this.$dayjs().valueOf()
+
       this.chart = this.$echarts.init(document.getElementById('alarm-point'), {
         renderer: 'svg'
       })
@@ -126,23 +246,36 @@ export default {
               color: 'rgba(255, 255, 255, 0.6)',
               fontSize: 10
             },
-            formatter: function (value) {
-              const time = new Date(value)
-              return (
-                that.util.fillStr(time.getHours().toString(), 2, 0) +
-                ':' +
-                that.util.fillStr(time.getMinutes().toString(), 2, 0)
-              )
+            formatter(value) {
+              // const time = that.$dayjs(value).format('HH:mm:ss')
+              const time = that.$dayjs(value).format('HH:mm')
+              return time
             }
           },
           splitLine: { show: false }
         },
+        // yAxis: {
+        //   type: 'value',
+        //   axisLine: { show: false },
+        //   splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
+        //   splitNumber: 5,
+        //   interval: 20,
+        //   axisLabel: {
+        //     formatter: '{value}°C',
+        //     textStyle: {
+        //       color: 'rgba(255, 255, 255, 0.6)',
+        //       fontSize: 10
+        //     }
+        //   },
+        //   min: Math.floor(this.tempMin / 10 - 2) * 10
+        // },
         yAxis: {
           type: 'value',
-          axisLine: { show: false },
-          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-          splitNumber: 5,
-          interval: 20,
+          scale: true,
+
+          // name: '温度',
+          // min: 0,
+          boundaryGap: false,
           axisLabel: {
             formatter: '{value}°C',
             textStyle: {
@@ -150,27 +283,61 @@ export default {
               fontSize: 10
             }
           },
-          min: Math.floor(this.tempMin / 10 - 2) * 10
-        },
-        visualMap: {
-          show: false,
-          pieces: [
-            {
-              gt: 0,
-              lte: this.tempHigh,
-              color: colorTheme
-            },
-            {
-              gt: this.tempHigh,
-              lte: 500,
-              color: colorAlarmB
+          axisTick: {
+            show: false
+          },
+          axisLine: {
+            show: true,
+            lineStyle: {
+              color: '#394056'
             }
-          ]
+          },
+          splitLine: {
+            show: true,
+            lineStyle: {
+              color: '#394056'
+            }
+          }
         },
+        visualMap: [
+          {
+            show: false,
+            dimension: 1,
+            pieces: [
+              // { gte: that.warningVal, lte: 5000, color: colorAlarmB },
+              // { gte: -100, lte: 200, color: colorTheme }
+              {
+                gt: 0,
+                lte: 250,
+                color: colorTheme
+              },
+              {
+                gt: 250,
+                lte: 500,
+                color: colorAlarmB
+              }
+            ]
+          }
+        ],
+        // visualMap: {
+        //   show: false,
+        //   pieces: [
+        //     {
+        //       gt: 0,
+        //       lte: this.tempHigh,
+        //       color: colorTheme
+        //     },
+        //     {
+        //       gt: this.tempHigh,
+        //       lte: 500,
+        //       color: colorAlarmB
+        //     }
+        //   ]
+        // },
         series: {
           name: '温度',
           type: 'line',
-          data: this.tempData,
+          data: this.xData,
           symbolSize: 0,
           lineStyle: { width: 2, join: 'round' },
           areaStyle: {
@@ -209,7 +376,7 @@ export default {
               fontWeight: 600,
               color: colorAlarmB
             },
-            data: [{ yAxis: this.tempHigh }]
+            data: [{ yAxis: that.warningVal }]
           }
         }
       })
@@ -279,7 +446,7 @@ export default {
   .left:before {
     left: -16px;
     transform: scale(1.4, 2.8) rotate(90deg);
-    opacity: 0.2;
+    opacity: 0.7;
   }
   .right:before {
     right: -16px;

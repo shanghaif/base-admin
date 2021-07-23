@@ -1,9 +1,12 @@
 <template>
-  <div class="module-c">
-    <div class="sub">{{ count === 1 ? '二' : '' }}分区告警测温点位数</div>
+  <div
+    id="module"
+    class="module-c"
+  >
+    <div class="sub">分区告警测温点位数</div>
     <div class="chart">
       <div
-        v-if="count === 0"
+        v-if="isEmpty"
         class="info"
       >
         <Status
@@ -12,29 +15,29 @@
         />
       </div>
       <div
-        v-else-if="count === 1"
+        v-else-if="isSingle"
         class="info"
       >
         <div class="info-item">
-          <div class="info-item-num alarm-a">{{ areaData.offline[0] }}</div>
+          <div class="info-item-num alarm-a">{{ currentObj.area_infos[0].offline_point }}</div>
           离线点位
         </div>
         <div class="info-item">
-          <div class="info-item-num alarm-b">{{ areaData.tempHigh[0] }}</div>
+          <div class="info-item-num alarm-b">{{ currentObj.area_infos[0].alarm_point }}</div>
           温度告警
         </div>
         <div class="info-item">
-          <div class="info-item-num alarm-c">{{ areaData.abnormal[0] }}</div>
+          <div class="info-item-num alarm-c">{{ currentObj.area_infos[0].abnormal_point }}</div>
           设备异常
         </div>
         <div class="info-item">
-          <div class="info-item-num alarm-b">{{ areaData.trend[0] }}</div>
+          <div class="info-item-num alarm-b">{{ currentObj.area_infos[0].rate_point }}</div>
           趋势预警
         </div>
       </div>
       <div
         v-else
-        id="area-count-c"
+        :id="id"
       />
     </div>
   </div>
@@ -43,61 +46,85 @@
 <script>
 import Status from '@/components/Status'
 export default {
+  name: 'AreaCountC',
+
   components: {
     Status
   },
-  props: { count: Number },
-  data() {
-    return {
-      areaData: {}
+  props: {
+    id: {
+      type: String,
+      default: 'area-count-c'
+    },
+    obj: {
+      type: Object,
+      default() {
+        return {}
+      }
     }
   },
-  mounted() {
-    this.randomData()
+  data() {
+    return {
+      chart: null,
+      currentObj: {},
+      axisData: [],
+      offlineData: [],
+      alarmData: [],
+      abnormalData: [],
+      rateData: []
+    }
   },
-  methods: {
-    randomData() {
-      // 随机数据
-      this.areaData = {}
-      const name = []
-      const offline = []
-      const tempHigh = []
-      const trend = []
-      const abnormal = []
-      const nameList = [
-        '一',
-        '二',
-        '三',
-        '四',
-        '五',
-        '六',
-        '七',
-        '八',
-        '九',
-        '十',
-        '十一',
-        '十二'
-      ]
-      for (let i = 0; i < this.count; i++) {
-        name.push(nameList[i] + '分区')
-        offline.push(Math.floor(Math.random() * 100 + 40))
-        tempHigh.push(Math.floor(Math.random() * 100 + 40))
-        trend.push(Math.floor(Math.random() * 100 + 40))
-        abnormal.push(Math.floor(Math.random() * 100 + 40))
-      }
-      this.$set(this.areaData, 'name', name)
-      this.$set(this.areaData, 'offline', offline)
-      this.$set(this.areaData, 'tempHigh', tempHigh)
-      this.$set(this.areaData, 'trend', trend)
-      this.$set(this.areaData, 'abnormal', abnormal)
-      this.$nextTick(() => {
-        if (this.count > 1) {
-          this.draw()
+  computed: {
+    isSingle() {
+      return this.currentObj.area_infos && this.currentObj.area_infos.length < 1
+    },
+    isSeveral() {
+      return this.currentObj.area_infos && this.currentObj.area_infos.length > 1
+    },
+    isEmpty() {
+      return !this.currentObj.area_infos
+    }
+  },
+  watch: {
+    obj: {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          this.currentObj = newVal
+          setTimeout(() => {
+            this.draw()
+          }, 100)
         }
-      })
+      },
+      deep: true
+    }
+  },
+  mounted() {},
+  methods: {
+    getxAxisData(list) {
+      const arr1 = []
+      const arr2 = []
+      const arr3 = []
+      const arr4 = []
+      const arr5 = []
+
+      list &&
+        list.map((v) => {
+          arr1.push(v.name)
+          arr2.push(v.offline_point)
+          arr3.push(v.alarm_point)
+          arr4.push(v.abnormal_point)
+          arr5.push(v.rate_point)
+        })
+      this.axisData = arr1
+      this.offlineData = arr2
+      this.alarmData = arr3
+      this.abnormalData = arr4
+      this.rateData = arr5
     },
     draw() {
-      this.chart = this.$echarts.init(document.getElementById('area-count-c'), {
+      const that = this
+      this.getxAxisData(this.currentObj.area_infos)
+      this.chart = this.$echarts.init(document.getElementById(that.id), {
         renderer: 'svg'
       })
 
@@ -141,7 +168,7 @@ export default {
         },
         xAxis: {
           type: 'category',
-          data: this.areaData.name,
+          data: that.axisData,
           axisLine: { lineStyle: { color: 'hsla(0, 100%, 100%, 0.1)' } },
           axisTick: { show: false },
           axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } }
@@ -182,7 +209,7 @@ export default {
                 false
               )
             },
-            data: this.areaData.offline
+            data: that.offlineData
           },
           {
             name: '温度告警',
@@ -218,7 +245,7 @@ export default {
                 false
               )
             },
-            data: this.areaData.tempHigh
+            data: that.alarmData
           },
           {
             name: '设备异常',
@@ -254,7 +281,7 @@ export default {
                 false
               )
             },
-            data: this.areaData.abnormal
+            data: that.abnormalData
           },
           {
             name: '趋势预警',
@@ -290,7 +317,7 @@ export default {
                 false
               )
             },
-            data: this.areaData.trend
+            data: that.rateData
           }
         ]
       })
@@ -300,7 +327,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.module-c {
+#module {
   position: relative;
   margin-top: -20px;
   height: calc(22% - 11.33px);

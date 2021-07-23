@@ -11,21 +11,22 @@
       <AreaCountA
         ref="area_count_a"
         class="module"
-        :count="areaCount"
+        :obj="areaDeviceData"
       />
       <AreaCountB
         ref="area_count_b"
         class="module"
-        :count="areaCount"
+        :obj="areaDeviceData"
       />
       <AreaCountC
         ref="area_count_c"
         class="module"
-        :count="areaCount"
+        :obj="areaDeviceData"
       />
       <AlarmCount
         ref="alarm_count"
         class="module"
+        :obj="statusData"
       />
     </div>
     <div class="top">
@@ -41,7 +42,10 @@
       </div>
     </div>
     <div class="bottom">
-      <Info ref="info" />
+      <Info
+        ref="info"
+        :obj="areaDeviceData"
+      />
     </div>
     <div class="right">
       <AlarmFactory
@@ -51,7 +55,6 @@
       <AlarmPoint
         ref="alarm_point"
         class="module"
-        :list="areaDeviceData"
       />
     </div>
     <div
@@ -96,9 +99,10 @@ export default {
       wsAlarm: null,
       wsAreaDevice: null,
       wbSockeStatus: null,
-      areaDeviceData: [],
+      areaDeviceData: {},
       alarmList: [],
-      statusList: [],
+      statusData: {},
+      legend: [],
 
       title: {
         text: '新视智科温度监测系统',
@@ -119,18 +123,20 @@ export default {
       return `${baseUrl}factory_info?factory_id=${this.currentFactory.uid}`
     },
     wsUrlStatus() {
-      return `${baseUrl}alarm?tid=${this.currentFactory.uid}`
+      return `${baseUrl}alarm_statistics?factory_id=${this.currentFactory.uid}`
     }
   },
   created() {
     this.sendWsAreaDevice()
     this.sendWsAlarm()
+    this.sendWsStatus()
   },
   mounted() {
     this.updateTime = this.util.formatTime(new Date())
     // window.onresize = this.resize
     // this.autoSize()
     // this.autoSize()
+    this.resize()
 
     this.resizeHandler = debounce(() => {
       this.resize()
@@ -141,16 +147,32 @@ export default {
     this.destroyResizeEvent()
   },
   methods: {
+    ...mapMutations({
+      SET_ALARMITEM: 'station/SET_ALARMITEM',
+      SET_ALARMLIST: 'station/SET_ALARMLIST'
+    }),
     sendWsAlarm() {
       this.wsAlarm = new Socket({ url: this.wsUrlAlarm })
       this.wsAlarm.onmessage((data) => {
+        console.log('data :>> ', data)
         this.alarmList = data
+        this.SET_ALARMLIST(this.alarmList)
       })
     },
     sendWsAreaDevice() {
       this.wsAreaDevice = new Socket({ url: this.wsUrlAreaDevice })
       this.wsAreaDevice.onmessage((data) => {
+        console.log('data :>> ', data)
+
         this.areaDeviceData = data
+      })
+    },
+    sendWsStatus() {
+      this.wbSockeStatus = new Socket({ url: this.wsUrlStatus })
+      this.wbSockeStatus.onmessage((data) => {
+        console.log('data :>> ', data)
+
+        this.statusData = data
       })
     },
     autoSize() {
@@ -168,12 +190,16 @@ export default {
     resize() {
       this.autoSize()
       this.$nextTick(() => {
-        this.$refs.map.chart.resize()
-        this.$refs.area_count_a.chart.resize()
-        this.$refs.area_count_b.chart.resize()
-        this.$refs.area_count_c.chart.resize()
-        this.$refs.alarm_count.chart.resize()
-        this.$refs.alarm_point.chart.resize()
+        try {
+          this.$refs.map && this.$refs.map.chart.resize()
+          this.$refs.area_count_a && this.$refs.area_count_a.chart.resize()
+          this.$refs.area_count_b && this.$refs.area_count_b.chart.resize()
+          this.$refs.area_count_c && this.$refs.area_count_c.chart.resize()
+          this.$refs.alarm_count && this.$refs.alarm_count.chart.resize()
+          this.$refs.alarm_point && this.$refs.alarm_point.chart.resize()
+        } catch (err) {
+          console.log('resize :>> ', err)
+        }
       })
     },
     initResizeEvent() {

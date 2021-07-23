@@ -13,7 +13,7 @@
         v-else
         :key="index"
         class="alarm-item"
-        :class="item.alarmId === 0 ? 'alarm-a' : item.alarmId === 3 ? 'alarm-c' : 'alarm-b'"
+        :class="styleStatus(item.alarm_id)"
         @click="itemClick()"
       >
         <div class="left">
@@ -79,6 +79,14 @@ export default {
     this.updateValue()
   },
   methods: {
+    styleStatus(val) {
+      const obj = {}
+      obj['alarm-b'] = val === 'temperature_high'
+      obj['alarm-c'] = val === 'rate_high'
+      obj['alarm-a'] = val === 'offline'
+
+      return obj
+    },
     updateValue() {
       // 生成随机告警数据
       const area = ['一分区', '二分区', '三分区']

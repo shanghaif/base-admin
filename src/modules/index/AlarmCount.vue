@@ -3,7 +3,7 @@
     <div class="title">告警处理统计信息</div>
     <div class="chart">
       <div
-        v-if="!hasData"
+        v-if="Object.keys(obj).length < 1"
         class="info"
       >
         <Status
@@ -22,42 +22,79 @@
 <script>
 import Status from '@/components/Status'
 export default {
+  name: 'AlarmCount',
+
   components: {
     Status
   },
-  data() {
-    return {
-      alarmCount: {},
-      hasData: true
+  props: {
+    obj: {
+      type: Object,
+      default() {
+        return {}
+      }
     }
   },
-  mounted() {
-    this.randomData()
+  data() {
+    return {
+      chart: null,
+      option: null,
+      dateList: [],
+      dataBar: [],
+      dataLine: []
+    }
   },
-  methods: {
-    randomData() {
-      // 随机数据
-      this.alarmCount = {}
-      const time = []
-      const alarm = []
-      const done = []
-      if (this.hasData) {
-        for (let i = 0; i < 7; i++) {
-          const t = new Date(new Date() - (6 - i) * 86400000)
-          time.push(t.getFullYear() + '\n' + this.util.formatDate(t).slice(5))
-          alarm.push(Math.floor(Math.random() * 30 + 90))
-          done.push(Math.floor(Math.random() * 40 + 70))
+  watch: {
+    obj: {
+      handler(newName, oldName) {
+        if (Object.keys(newName).length > 0) {
+          this.init()
         }
-        this.$set(this.alarmCount, 'time', time)
-        this.$set(this.alarmCount, 'alarm', alarm)
-        this.$set(this.alarmCount, 'done', done)
-        this.$nextTick(() => {
-          this.draw()
-          // console.log(this.alarmCount);
-        })
-      }
+      },
+      deep: true
+    }
+  },
+  mounted() {},
+  methods: {
+    init() {
+      this.getDate()
+      this.getSeriesData()
+      this.$nextTick(() => {
+        this.draw()
+        // console.log(this.alarmCount);
+      })
     },
+    getSeriesData() {
+      // 告警数
+      let i = 7
+      const arrBar = []
+      const arrLine = []
+      const objBar = this.obj.added
+      const objLine = this.obj.processed
+      while (i--) {
+        let n
+        // debugger
+        i > 0 ? (n = `-${i}`) : (n = '0')
+        arrBar[i] = objBar[n]
+        arrLine[i] = objLine[n]
+      }
+
+      this.dataBar = arrBar.reverse()
+      this.dataLine = arrLine.reverse()
+    },
+    getDate() {
+      const n = 7
+      const arr = []
+
+      for (let i = 0; i < n; i++) {
+        const today = this.$dayjs().subtract(i, 'day').format('YYYY.MM.DD')
+        arr.unshift(today)
+      }
+      this.dateList = arr
+    },
+
     draw() {
+      const that = this
       this.chart = this.$echarts.init(document.getElementById('alarm-count'), {
         renderer: 'svg'
       })
@@ -100,7 +137,7 @@ export default {
         },
         xAxis: {
           type: 'category',
-          data: this.alarmCount.time,
+          data: that.dateList,
           axisLine: { lineStyle: { color: 'hsla(0, 100%, 100%, 0.1)' } },
           axisTick: { show: false },
           axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } }
@@ -141,7 +178,7 @@ export default {
                 false
               )
             },
-            data: this.alarmCount.alarm
+            data: that.dataBar
           },
           {
             name: '当日处理',
@@ -177,7 +214,7 @@ export default {
                 false
               )
             },
-            data: this.alarmCount.done
+            data: that.dataLine
           }
         ]
       })

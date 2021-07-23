@@ -1,9 +1,12 @@
 <template>
-  <div class="module-b">
-    <div class="sub">{{ count === 1 ? '二' : '' }}分区测温点位数</div>
+  <div
+    id="module"
+    class="module-b"
+  >
+    <div class="sub">分区测温点位数</div>
     <div class="chart">
       <div
-        v-if="count === 0"
+        v-if="isEmpty"
         class="info"
       >
         <Status
@@ -12,21 +15,21 @@
         />
       </div>
       <div
-        v-else-if="count === 1"
+        v-else-if="isSingle"
         class="info"
       >
         <div class="info-item">
-          <div class="info-item-num total">{{ areaData.total[0] }}</div>
+          <div class="info-item-num total">{{ currentObj.all_point }}</div>
           总测温点位
         </div>
         <div class="info-item">
-          <div class="info-item-num online">{{ areaData.online[0] }}</div>
+          <div class="info-item-num online">{{ currentObj.online_point }}</div>
           在线测温点位
         </div>
       </div>
       <div
         v-else
-        id="area-count-b"
+        :id="id"
       />
     </div>
   </div>
@@ -35,55 +38,81 @@
 <script>
 import Status from '@/components/Status'
 export default {
+  name: 'AreaCountB',
+
   components: {
     Status
   },
-  props: { count: Number },
+  props: {
+    id: {
+      type: String,
+      default: 'area-count-b'
+    },
+    obj: {
+      type: Object,
+      default() {
+        return {}
+      }
+    }
+  },
   data() {
     return {
-      areaData: {}
+      chart: null,
+      currentObj: {},
+      axisData: [],
+      onLineData: [],
+      allData: []
+    }
+  },
+  computed: {
+    isSingle() {
+      return this.currentObj.area_infos && this.currentObj.area_infos.length < 1
+    },
+    isSeveral() {
+      return this.currentObj.area_infos && this.currentObj.area_infos.length > 1
+    },
+    isEmpty() {
+      return !this.currentObj.area_infos
+    }
+  },
+  watch: {
+    obj: {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          this.currentObj = newVal
+          setTimeout(() => {
+            this.draw()
+          }, 100)
+        }
+      },
+      deep: true
     }
   },
   mounted() {
-    this.randomData()
+    // this.randomData()
   },
   methods: {
-    randomData() {
-      // 随机数据
-      this.areaData = {}
-      const name = []
-      const total = []
-      const online = []
-      const nameList = [
-        '一',
-        '二',
-        '三',
-        '四',
-        '五',
-        '六',
-        '七',
-        '八',
-        '九',
-        '十',
-        '十一',
-        '十二'
-      ]
-      for (let i = 0; i < this.count; i++) {
-        name.push(nameList[i] + '分区')
-        total.push(Math.floor(Math.random() * 3000 + 900))
-        online.push(total[i] - Math.floor(Math.random() * 800))
-      }
-      this.$set(this.areaData, 'name', name)
-      this.$set(this.areaData, 'total', total)
-      this.$set(this.areaData, 'online', online)
-      this.$nextTick(() => {
-        if (this.count > 1) {
-          this.draw()
-        }
-      })
+    getxAxisData(list) {
+      const arr1 = []
+      const arr2 = []
+      const arr3 = []
+
+      list &&
+        list.map((v) => {
+          arr1.push(v.name)
+          arr2.push(v.all_point)
+          arr3.push(v.online_point)
+        })
+      this.axisData = arr1
+      this.allData = arr2
+
+      this.onLineData = arr3
     },
     draw() {
-      this.chart = this.$echarts.init(document.getElementById('area-count-b'), {
+      const that = this
+      this.getxAxisData(this.currentObj.area_infos)
+
+      this.chart = this.$echarts.init(document.getElementById(that.id), {
         renderer: 'svg'
       })
 
@@ -125,7 +154,7 @@ export default {
         },
         xAxis: {
           type: 'category',
-          data: this.areaData.name,
+          data: that.axisData,
           axisLine: { lineStyle: { color: 'hsla(0, 100%, 100%, 0.1)' } },
           axisTick: { show: false },
           axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } }
@@ -166,7 +195,7 @@ export default {
                 false
               )
             },
-            data: this.areaData.total
+            data: that.allData
           },
           {
             name: '在线测温点位',
@@ -202,7 +231,7 @@ export default {
                 false
               )
             },
-            data: this.areaData.online
+            data: that.onLineData
           }
         ]
       })
@@ -212,7 +241,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.module-b {
+#module {
   position: relative;
   padding: 10px 20px;
   margin-top: -20px;
