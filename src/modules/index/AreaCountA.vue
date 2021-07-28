@@ -4,7 +4,11 @@
     class="module-a"
   >
     <div class="title">分区概况</div>
-    <div class="sub">二分区电解槽数</div>
+    <div class="sub">
+      <span v-if="isSingle">{{ currentObj.area_infos && currentObj.area_infos[0].name }}电解槽数</span>
+      <span v-else>分区电解槽数</span>
+
+    </div>
     <div class="chart">
       <div
         v-if="isEmpty"
@@ -29,7 +33,7 @@
         </div>
       </div>
       <div
-        v-else
+        v-else-if="isSeveral"
         :id="id"
       />
     </div>
@@ -68,13 +72,17 @@ export default {
   },
   computed: {
     isSingle() {
-      return this.currentObj.area_infos && this.currentObj.area_infos.length < 1
+      return (
+        this.currentObj.area_infos && this.currentObj.area_infos.length === 1
+      )
     },
     isSeveral() {
       return this.currentObj.area_infos && this.currentObj.area_infos.length > 1
     },
     isEmpty() {
-      return !this.currentObj.area_infos
+      return (
+        !this.currentObj.area_infos || this.currentObj.area_infos.length === 0
+      )
     }
   },
   watch: {
@@ -82,12 +90,16 @@ export default {
       handler: function (newVal, oldVal) {
         if (newVal) {
           this.currentObj = newVal
-          // setTimeout(() => {
-          //   this.draw()
-          // }, 100)
-          this.$nextTick(() => {
-            this.draw()
-          })
+
+          const flag =
+            this.currentObj.area_infos && this.currentObj.area_infos.length > 1
+          if (flag) {
+            this.$nextTick(() => {
+              this.draw()
+            })
+          } else {
+            this.chart.dispose()
+          }
         }
       },
       deep: true
@@ -116,6 +128,7 @@ export default {
 
     draw() {
       const that = this
+      // this.chart.clear()
       this.getxAxisData(this.currentObj.area_infos)
       this.chart = this.$echarts.init(document.getElementById(that.id), {
         renderer: 'svg'

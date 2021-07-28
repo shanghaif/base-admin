@@ -223,7 +223,7 @@ export default {
   },
   mounted() {
     // screenSize(this.$refs.editor)
-    this.sendSocketUnusualList()
+    // this.sendSocketUnusualList()
   },
 
   beforeDestroy() {
@@ -360,13 +360,13 @@ export default {
     // },
     // 公司查询
     async query() {
-      // try {
-      //   // 分公司
-      //   const companyResult = await company(1)
-      //   this.companyList = companyResult.data.result.stations || []
-      // } catch (err) {
-      //   this.$message('分公司错误')
-      // }
+      try {
+        // 分公司
+        const companyResult = await company(1)
+        this.companyList = companyResult.data.result.stations || []
+      } catch (err) {
+        this.$message('分公司错误')
+      }
       if (this.companyList.length > 0) {
         try {
           // 工厂
@@ -376,6 +376,7 @@ export default {
           const factoryResult = await factory(id_company, 1)
           this.factoryList = factoryResult.data.result.stations || []
           const len = this.factoryList.length
+          debugger
 
           const hasData = len > 1 ? this.factoryList[1] : this.factoryList[0]
           this.SET_FACTORY(hasData)

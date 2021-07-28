@@ -23,7 +23,7 @@
           离线点位
         </div>
         <div class="info-item">
-          <div class="info-item-num alarm-b">{{ currentObj.area_infos[0].alarm_point }}</div>
+          <div class="info-item-num alarm-b">{{ currentObj.area_infos[0].temp_point }}</div>
           温度告警
         </div>
         <div class="info-item">
@@ -36,7 +36,7 @@
         </div>
       </div>
       <div
-        v-else
+        v-else-if="isSeveral"
         :id="id"
       />
     </div>
@@ -76,13 +76,17 @@ export default {
   },
   computed: {
     isSingle() {
-      return this.currentObj.area_infos && this.currentObj.area_infos.length < 1
+      return (
+        this.currentObj.area_infos && this.currentObj.area_infos.length === 1
+      )
     },
     isSeveral() {
       return this.currentObj.area_infos && this.currentObj.area_infos.length > 1
     },
     isEmpty() {
-      return !this.currentObj.area_infos
+      return (
+        !this.currentObj.area_infos || this.currentObj.area_infos.length === 0
+      )
     }
   },
   watch: {
@@ -90,9 +94,16 @@ export default {
       handler: function (newVal, oldVal) {
         if (newVal) {
           this.currentObj = newVal
-          setTimeout(() => {
-            this.draw()
-          }, 100)
+
+          const flag =
+            this.currentObj.area_infos && this.currentObj.area_infos.length > 1
+          if (flag) {
+            this.$nextTick(() => {
+              this.draw()
+            })
+          } else {
+            this.chart.dispose()
+          }
         }
       },
       deep: true

@@ -174,7 +174,6 @@ export default {
   },
   methods: {
     goAlarm() {
-      debugger
       this.$router.push({ name: 'AlarmHistory' })
     }
   }

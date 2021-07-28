@@ -1,6 +1,17 @@
 <template>
-  <div id="module">
-    <div class="title">{{ title }}</div>
+  <div
+    id="module"
+    :class="{'is-area':isArea}"
+  >
+    <div class="title">
+      {{ isArea? '分区告警信息' : '分厂告警信息' }}
+
+    </div>
+    <div
+      v-if="isArea"
+      class="sub"
+    >{{ alarmItem.Company }} / {{ alarmItem.Factory }} / {{ alarmItem.Area }}
+    </div>
     <div class="alarm">
       <Status
         v-if="alarm.length === 0"
@@ -14,7 +25,7 @@
         :key="index"
         class="alarm-item"
         :class="styleStatus(item.alarm_id)"
-        @click="itemClick()"
+        @click="itemClick(item)"
       >
         <div class="left">
           <div class="position">{{ item.Area }} / {{ item.Bath }}</div>
@@ -22,7 +33,10 @@
         </div>
         <div class="right">
           {{ $dayjs(item.time_changed).format('YYYY-MM-DD HH:mm') }}
-          <span class="iconfont icon-arrow" />
+          <span
+            v-if="!isArea"
+            class="iconfont icon-arrow"
+          />
         </div>
       </div>
     </div>
@@ -31,6 +45,8 @@
 
 <script>
 import Status from '@/components/Status'
+import { mapState, mapActions, mapMutations } from 'vuex'
+
 export default {
   name: 'AlarmFactory',
   components: {
@@ -46,7 +62,7 @@ export default {
       } else if (val === 'rate_high') {
         res = '趋势预警'
       } else if (val === 'abnormal') {
-        res = '异常'
+        res = '设备异常'
       }
       return res
     }
@@ -57,13 +73,18 @@ export default {
       default() {
         return []
       }
-    }
+    },
+    isArea: { type: Boolean, default: false }
   },
   data() {
     return {
-      title: '分厂告警信息',
       alarm: []
     }
+  },
+  computed: {
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem
+    })
   },
   watch: {
     list: {
@@ -76,44 +97,46 @@ export default {
     }
   },
   mounted() {
-    this.updateValue()
+    // this.updateValue()
   },
   methods: {
     styleStatus(val) {
       const obj = {}
-      obj['alarm-b'] = val === 'temperature_high'
-      obj['alarm-c'] = val === 'rate_high'
+      obj['alarm-c'] = val === 'temperature_high' || val === 'abnormal'
+      obj['alarm-b'] = val === 'rate_high'
       obj['alarm-a'] = val === 'offline'
 
       return obj
     },
-    updateValue() {
-      // 生成随机告警数据
-      const area = ['一分区', '二分区', '三分区']
-      const alarmText = ['离线', '温度告警', '趋势预警', '异常设备']
-      const randomCount = Math.floor(Math.random() * 20 + 1)
-      for (let i = 0; i < randomCount; i++) {
-        const alarmId = Math.floor(Math.random() * 4)
-        const alarmTime =
-          i === 0
-            ? new Date()
-            : new Date(
-              new Date(this.alarm[i - 1].alarmTime) - Math.random() * 43200000
-            )
-        const alarmMsg = {
-          area: area[Math.floor(Math.random() * 3)],
-          bath: '电解槽' + Math.floor(Math.random() * 500 + 1000),
-          alarmId: alarmId,
-          alarmText: alarmText[alarmId],
-          name: 'run@' + Math.floor(Math.random() * 114514.191981) + '.exe',
-          alarmTime: this.util.formatTime(alarmTime)
-        }
-        this.$set(this.alarm, i, alarmMsg)
-      }
-      // console.log(this.alarm);
-    },
-    itemClick() {
-      window.location.href = '#/detail'
+    // updateValue() {
+    //   // 生成随机告警数据
+    //   const area = ['一分区', '二分区', '三分区']
+    //   const alarmText = ['离线', '温度告警', '趋势预警', '异常设备']
+    //   const randomCount = Math.floor(Math.random() * 20 + 1)
+    //   for (let i = 0; i < randomCount; i++) {
+    //     const alarmId = Math.floor(Math.random() * 4)
+    //     const alarmTime =
+    //       i === 0
+    //         ? new Date()
+    //         : new Date(
+    //             new Date(this.alarm[i - 1].alarmTime) - Math.random() * 43200000
+    //           )
+    //     const alarmMsg = {
+    //       area: area[Math.floor(Math.random() * 3)],
+    //       bath: '电解槽' + Math.floor(Math.random() * 500 + 1000),
+    //       alarmId: alarmId,
+    //       alarmText: alarmText[alarmId],
+    //       name: 'run@' + Math.floor(Math.random() * 114514.191981) + '.exe',
+    //       alarmTime: this.util.formatTime(alarmTime)
+    //     }
+    //     this.$set(this.alarm, i, alarmMsg)
+    //   }
+    //   // console.log(this.alarm);
+    // },
+    itemClick(item) {
+      // window.location.href = '#/detail'
+      this.$router.push({ path: '/detail' })
+      this.$emit('current-row', item)
     }
   }
 }
@@ -122,8 +145,22 @@ export default {
 <style lang="scss" scoped>
 #module {
   height: calc(66% - 20px);
+  &.is-area {
+    height: 100%;
+    .alarm {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 2px 8px;
+      margin: 4px -8px 0 -8px;
+      height: calc(100% - 58px);
+      width: calc(100% + 16px);
+    }
+  }
 }
-
+.sub {
+  margin: 10px 0;
+}
 .alarm {
   display: flex;
   flex-direction: column;
@@ -132,7 +169,8 @@ export default {
   margin: 20px -8px 0 -8px;
   height: calc(100% - 32px);
   width: calc(100% + 16px);
-  overflow-y: scroll;
+  overflow-y: auto;
+
   &-item {
     display: flex;
     padding: 14px;

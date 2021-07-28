@@ -1,46 +1,51 @@
 <template>
-  <div id="module">
+  <div
+    id="module"
+    class="module"
+  >
     <div class="title">电解槽点位详情
-      <div class="sub">{{ company }} / {{ factory }} / {{ area }} / {{ bath }}</div>
+      <div class="sub">{{ alarmItem.Company }} / {{ alarmItem.Factory }} / {{ alarmItem.Area }} /
+        {{ alarmItem.Bath }}</div>
     </div>
     <div
-      v-for="(bath, bIndex) of ['A', 'B']"
-      :key="bIndex"
+      v-for="(bath,i) of list"
+      :key="(i + 'a')"
       class="bath"
     >
-      <div class="bath-name">{{ bath }}</div>
+      <div class="bath-name">{{ i | NumToLetter }}</div>
       <div
         v-for="(part, index) of ['top', 'bottom']"
         :key="index"
         :class="'bath-' + part"
       >
         <div
-          v-for="(group, gIndex) of pointData[bIndex]"
-          :key="gIndex"
+          v-for="(group, j) of bath.arr"
+          :key="'group' + j"
           class="point-group"
         >
+
           <div
-            v-for="(point, pIndex) of pointGroup"
-            :ref="part + bIndex + pIndex"
-            :key="pIndex"
+            v-for="(point, k) of group.pointList"
+            :key="'point' + k"
             class="point"
-            :class="group[pIndex].hasDevice ? group[pIndex].alarm + ' ' + group[pIndex].size : 'none ' + group[pIndex].size"
-            @mouseenter="pointEnter(group[pIndex].hasDevice, bIndex, pIndex, gIndex)"
-            @mouseleave="pointLeave(bIndex, pIndex, gIndex)"
-            @click="pointClick(group[pIndex].hasDevice, bIndex, pIndex, gIndex)"
+            :class="pointClass(point,k)"
+            @click="selectPoint(point)"
+            @mouseenter="pointStatus(point,1)"
+            @mouseleave="pointStatus(point)"
           >
 
             <div
               v-if="index === 1"
-              v-show="group[pIndex].showPop"
+              v-show="hoverActive === point.tid"
               class="pop"
             >
-              <div class="pop-name">{{ group[pIndex].name }}</div>
+              <div class="pop-name">{{ point.s_name }}</div>
               <div class="pop-status">告警状态:
-                <p :class="group[pIndex].alarm + '-text'"> {{ group[pIndex].text }}</p>
+                <p :class="pointTextClass(point)">
+                  {{ point.alarm_type && point.alarm_type[0] | typeText }}</p>
               </div>
               <div class="pop-temp">当前温度:
-                <p :class="group[pIndex].alarm + '-text'"> {{ group[pIndex].temp }}</p>
+                <p :class="pointTextClass(point)"> {{ point.value }}</p>
               </div>
               <div class="pop-arrow" />
             </div>
@@ -49,16 +54,82 @@
           <div
             v-if="index === 1"
             class="group-num"
-          >{{ gIndex }}</div>
+          >{{ j | formatNum }}</div>
         </div>
       </div>
+      <!-- <div class="cell-indexs">
+        <div
+          v-for="(groupB, n) of bath.arr"
+          :key="'group_index' + n"
+          class="cell-index"
+          :style="cellWidth"
+        >
+
+          {{ n | formatNum }}
+        </div>
+      </div> -->
     </div>
   </div>
 </template>
 
 <script>
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 export default {
   name: 'Bath',
+  filters: {
+    typeText(val) {
+      let res = ''
+      if (val === 'temperature_high') {
+        res = '温度告警'
+      } else if (val === 'offline') {
+        res = '离线'
+      } else if (val === 'rate_high') {
+        res = '趋势预警'
+      } else if (val === 'abnormal') {
+        res = '设备异常'
+      } else {
+        res = '正常'
+      }
+      return res
+    },
+    formatNum(i) {
+      const n = i + 1
+      let str = ''
+      if (n < 10) {
+        str = `0${n}`
+      } else {
+        str = n
+      }
+      return str
+    },
+    NumToLetter(n) {
+      let str = ''
+      if (n === 0) {
+        str = 'A'
+      } else if (n === 1) {
+        str = 'B'
+      } else if (n === 2) {
+        str = 'C'
+      }
+      return str
+    }
+  },
+  props: {
+    list: {
+      type: Array,
+      default() {
+        return [{ arr: [] }]
+      }
+    },
+    min: {
+      type: Number,
+      default: 0
+    },
+    max: {
+      type: Number,
+      default: 0
+    }
+  },
   data() {
     return {
       bathList: ['A', 'B'],
@@ -68,63 +139,96 @@ export default {
       company: '云南分公司',
       factory: '电解铝二厂',
       area: '二分区',
-      bath: '电解槽2001'
+      // bath: '电解槽2001'
+      tipShow: false,
+      classStr: '',
+      clickActive: '',
+      hoverActive: '',
+      pointIndex: -1,
+      cellIndex: -1
     }
   },
-  mounted() {
-    const alarmStatus = [
-      'null',
-      'null',
-      'null',
-      'null',
-      'null',
-      'null',
-      'offline',
-      'tempHigh',
-      'trend',
-      'abnormal'
-    ]
-    const alarmText = [
-      '正常',
-      '正常',
-      '正常',
-      '正常',
-      '正常',
-      '正常',
-      '离线',
-      '温度告警',
-      '趋势预警',
-      '设备异常'
-    ]
-    const groupCount = this.pointTotal / this.pointGroup.length // 点位组合数
-    let item = []
-    for (let i = 0; i < groupCount; i++) {
-      const g = []
-      for (let j = 0; j < this.pointGroup.length; j++) {
-        const alarmRandom = Math.floor(Math.random() * 10)
-        const p = {
-          name: 'run@' + Math.floor(Math.random() * 114514.191981) + '.exe',
-          temp: Math.floor(Math.random() * 10000 + 25000) / 100,
-          hasDevice: Math.random() > 0.2,
-          alarm: alarmStatus[alarmRandom],
-          text: alarmText[alarmRandom],
-          size: this.pointGroup[j],
-          selected: false,
-          showPop: false
-        }
-        g.push(p)
-      }
-      item.push(g)
-      if (i === groupCount / 2 - 1) {
-        this.$set(this.pointData, 0, item)
-        item = []
-      }
-      if (i === groupCount - 1) {
-        this.$set(this.pointData, 1, item)
+  // mounted() {},
+  computed: {
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem,
+      currentPoint: (state) => state.station.currentPoint
+    }),
+    cellWidth() {
+      const num = 100 / this.list[0].arr.length
+      const pct = num.toFixed(2) + '%'
+      return {
+        // '--width': `calc(100% / ${num})`
+        '--width': pct
       }
     }
   },
+  watch: {
+    list: {
+      handler(newName, oldName) {
+        this.clickActive = this.alarmItem.t_id
+      },
+      deep: true
+    }
+  },
+  mounted() {},
   methods: {
+    ...mapMutations({
+      SET_ALARMITEM: 'station/SET_ALARMITEM',
+      SET_POINT: 'station/SET_POINT'
+    }),
+    pointTextClass(point) {
+      let res = ''
+      const val = point.alarm_type && point.alarm_type[0]
+
+      if (val === 'temperature_high') {
+        res = 'wram-text'
+      } else if (val === 'offline') {
+        res = ''
+      } else if (val === 'rate_high') {
+        res = 'red-text'
+      } else if (val === 'abnormal') {
+        res = 'red-text'
+      } else {
+        res = 'null-text'
+      }
+
+      return res
+    },
+    pointClass(point, k) {
+      return {
+        small: k === 1,
+        none: point.empty,
+        null: !point.alarm_type,
+        red:
+          (point.alarm_type && point.alarm_type[0] === 'rate_high') ||
+          (point.alarm_type && point.alarm_type[0] === 'abnormal'),
+        wram: point.alarm_type && point.alarm_type[0] === 'temperature_high',
+        offline: point.alarm_type && point.alarm_type[0] === 'offline',
+        active: this.clickActive === point.tid,
+        hover: this.hoverActive === point.tid
+      }
+    },
+    selectPoint(point) {
+      if (point.empty) {
+        return
+      }
+      const id = point.tid
+      this.clickActive = id
+      this.$emit('pointClick', point)
+    },
+    pointStatus(point, flag) {
+      // flag ture鼠标进入
+      if (point.empty) {
+        return
+      }
+      const id = point.tid
+      if (flag) {
+        this.hoverActive = id
+      } else {
+        this.hoverActive = ''
+      }
+    },
     pointEnter(hasDevice, bIndex, pIndex, gIndex) {
       if (hasDevice) {
         this.$refs['top' + bIndex + pIndex][gIndex].style.borderColor =
@@ -173,10 +277,19 @@ export default {
   height: 100%;
   width: 100%;
 }
+.module {
+}
 .title {
   display: flex;
   gap: 14px;
   align-items: flex-end;
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--theme);
+  .sub {
+    font-size: 16px;
+    color: #fff;
+  }
 }
 
 .bath {
@@ -247,6 +360,46 @@ export default {
       position: relative;
       height: 100%;
       width: 30%;
+      border-color: rgba(255, 255, 255, 0.08);
+      border-width: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      &.active {
+        border-color: var(--theme) !important;
+        border-width: 2px !important;
+        background: var(--theme-50) !important;
+      }
+      &.hover {
+        border-color: var(--theme) !important;
+        border-width: 2px !important;
+        background: var(--theme-50) !important;
+      }
+      &.null {
+        border-color: rgba(255, 255, 255, 0.2);
+        border-width: 1px;
+        background: rgba(255, 255, 255, 0.2);
+      }
+      &.none {
+        border-color: rgba(255, 255, 255, 0.08);
+        border-width: 1px;
+        background: rgba(255, 255, 255, 0.08);
+        cursor: default;
+      }
+      &.offline {
+        border-color: var(--alarmA);
+        border-width: 1.8px;
+        background: var(--alarmA-40);
+      }
+      &.wram {
+        border-color: var(--alarmC);
+        border-width: 2px;
+        background: var(--alarmC-50);
+      }
+      &.red {
+        border-color: var(--alarmB);
+        border-width: 2px;
+        background: var(--alarmB-50);
+      }
     }
     .group-num {
       position: absolute;
@@ -257,32 +410,6 @@ export default {
       font-family: 'DIN';
       text-align: center;
     }
-  }
-  .none {
-    border-color: rgba(255, 255, 255, 0.08);
-    border-width: 1px;
-    background: rgba(255, 255, 255, 0.08);
-  }
-  .null {
-    border-color: rgba(255, 255, 255, 0.2);
-    border-width: 1px;
-    background: rgba(255, 255, 255, 0.2);
-  }
-  .offline {
-    border-color: var(--alarmA);
-    border-width: 1.8px;
-    background: var(--alarmA-40);
-  }
-  .abnormal {
-    border-color: var(--alarmC);
-    border-width: 2px;
-    background: var(--alarmC-50);
-  }
-  .tempHigh,
-  .trend {
-    border-color: var(--alarmB);
-    border-width: 2px;
-    background: var(--alarmB-50);
   }
 }
 
@@ -338,12 +465,22 @@ export default {
   .offline-text {
     color: var(--alarmA);
   }
-  .abnormal-text {
+  .wram-text {
     color: var(--alarmC);
   }
-  .tempHigh-text,
-  .trend-text {
+  .red-text {
     color: var(--alarmB);
+  }
+}
+.cell-indexs {
+  width: 100%;
+  @include flex(flex-start, center);
+  margin-bottom: 10px;
+  .cell-index {
+    @include flex(center, center);
+    margin-top: 10px;
+    font-size: 16px;
+    width: var(--width);
   }
 }
 </style>

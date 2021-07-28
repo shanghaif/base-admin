@@ -28,21 +28,27 @@
 <script>
 // import China from '@/assets/China'
 import China from '@/assets/china/China'
-import { mapState, mapActions, mapMutations } from 'vuex'
-import { getCell, setCell, removeCell, setCurrentFactory } from '@/utils/auth'
-import { Socket } from '@/utils/socket'
 
-import {
-  company,
-  factory,
-  areaPage,
-  cell,
-  device,
-  handelAlarm,
-  deviceStatus
-} from '@/api/station'
 export default {
-  props: { id: String },
+  props: {
+    id: {
+      type: String,
+      default: 'map-chart'
+    },
+
+    data: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
+    current: {
+      type: Object,
+      default() {
+        return {}
+      }
+    }
+  },
   data() {
     return {
       img: require('@/assets/bg.jpg'),
@@ -64,14 +70,25 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      currentFactory: (state) => state.station.currentFactory
-    })
+    // ...mapState({
+    //   currentFactory: (state) => state.station.currentFactory
+    // })
+  },
+  watch: {
+    data: {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          this.factoryList = newVal
+          this.factoryId = this.current.uid
+        }
+      },
+      deep: true
+    }
   },
   created() {
-    this.queryCompany().then((res) => {
-      this.queryFactory(res)
-    })
+    // this.queryCompany().then((res) => {
+    //   this.queryFactory(res)
+    // })
   },
   mounted() {
     const n = Math.floor(Math.sqrt(this.popItem.length) + 0.5)
@@ -81,50 +98,45 @@ export default {
     this.draw()
   },
   methods: {
-    ...mapMutations({
-      SET_FACTORY: 'station/SET_FACTORY',
-      SET_CELL: 'station/SET_CELL'
-    }),
-    queryCompany() {
-      // try {
-      //   const res = await company(1)
-      //   this.companyList = (res.data.result && res.data.result.stations) || []
-      // } catch (err) {
-      //   this.$message('工厂错误')
-      // }
-      return new Promise((resolve, reject) => {
-        company(1)
-          .then((res) => {
-            this.companyList =
-              (res.data.result && res.data.result.stations) || []
-            resolve(this.companyList)
-          })
-          .catch((error) => {
-            reject(error)
-          })
-      })
-    },
-    async queryFactory(arr) {
-      console.log('this.companyList.length :>> ', this.companyList.length)
-      if (arr.length > 0) {
-        try {
-          // 工厂
-          const id_company = this.companyList.find(
-            (v) => v.s_name === '云南分公司'
-          ).uid
-          const factoryResult = await factory(id_company, 1)
-          this.factoryList = factoryResult.data.result.stations || []
-          const len = this.factoryList.length
+    // ...mapMutations({
+    //   SET_FACTORY: 'station/SET_FACTORY',
+    //   SET_CELL: 'station/SET_CELL'
+    // }),
+    // queryCompany() {
+    //   return new Promise((resolve, reject) => {
+    //     company(1)
+    //       .then((res) => {
+    //         this.companyList =
+    //           (res.data.result && res.data.result.stations) || []
+    //         resolve(this.companyList)
+    //       })
+    //       .catch((error) => {
+    //         reject(error)
+    //       })
+    //   })
+    // },
+    // async queryFactory(arr) {
+    //   console.log('this.companyList.length :>> ', this.companyList.length)
+    //   if (arr.length > 0) {
+    //     try {
+    //       // 工厂
+    //       const id_company = this.companyList.find(
+    //         (v) => v.s_name === '云南分公司'
+    //       ).uid
+    //       const factoryResult = await factory(id_company, 1)
+    //       this.factoryList = factoryResult.data.result.stations || []
+    //       const len = this.factoryList.length
 
-          const hasData = len > 1 ? this.factoryList[1] : this.factoryList[0]
-          this.SET_FACTORY(hasData)
-          setCurrentFactory(hasData)
-          this.factoryId = hasData.uid
-        } catch (err) {
-          this.$message('工厂错误')
-        }
-      }
-    },
+    //       // const hasData = len > 1 ? this.factoryList[1] : this.factoryList[0]
+    //       const hasData = len > 1 ? this.factoryList[0] : this.factoryList[0]
+    //       this.SET_FACTORY(hasData)
+    //       setCurrentFactory(hasData)
+    //       this.factoryId = hasData.uid
+    //     } catch (err) {
+    //       this.$message('工厂错误')
+    //     }
+    //   }
+    // },
     draw() {
       this.chart = this.$echarts.init(document.getElementById('chart-map'), {
         renderer: 'svg'
@@ -232,8 +244,9 @@ export default {
     itemClick(obj) {
       this.factoryId = obj.uid
       // const currentFactory = this.factoryList.find((v) => v.uid === uid)
-      this.SET_FACTORY(obj)
-      setCurrentFactory(obj)
+      // this.SET_FACTORY(obj)
+      // setCurrentFactory(obj)
+      this.$emit('clickMap', obj)
     }
   }
 }

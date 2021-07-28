@@ -76,7 +76,17 @@
             label="设备名称"
             show-overflow-tooltip
           />
+          <el-table-column
+            prop="pick_time"
+            label="时间"
+            class-name="n-wrap"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
 
+              <span>{{ $dayjs(scope.row.pick_time * 1000).format('YYYY-MM-DD mm:ss') }}</span>
+            </template>
+          </el-table-column>
         </el-table>
         <div class="pagination-wrap">
 
@@ -219,7 +229,7 @@ export default {
     exportPoint(obj) {
       const { arr, is_compress } = obj
       const params = {
-        id: this.currenRow.t_id,
+        id: this.currenRow.tid,
         is_compress,
         sTime: arr[0],
         eTime: arr[1]
@@ -227,8 +237,14 @@ export default {
 
       exportPointInfo(params)
         .then((res) => {
-          this.$refs.ExportFilter.isExcel(res)
-          this.$refs.ExportFilter.hide()
+          if (res.status === 200) {
+            if (res.headers['content-disposition']) {
+              this.$refs.ExportFilter.isExcel(res)
+              this.$refs.ExportFilter.hide()
+            } else {
+              this.$message({ type: 'error', message: '无数据', time: 6000 })
+            }
+          }
         })
         .catch((err) => {
           this.$message(err)

@@ -1,7 +1,7 @@
 <template>
   <div id="info">
     <div class="title">{{ company }} {{ currentFactory.s_name }}</div>
-    <div class="sub">告警信息统计时间: {{ date }}
+    <div class="sub">告警信息统计时间: {{ $dayjs().format('YYYY年MM月DD日') }}
       <b @click="logClick()">告警信息日志<span class="iconfont icon-arrow" /></b>
     </div>
     <div class="rate-container">
@@ -72,6 +72,7 @@ export default {
         if (newVal) {
           this.currentObj = newVal
           this.getRate()
+          this.updateColor()
         }
       },
       deep: true
@@ -83,29 +84,37 @@ export default {
     const d = new Date()
     this.date =
       d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDay() + '日'
-    this.bath.total = Math.floor(Math.random() * 100 + 800)
-    this.bath.online = this.bath.total - Math.floor(Math.random() * 80)
-    this.bath.running = this.bath.online - Math.floor(Math.random() * 90)
-    this.bath.alarm = this.bath.running - Math.floor(Math.random() * 100 + 600)
-    this.rate.online =
-      Math.floor((this.bath.online / this.bath.total) * 1000) / 10
-    this.rate.running =
-      Math.floor((this.bath.running / this.bath.total) * 1000) / 10
-    this.rate.alarm =
-      Math.floor((this.bath.alarm / this.bath.total) * 1000) / 10
-    this.updateColor()
+    // this.bath.total = Math.floor(Math.random() * 100 + 800)
+    // this.bath.online = this.bath.total - Math.floor(Math.random() * 80)
+    // this.bath.running = this.bath.online - Math.floor(Math.random() * 90)
+    // this.bath.alarm = this.bath.running - Math.floor(Math.random() * 100 + 600)
+    // this.rate.online =
+    //   Math.floor((this.bath.online / this.bath.total) * 1000) / 10
+    // this.rate.running =
+    //   Math.floor((this.bath.running / this.bath.total) * 1000) / 10
+    // this.rate.alarm =
+    //   Math.floor((this.bath.alarm / this.bath.total) * 1000) / 10
+    // this.updateColor()
   },
   methods: {
     getRate() {
-      const total = this.currentObj.all_bath
-      const alarm = this.currentObj.alarm_bath
-      const running = this.currentObj.run_bath
-      const online = this.currentObj.online_bath
-      this.bath = { total, online, running, alarm }
-      this.rate = {
-        online: ((online * 100) / total).toFixed(0),
-        running: ((running * 100) / total).toFixed(0),
-        alarm: ((alarm * 100) / total).toFixed(0)
+      if (this.currentObj.all_bath) {
+        const total = this.currentObj.all_bath
+        const alarm = this.currentObj.alarm_bath
+        const running = this.currentObj.run_bath
+        const online = this.currentObj.online_bath
+        this.bath = { total, online, running, alarm }
+        this.rate = {
+          online: ((online * 100) / total).toFixed(0),
+          running: ((running * 100) / total).toFixed(0),
+          alarm: ((alarm * 100) / total).toFixed(0)
+        }
+      } else {
+        this.rate = {
+          online: 0,
+          running: 0,
+          alarm: 0
+        }
       }
     },
     updateColor() {
@@ -141,6 +150,7 @@ export default {
     },
     logClick() {
       // 跳转告警日志
+      this.$router.push({ name: 'AlarmHistory' })
     }
   }
 }

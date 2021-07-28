@@ -19,16 +19,16 @@
         class="info"
       >
         <div class="info-item">
-          <div class="info-item-num total">{{ currentObj.all_point }}</div>
+          <div class="info-item-num total">{{ currentObj.area_infos[0].all_point }}</div>
           总测温点位
         </div>
         <div class="info-item">
-          <div class="info-item-num online">{{ currentObj.online_point }}</div>
+          <div class="info-item-num online">{{ currentObj.area_infos[0].online_point }}</div>
           在线测温点位
         </div>
       </div>
       <div
-        v-else
+        v-else-if="isSeveral"
         :id="id"
       />
     </div>
@@ -66,23 +66,40 @@ export default {
   },
   computed: {
     isSingle() {
-      return this.currentObj.area_infos && this.currentObj.area_infos.length < 1
+      return (
+        this.currentObj.area_infos && this.currentObj.area_infos.length === 1
+      )
     },
     isSeveral() {
       return this.currentObj.area_infos && this.currentObj.area_infos.length > 1
     },
     isEmpty() {
-      return !this.currentObj.area_infos
+      return (
+        !this.currentObj.area_infos || this.currentObj.area_infos.length === 0
+      )
     }
   },
   watch: {
     obj: {
       handler: function (newVal, oldVal) {
+        // if (newVal) {
+        //   this.currentObj = newVal
+        //   setTimeout(() => {
+        //     this.draw()
+        //   }, 100)
+        // }
         if (newVal) {
           this.currentObj = newVal
-          setTimeout(() => {
-            this.draw()
-          }, 100)
+
+          const flag =
+            this.currentObj.area_infos && this.currentObj.area_infos.length > 1
+          if (flag) {
+            this.$nextTick(() => {
+              this.draw()
+            })
+          } else {
+            this.chart.dispose()
+          }
         }
       },
       deep: true

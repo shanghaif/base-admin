@@ -27,6 +27,8 @@ import VueSocketIO from 'vue-socket.io'
 import echarts from 'echarts'
 // import echarts from 'echarts'
 import util from '@/util'
+import Status from '@/components/Status'
+import ZSelect from '@/components/ZSelect'
 
 // 大屏暗黑主题使用ivew
 import { Button, DatePicker, Modal, Dropdown, DropdownMenu, DropdownItem, Select, OptionGroup, Option, Poptip} from 'iview'
@@ -40,6 +42,8 @@ Vue.component('Select', Select)
 Vue.component('OptionGroup', OptionGroup)
 Vue.component('Option', Option)
 Vue.component('Poptip', Poptip)
+Vue.component('Status', Status)
+Vue.component('ZSelect', ZSelect)
 
 
 /**

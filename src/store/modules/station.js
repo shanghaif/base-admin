@@ -5,6 +5,7 @@ import { getCell, setCell, getAlarmItem, setAlarmItem, getCurrentFactory} from '
 
 const state = {
   currentCompany: {},
+  currentPoint: {},
   currentFactory: getCurrentFactory(),
   // currentFactory: {},
   alarmList: [],
@@ -35,6 +36,9 @@ const mutations = {
   },
   SET_ALARMLIST: (state, alarmList) => {
     state.alarmList = alarmList
+  },
+  SET_POINT: (state, currentPoint) => {
+    state.currentPoint = currentPoint
   }
 }
 

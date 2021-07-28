@@ -114,6 +114,7 @@
 <script>
 import add from '@/mixins/add.js'
 import { queryUser, updateUser } from '@/api/user'
+import { sha256 } from 'js-sha256'
 
 export default {
   name: 'UserFormDlg',
@@ -278,7 +279,7 @@ export default {
           const params = {
             user_name: obj.user_name,
             nick_name: obj.nick_name,
-            password: obj.password,
+            password: sha256(obj.password),
             email: obj.email,
             phone: obj.phone,
             role_name: obj.role_name

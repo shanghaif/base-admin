@@ -1,10 +1,10 @@
 <template>
   <div
-    id="select"
+    class="z-select"
     :style="{fontSize: fontSize + 'px'}"
     @click="showList()"
   >
-    {{ text }}{{ text === '' ? '' : ': ' }}{{ list[this.index] }}
+    {{ text }}{{ text === '' ? '' : ': ' }}{{ current.label }}
     <div
       class="iconfont icon-arrow"
       :class="show ? 'rotate' : ''"
@@ -14,12 +14,12 @@
       class="list"
     >
       <div
-        v-for="(item, index) of list"
-        :key="index"
+        v-for="(item, i) of list"
+        :key="i"
         class="list-item"
         :style="{fontSize: fontSize + 'px'}"
-        @click="update(index)"
-      >{{ item }}</div>
+        @click="update(item,i)"
+      >{{ item.label }}</div>
     </div>
   </div>
 </template>
@@ -31,7 +31,7 @@ export default {
     event: 'update'
   },
   props: {
-    value: Number,
+    value: String,
     list: Array,
     text: { type: String, default: '' },
     fontSize: { type: Number, default: 14 }
@@ -39,30 +39,35 @@ export default {
   data() {
     return {
       index: this.value,
-      show: false
+      show: false,
+      current: { label: '', value: '' }
     }
   },
+
   mounted() {
     document.addEventListener('click', (e) => {
       if (!this.$el.contains(e.target)) {
         this.show = false
       }
     })
+    this.current = this.list.find((v) => v.value === this.value)
   },
   methods: {
     showList() {
       this.show = !this.show
     },
-    update(index) {
+    update(obj, index) {
+      this.current = { ...obj }
       this.index = index
-      this.$emit('update', index)
+      this.$emit('update', obj.value)
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
-#select {
+.z-select {
+  width: 100%;
   position: relative;
   display: flex;
   padding: 8px;

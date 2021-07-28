@@ -6,20 +6,26 @@
     <Map
       :id="'map'"
       ref="map"
+      :data="factoryList"
+      :current="currentFactory"
+      @clickMap="clickMap"
     />
     <div class="left">
       <AreaCountA
         ref="area_count_a"
+        :key="areaKey + 'AreaCountA'"
         class="module"
         :obj="areaDeviceData"
       />
       <AreaCountB
         ref="area_count_b"
+        :key="areaKey + 'AreaCountB'"
         class="module"
         :obj="areaDeviceData"
       />
       <AreaCountC
         ref="area_count_c"
+        :key="areaKey + 'AreaCountC'"
         class="module"
         :obj="areaDeviceData"
       />
@@ -51,6 +57,7 @@
       <AlarmFactory
         class="module"
         :list="alarmList"
+        @current-row="clickAlarm"
       />
       <AlarmPoint
         ref="alarm_point"
@@ -65,8 +72,18 @@
 </template>
 
 <script>
+import {
+  company,
+  factory,
+  areaPage,
+  cell,
+  device,
+  handelAlarm,
+  deviceStatus
+} from '@/api/station'
 import { debounce } from '@/utils'
 import { mapState, mapActions, mapMutations } from 'vuex'
+import { getCell, setCell, removeCell, setCurrentFactory } from '@/utils/auth'
 
 import AreaCountA from '@/modules/index/AreaCountA'
 import AreaCountB from '@/modules/index/AreaCountB'
@@ -79,7 +96,6 @@ import Info from '@/modules/index/Info'
 import AlarmFactory from '@/modules/index/AlarmFactory'
 import AlarmPoint from '@/modules/index/AlarmPoint'
 import { Socket } from '@/utils/socket'
-const baseUrl = `${process.env.VUE_APP_SOCKET_API}/api/ws/`
 
 export default {
   name: 'Home',
@@ -95,6 +111,8 @@ export default {
   },
   data() {
     return {
+      areaKey: 0,
+
       resizeHandler: null,
       wsAlarm: null,
       wsAreaDevice: null,
@@ -103,6 +121,8 @@ export default {
       alarmList: [],
       statusData: {},
       legend: [],
+      companyList: [],
+      factoryList: [],
 
       title: {
         text: '新视智科温度监测系统',
@@ -115,21 +135,34 @@ export default {
   computed: {
     ...mapState({
       currentFactory: (state) => state.station.currentFactory
-    }),
-    wsUrlAlarm() {
-      return `${baseUrl}alarm?tid=${this.currentFactory.uid}`
-    },
-    wsUrlAreaDevice() {
-      return `${baseUrl}factory_info?factory_id=${this.currentFactory.uid}`
-    },
-    wsUrlStatus() {
-      return `${baseUrl}alarm_statistics?factory_id=${this.currentFactory.uid}`
+    })
+    // wsUrlAlarm() {
+    //   return `${baseUrl}alarm?tid=${this.currentFactory.uid}&api_token=${token}`
+    // },
+    // wsUrlAreaDevice() {
+    //   return `${baseUrl}factory_info?factory_id=${this.currentFactory.uid}&api_token=${token}`
+    // },
+    // wsUrlStatus() {
+    //   return `${baseUrl}alarm_statistics?factory_id=${this.currentFactory.uid}&api_token=${token}`
+    // }
+  },
+  watch: {
+    currentFactory: {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          this.init()
+        }
+      },
+      deep: true
     }
   },
   created() {
-    this.sendWsAreaDevice()
-    this.sendWsAlarm()
-    this.sendWsStatus()
+    // this.sendWsAreaDevice()
+    // this.sendWsAlarm()
+    // this.sendWsStatus()
+    this.queryCompany().then((res) => {
+      this.queryFactory(res)
+    })
   },
   mounted() {
     this.updateTime = this.util.formatTime(new Date())
@@ -145,14 +178,84 @@ export default {
   },
   beforeDestroy() {
     this.destroyResizeEvent()
+    this.destroyWs()
+    this.autoSize(1)
   },
   methods: {
     ...mapMutations({
       SET_ALARMITEM: 'station/SET_ALARMITEM',
-      SET_ALARMLIST: 'station/SET_ALARMLIST'
+      SET_ALARMLIST: 'station/SET_ALARMLIST',
+      SET_FACTORY: 'station/SET_FACTORY',
+      SET_CELL: 'station/SET_CELL'
     }),
+
+    init() {
+      this.destroyWs()
+      this.sendWsAreaDevice()
+      this.sendWsAlarm()
+      this.sendWsStatus()
+    },
+
+    clickMap(obj) {
+      setCurrentFactory(obj)
+      this.SET_FACTORY(obj)
+    },
+
+    clickAlarm(obj) {
+      this.SET_ALARMITEM(obj)
+    },
+    destroyWs() {
+      this.wsAlarm && this.wsAlarm.destroy()
+      this.wsAreaDevice && this.wsAreaDevice.destroy()
+      this.wbSockeStatus && this.wbSockeStatus.destroy()
+    },
+    queryCompany() {
+      return new Promise((resolve, reject) => {
+        company(1)
+          .then((res) => {
+            this.companyList =
+              (res.data.result && res.data.result.stations) || []
+            resolve(this.companyList)
+          })
+          .catch((error) => {
+            reject(error)
+          })
+      })
+    },
+    async queryFactory(arr) {
+      console.log('this.companyList.length :>> ', this.companyList.length)
+      if (arr.length > 0) {
+        try {
+          // 工厂
+          const id_company = this.companyList.find(
+            (v) => v.s_name === '云南分公司'
+          ).uid
+          const factoryResult = await factory(id_company, 1)
+
+          this.factoryList = factoryResult.data.result.stations || []
+          const len = this.factoryList.length
+
+          // const hasData = len > 1 ? this.factoryList[1] : this.factoryList[0]
+          const hasData = len > 1 ? this.factoryList[0] : this.factoryList[0]
+          this.SET_FACTORY(hasData)
+          setCurrentFactory(hasData)
+          this.factoryId = hasData.uid
+        } catch (err) {
+          this.$message('工厂错误')
+        }
+      }
+    },
     sendWsAlarm() {
-      this.wsAlarm = new Socket({ url: this.wsUrlAlarm })
+      const url = '/alarm'
+      const params = {
+        url,
+
+        data: {
+          tid: this.currentFactory.uid
+        }
+      }
+
+      this.wsAlarm = new Socket(params)
       this.wsAlarm.onmessage((data) => {
         console.log('data :>> ', data)
         this.alarmList = data
@@ -160,22 +263,46 @@ export default {
       })
     },
     sendWsAreaDevice() {
-      this.wsAreaDevice = new Socket({ url: this.wsUrlAreaDevice })
+      const url = '/factory_info'
+      const params = {
+        url,
+        data: {
+          factory_id: this.currentFactory.uid
+        }
+      }
+
+      this.wsAreaDevice = new Socket(params)
       this.wsAreaDevice.onmessage((data) => {
         console.log('data :>> ', data)
+        // this.areaKey++
 
         this.areaDeviceData = data
       })
     },
     sendWsStatus() {
-      this.wbSockeStatus = new Socket({ url: this.wsUrlStatus })
+      const url = '/alarm_statistics'
+      const params = {
+        url,
+
+        data: {
+          factory_id: this.currentFactory.uid
+        }
+      }
+      this.wbSockeStatus = new Socket(params)
       this.wbSockeStatus.onmessage((data) => {
         console.log('data :>> ', data)
 
         this.statusData = data
       })
     },
-    autoSize() {
+    autoSize(cancle) {
+      if (cancle) {
+        document.getElementById('app').style.height = 100 + 'vh'
+        document.getElementById('app').style.width = 100 + 'vw'
+        document.getElementById('app').style.transform = 'none'
+
+        return
+      }
       // 自适应窗口大小
       const h = window.innerHeight / 900
       const w = window.innerWidth / 1600
@@ -210,12 +337,23 @@ export default {
     },
     closeClick() {
       // 关闭大屏
+      this.$router.push({ name: 'Dashboard' })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 1;
+  font-family: 'PingFang SC', 'Microsoft Yahei', sans-serif;
+  text-decoration: none;
+  color: #ffffff;
+}
 #home {
   position: relative;
   display: flex;

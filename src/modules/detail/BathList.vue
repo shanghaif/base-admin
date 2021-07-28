@@ -1,22 +1,55 @@
 <template>
   <div id="module">
     <div class="title">{{ title }}</div>
-    <div class="sub">{{ company }} / {{ factory }} / {{ area }}</div>
+    <div class="sub">{{ alarmItem.Company }} / {{ alarmItem.Factory }} / {{ alarmItem.Area }}</div>
+    <!-- <div class="content-crumbs">
+      <div class="content-crumb">{{ alarmItem.Company }}</div>
+      <div class="content-crumb">{{ alarmItem.Factory }}</div>
+      <div class="content-crumb">{{ alarmItem.Area }}</div>
+    </div> -->
+    <div class="content-filter">
 
-    <div class="filter">
-      <ZSelect
-        v-model="bathStatus.selected"
-        class="filter-status"
-        :list="bathStatus.status"
-        text="电解槽状态"
-      />
+      <div class="content-select">
+
+        <!-- <Select
+          v-model="selectType"
+          placeholder="所有状态"
+          filterable
+          @on-change="getType"
+        >
+          <Option
+            v-for="item in cellTypeOptions"
+            :key="item.value + '所有状态'"
+            :value="item.value"
+          >{{ item.label }}</Option>
+        </Select> -->
+        <ZSelect
+          v-model="selectType"
+          :list="cellTypeOptions"
+          text="电解槽状态"
+          @update="getType"
+        />
+      </div>
+      <!-- <div class="content-search">
+        <Select
+          v-model="searchCell"
+          placeholder="搜索电解槽"
+          @on-change="getSearch"
+        >
+          <Option
+            v-for="item in searchOptions"
+            :key="item.value + '搜索电解槽'"
+            :value="item.value"
+          >{{ item.label }}</Option>
+        </Select>
+      </div> -->
       <div class="filter-keyword">
         <input
-          v-model="keyword"
+          v-model="searchCell"
           class="filter-keyword-input"
           type="text"
           placeholder="搜索电解槽..."
-          @input="findKeyword()"
+          @input="getSearch(searchCell)"
         >
         <p class="iconfont icon-search" />
       </div>
@@ -24,26 +57,25 @@
 
     <div class="area">
       <Status
-        v-if="bathData.length === 0"
+        v-if="list.length === 0"
         img="null"
         text="暂无电解槽信息"
       />
 
       <div
-        v-for="(item, index) of bathData"
+        v-for="(item, index) of list"
         v-else
-        ref="bath"
         :key="index"
         class="bath"
-        :class="item.isRunning ? '' : 'stopped'"
-        @click="bathClick(index)"
+        :class="{stopped:!item.isRunning,active:item.bath_id === currentbathID}"
+        @click="bathClick(index,item)"
       >
         <BathIcon
           class="bath-icon"
-          :fill-color="item.bathColor"
+          :fill-color="item.bath_id === currentbathID ? 'var(--theme)' : 'rgba(255, 255, 255, 0.7)'"
         />
         <div class="bath-info">
-          <div class="bath-name">{{ item.name }} {{ item.isRunning ? '' : '(停机)' }}</div>
+          <div class="bath-name">{{ item.name }} {{ item.isRunning ? '' : '(离线)' }}</div>
           <div class="bath-point">
             <div
               v-for="(point, index2) of item.point"
@@ -64,13 +96,18 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapMutations } from 'vuex'
+import { cellInfo } from '@/api/station'
+
 import Status from '@/components/Status'
-import ZSelect from '@/components/ZSelect'
+// import ZSelect from '@/components/ZSelect'
 import BathIcon from '@/components/BathIcon'
+import { Socket } from '@/utils/socket'
+
 export default {
   components: {
     Status,
-    ZSelect,
+    // ZSelect,
     BathIcon
   },
   data() {
@@ -79,63 +116,141 @@ export default {
       company: '云南分公司',
       factory: '电解铝二厂',
       area: '二分区',
-      bathStatus: { selected: 0, status: ['全部', '正常', '停机'] },
-      bathData: [],
-      keyword: ''
+      bathStatus: { selected: 0, status: ['全部', '正常', '离线'] },
+      // list: [],
+      // list: [],
+      bathWs: null,
+      currentBath: null,
+      keyword: '',
+      currentbathID: 0,
+
+      data: [],
+      list: [],
+      // searchOptions: [],
+
+      selectType: 'all',
+      selectFreshTime: '',
+      selectTime: '',
+      searchCell: '',
+      loading: false,
+      cellTypeOptions: [
+        { value: 'all', label: '全部' },
+        { value: 'good', label: '正常' },
+        { value: 'off', label: '离线' }
+      ],
+      cacheList: [],
+      imgUrl: null,
+
+      curCell: '10000'
+    }
+  },
+  computed: {
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem
+    }),
+
+    searchOptions() {
+      return this.list.map((item) => {
+        return { value: `${item.name}`, label: `${item.name}` }
+      })
     }
   },
   mounted() {
-    this.updateValue()
+    this.currentBath = { ...this.alarmItem }
+    this.currentbathID = this.currentBath.BathID
+    this.sendWs()
+  },
+  beforeDestroy() {
+    this.destroyWs()
   },
   methods: {
-    updateValue() {
-      // 生成随机电解槽数据
-      const randomCount = Math.floor(Math.random() * 20 + 1)
-      const randomName = Math.floor(Math.random() * 100 + 1990)
-      for (let i = 0; i < randomCount; i++) {
-        const bath = {
-          name: '电解槽' + (randomName + i),
-          isRunning: i === 0 ? true : i === 3 ? false : Math.random() > 0.2,
+    buildData() {
+      this.list = this.data.map((v) => {
+        return {
+          bath_id: v.bath_id,
+          name: v.bath_name,
+          isRunning: v.point_all > 0,
           bathColor: 'rgba(255, 255, 255, 0.7)',
           point: [
             {
               text: '在线点位',
-              value: Math.floor(Math.random() * 38 + 130),
+              value: v.point_online,
               color: 'var(--theme)'
             },
             {
               text: '温度告警',
-              value: i === 0 ? 0 : Math.floor(Math.random() * 20),
+              value: v.point_temperature,
               color: 'var(--alarmB)'
             },
             {
               text: '设备异常',
-              value: i === 1 ? 0 : Math.floor(Math.random() * 20),
+              value: v.point_abnormal,
               color: 'var(--alarmC)'
             },
             {
               text: '趋势预警',
-              value: i === 2 ? 0 : Math.floor(Math.random() * 20),
+              value: v.point_rate,
               color: 'var(--alarmB)'
             }
           ]
         }
-        this.$set(this.bathData, i, bath)
-        setTimeout(() => {
-          this.bathClick(0)
-        }, 20)
-      }
-      // console.log(this.bathData);
+      })
+      this.cacheList = this.list
+      // this.searchOptions = this.list.map((item) => {
+      //   return { value: `${item.name}`, label: `${item.name}` }
+      // })
     },
-    bathClick(index) {
-      if (this.bathData[index].isRunning) {
-        for (let i = 0; i < this.bathData.length; i++) {
-          this.$refs.bath[i].removeAttribute('style')
-          this.$set(this.bathData[i], 'bathColor', 'rgba(255, 255, 255, 0.7)')
+    sendWs() {
+      const url = '/area_info'
+      const params = {
+        url,
+
+        data: {
+          area_id: this.currentBath.AreaID
         }
-        this.$refs.bath[index].style.boxShadow = 'inset 0 0 0 2px var(--theme)'
-        this.$refs.bath[index].style.background = 'var(--theme-bg)'
-        this.$set(this.bathData[index], 'bathColor', 'var(--theme)')
+      }
+      this.bathWs = new Socket(params)
+      this.bathWs.onmessage((data) => {
+        console.log('data :>> ', data)
+        this.data = data || []
+        this.buildData()
+      })
+    },
+    destroyWs() {
+      this.bathWs && this.bathWs.destroy()
+    },
+    // 根据状态过滤
+    getType(type) {
+      if (type === 'off') {
+        this.list = this.cacheList.filter((v) => !v.isRunning)
+      } else if (type === 'good') {
+        this.list = this.cacheList.filter((v) => v.isRunning)
+      } else {
+        this.list = this.cacheList
+      }
+    },
+    getSearch(val) {
+      this.getType(this.selectType)
+      if (val) {
+        this.list = this.list.filter((v) => {
+          // return v.name === val
+          return v.name.indexOf(val) > -1
+        })
+      }
+    },
+    bathClick(index, item) {
+      // if (this.list[index].isRunning) {
+      //   for (let i = 0; i < this.list.length; i++) {
+      //     this.$refs.bath[i].removeAttribute('style')
+      //     this.$set(this.list[i], 'bathColor', 'rgba(255, 255, 255, 0.7)')
+      //   }
+      //   this.$refs.bath[index].style.boxShadow = 'inset 0 0 0 2px var(--theme)'
+      //   this.$refs.bath[index].style.background = 'var(--theme-bg)'
+      //   this.$set(this.list[index], 'bathColor', 'var(--theme)')
+      // }
+      if (item.isRunning) {
+        this.currentbathID = item.bath_id
+        this.$emit('onClick', item)
       }
     },
     findKeyword() {
@@ -146,13 +261,31 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+* {
+  color: #fff;
+}
 #module {
   height: 100%;
 }
 .sub {
   margin: 10px 0;
 }
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--theme);
+}
+.content-filter {
+  @include flex(space-between, center);
 
+  .content-select {
+    width: 40%;
+  }
+  .content-search {
+    // margin-left: 20px;
+    width: 50%;
+  }
+}
 .filter {
   display: flex;
   gap: 20px;
@@ -192,7 +325,7 @@ export default {
   margin: 4px -8px 0 -8px;
   height: calc(100% - 58px);
   width: calc(100% + 16px);
-  overflow-y: scroll;
+  overflow-y: auto;
   .bath {
     display: flex;
     gap: 14px;
@@ -203,6 +336,10 @@ export default {
     background: rgba(255, 255, 255, 0.1);
     cursor: pointer;
     transition: all ease, 0.3s;
+    &.active {
+      box-shadow: inset 0 0 0 2px var(--theme);
+      background: var(--theme-bg);
+    }
     &:hover {
       transform: scale(1.03);
     }

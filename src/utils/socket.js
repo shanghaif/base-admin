@@ -5,6 +5,11 @@
 // this.wbSocket = new Socket(options)
 // this.wbSocket.onmessage((data) => {})
 import { Heart } from './heart'
+import { getToken } from '@/utils/auth'
+import qs from 'qs'
+const baseUrl = `${process.env.VUE_APP_SOCKET_API}/api/ws`
+const tk = getToken()
+const tokenParams = {api_token: tk}
 export class Socket extends Heart {
   ws = null
 
@@ -13,6 +18,8 @@ export class Socket extends Heart {
 
   OPTIONS = {
     url: null, // 链接的通道的地址
+    data: null, // 链接的通道的地址
+    // api_token: getToken(), // 链接的通道的地址
     heartTime: 5000, // 心跳时间间隔
     heartMsg: 'ping', // 心跳信息,默认为'ping'
     isReconnect: true, // 是否自动重连
@@ -42,8 +49,10 @@ export class Socket extends Heart {
       new Error('地址不存在，无法建立通道')
       return
     }
+    const params = Object.assign(this.OPTIONS.data, tokenParams)
+    const url = `${baseUrl}${this.OPTIONS.url}?` + qs.stringify(params)
     delete this.ws
-    this.ws = new WebSocket(this.OPTIONS.url)
+    this.ws = new WebSocket(url)
     this.onopen()
     this.onclose()
     this.onmessage()

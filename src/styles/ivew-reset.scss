@@ -19,16 +19,16 @@
 }
 .ivu-input {
   background: rgba(255, 255, 255, 0.1);
-  height: 24px;
-  line-height: 24px;
+  height: 30px;
+  line-height: 30px;
   border: 0;
   border-radius: 0;
   color: #fff;
 }
 
 .ivu-input-suffix i {
-  font-size: 18px;
-  line-height: 24px;
+  font-size: 20px;
+  line-height: 30px;
 }
 .ivu-picker-panel-shortcut {
   &:hover {
@@ -54,7 +54,7 @@
 }
 .ivu-select {
   .ivu-select-selection {
-    height: 24px;
+    height: 30px;
     background: rgba(255, 255, 255, 0.1);
     border: 0;
     color: #fff;
@@ -95,8 +95,8 @@
 
 .ivu-select-input {
   // background: rgba(255, 255, 255, 0.1);
-  height: 24px;
-  line-height: 24px;
+  height: 30px;
+  line-height: 30px;
   border: 0;
   border-radius: 0;
   color: #fff;

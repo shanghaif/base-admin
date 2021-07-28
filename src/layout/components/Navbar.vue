@@ -16,7 +16,7 @@
 
       <template v-if="device!=='mobile'">
         <router-link
-          to="/big-screen"
+          to="/home"
           class="right-menu-item link"
         >
           {{ $t('navbar.bigScreen') }}

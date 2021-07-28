@@ -1,5 +1,8 @@
 <template>
-  <div id="detail">
+  <div
+    id="detail"
+    class="now-detail"
+  >
     <Background />
     <div class="top">
       <div class="main-title">
@@ -14,19 +17,37 @@
       </div>
     </div>
     <div class="left">
-      <BathList class="module" />
+      <BathList
+        class="module"
+        @onClick="clickBath"
+      />
+
     </div>
     <div class="middle">
-      <Point
-        ref="point"
-        class="module"
+      <detail-line-chart
+        ref="DetailLineChart"
+        :list="piontHistoryList"
+        @refresh="refresh"
+        @changeDate="changeDateQuery"
+        @exportPoint="exportPoint"
       />
     </div>
     <div class="right">
-      <AlarmArea class="module" />
+      <!-- <AlarmArea class="module" /> -->
+      <AlarmFactory
+        class="module"
+        :list="alarmList"
+        :is-area="true"
+        @current-row="clickAlarm"
+      />
     </div>
     <div class="bottom">
-      <Bath />
+      <Bath
+        :list="pointList"
+        :min="unusualVal"
+        :max="warningVal"
+        @pointClick="pointClick"
+      />
     </div>
     <div
       class="return"
@@ -42,22 +63,50 @@
 </template>
 
 <script>
+import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
+import { getCell, setCell, removeCell, getCurrentFactory } from '@/utils/auth'
+
+import sortBy from 'lodash/sortBy'
+import { devicePoint, deviceHistory, exportPointInfo } from '@/api/station'
+import { debounce } from '@/utils'
+
 import Background from '@/modules/detail/Background'
 
 import BathList from '@/modules/detail/BathList'
-import AlarmArea from '@/modules/detail/AlarmArea'
+// import AlarmArea from '@/modules/detail/AlarmArea'
 import Bath from '@/modules/detail/Bath'
+import AlarmFactory from '@/modules/index/AlarmFactory'
+import DetailLineChart from '@/modules/detail/DetailLineChart'
+// import DetailPoint from '@/modules/detail/DetailPoint'
 
-import Point from '@/modules/detail/Point'
-
+// import Point from '@/modules/detail/Point'
+import { Socket } from '@/utils/socket'
+const baseUrl = `${process.env.VUE_APP_SOCKET_API}/ws/`
+function createCellList(len) {
+  const n = len
+  const arr = []
+  let obj = {}
+  while (len--) {
+    obj = {
+      index: len,
+      empty: true,
+      tid: n - len,
+      value: '无数据'
+    }
+    arr.push(obj)
+  }
+  return arr
+}
 export default {
   name: 'Detail',
   components: {
     Background,
     BathList,
-    Point,
-    AlarmArea,
-    Bath
+    // Point,
+    // AlarmArea,
+    Bath,
+    AlarmFactory,
+    DetailLineChart
   },
   data() {
     return {
@@ -65,16 +114,252 @@ export default {
         text: '新视智科温度监测系统',
         logo: require('@/assets/logo.svg')
       },
-      updateTime: ''
+      updateTime: '',
+      wsAlarm: null,
+      alarmList: [],
+
+      pointList: [],
+      allPointList: [
+        {
+          tid: '',
+          value: 0
+        }
+      ],
+      allPointListFake: createCellList(168),
+      piontHistoryList: [
+        {
+          fv: 0,
+          pick_time: '',
+          pid: '',
+          tid: ''
+        }
+      ],
+      queryParams: {
+        sTime: '',
+        eTime: '',
+        id: ''
+      }
     }
   },
+  computed: {
+    ...mapGetters(['warningVal', 'unusualVal']),
+
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem,
+      currentPoint: (state) => state.station.currentPoint,
+      currentFactory: (state) => state.station.currentFactory
+    }),
+    wsUrlAlarm() {
+      return `${baseUrl}alarm?tid=${getCurrentFactory().uid}`
+    }
+  },
+  created() {
+    this.init()
+  },
+  // watch: {
+  //   alarmItem: {
+  //     handler: function (newVal, oldVal) {
+  //       if (newVal) {
+  //         this.init()
+  //       }
+  //     },
+  //     deep: true
+  //   }
+  // },
   mounted() {
     this.updateTime = this.util.formatTime(new Date())
-    window.onresize = this.resize
-    this.autoSize()
+    this.resize()
+
+    this.resizeHandler = debounce(() => {
+      this.resize()
+    }, 300)
+    this.initResizeEvent()
+  },
+  beforeDestroy() {
+    this.destroyResizeEvent()
+    this.autoSize(1)
+    this.destroyWs()
   },
   methods: {
-    autoSize() {
+    ...mapMutations({
+      SET_ALARMITEM: 'station/SET_ALARMITEM',
+      SET_POINT: 'station/SET_POINT'
+    }),
+    init() {
+      this.destroyWs()
+
+      // 第一次进入页面默认查询时间
+      this.queryParams.sTime =
+        this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 00:00'
+      this.queryParams.eTime =
+        this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 23:59'
+      this.queryPiont()
+      this.queryPiontHistory()
+      this.sendWsAlarm()
+    },
+    destroyWs() {
+      this.wsAlarm && this.wsAlarm.destroy()
+    },
+    sendWsAlarm() {
+      const url = '/alarm'
+      const params = {
+        url,
+
+        data: {
+          tid: getCurrentFactory().uid
+        }
+      }
+      this.wsAlarm = new Socket(params)
+      this.wsAlarm.onmessage((data) => {
+        console.log('data :>> ', data)
+        this.alarmList = data.filter((v) => v.Area === this.alarmItem.Area)
+        // this.SET_ALARMLIST(this.alarmList)
+      })
+    },
+    clickAlarm(obj) {
+      this.SET_ALARMITEM(obj)
+      this.init()
+    },
+    isExcel(res) {
+      let fileName = ''
+      const data = res.data
+      const disposition = res.headers['content-disposition']
+      if (disposition) {
+        fileName = window
+          .decodeURI(disposition.split('=')[1], 'UTF-8')
+          .replace(/"/g, '')
+      }
+      if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        const blob = new Blob([data])
+        window.navigator.msSaveOrOpenBlob(blob, fileName)
+      } else {
+        /* 火狐谷歌的文件下载方式 */
+        const blob = new Blob([data])
+        const downloadElement = document.createElement('a')
+        const href = window.URL.createObjectURL(blob)
+        downloadElement.href = href
+        downloadElement.download = fileName
+        document.body.appendChild(downloadElement)
+        downloadElement.click()
+        document.body.removeChild(downloadElement)
+        window.URL.revokeObjectURL(href)
+      }
+    },
+    exportPoint(obj) {
+      const { arr, is_compress } = obj
+      const params = {
+        id: this.alarmItem.t_id,
+        is_compress,
+        sTime: arr[0],
+        eTime: arr[1]
+      }
+
+      exportPointInfo(params)
+        .then((res) => {
+          this.isExcel(res)
+          this.$refs.DetailLineChart.hideExport()
+        })
+        .catch((err) => {
+          this.$message(err)
+        })
+    },
+    refresh() {
+      this.queryPiontHistory()
+    },
+    changeDateQuery(date) {
+      this.queryParams.sTime = date[0] + ' 00:00'
+      this.queryParams.eTime = date[1] + ' 23:59'
+      this.queryPiontHistory()
+    },
+
+    clickBath(item) {
+      const obj = { ...this.alarmItem }
+      obj.BathID = item.bath_id
+      this.SET_ALARMITEM(obj)
+      devicePoint(this.alarmItem.BathID)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.allPointList = arr
+          this.setFuncOfpoint()
+          obj.t_id =
+            this.allPointList.length > 0 ? this.allPointList[0].tid : ''
+          this.SET_ALARMITEM(obj)
+          this.queryPiontHistory()
+        })
+        .catch((err) => {
+          this.$message(err)
+        })
+    },
+    pointClick(point) {
+      // this.SET_ALARMITEM(bath)
+      const obj = { ...this.alarmItem }
+      obj.t_id = point.tid
+      this.SET_POINT(point)
+      this.SET_ALARMITEM(obj)
+      this.queryPiontHistory()
+    },
+    splitArr(data) {
+      const result = []
+      for (var i = 0; i < data.length; i += 3) {
+        result.push(data.slice(i, i + 3))
+      }
+      return result
+    },
+    /* 点位数据结构 */
+    setFuncOfpoint() {
+      this.allPointListFake = createCellList(168)
+      // let groupNum = 20,row = 1 // 电解槽一排多少组 每3个为一组
+      const len = this.allPointListFake.length // 默认168个点位
+      const arr = this.allPointList
+
+      arr.forEach((v, i) => {
+        this.allPointListFake[i] = v
+      })
+      const arrFake1 = this.allPointListFake.slice(0, len / 2)
+      const arrFake2 = this.allPointListFake.slice(len / 2, len)
+      const newArr1 = this.splitArr(arrFake1)
+      const newArr2 = this.splitArr(arrFake2)
+
+      const pointListItem1 = newArr1.map((v, i) => {
+        return { pointList: v }
+      })
+      const pointListItem2 = newArr2.map((v, i) => {
+        return { pointList: v }
+      })
+
+      this.pointList = [{ arr: pointListItem1 }, { arr: pointListItem2 }]
+      this.SET_POINT(this.allPointList[0])
+    },
+    queryPiont() {
+      devicePoint(this.alarmItem.BathID)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.allPointList = arr
+          this.setFuncOfpoint()
+        })
+        .catch((err) => {
+          this.$message(err)
+        })
+    },
+    queryPiontHistory(date) {
+      this.queryParams.id = this.alarmItem.t_id
+      deviceHistory(this.queryParams)
+        .then((res) => {
+          const arr = res.data.result || []
+          this.piontHistoryList = sortBy(arr, (v) => v.pick_time)
+        })
+        .catch((err) => {
+          this.$message(err)
+        })
+    },
+    autoSize(cancle) {
+      if (cancle) {
+        document.getElementById('app').style.height = 100 + 'vh'
+        document.getElementById('app').style.width = 100 + 'vw'
+        document.getElementById('app').style.transform = 'none'
+
+        return
+      }
       // 自适应窗口大小
       const h = window.innerHeight / 900
       const w = window.innerWidth / 1600
@@ -85,27 +370,46 @@ export default {
       document.getElementById('app').style.transform = 'scale(' + rate + ')'
       // console.log(rate, h, w);
     },
+
     resize() {
       this.autoSize()
       this.$nextTick(() => {
-        this.$refs.point.chart.resize()
+        try {
+          this.$refs.DetailLineChart &&
+            this.$refs.DetailLineChart.chart.resize()
+        } catch (err) {
+          console.log('resize :>> ', err)
+        }
       })
     },
-    refreshCharts() {
-      // 更新图表颜色(测试用)
-      this.$refs.point.draw()
+    initResizeEvent() {
+      window.addEventListener('resize', this.resizeHandler)
+    },
+    destroyResizeEvent() {
+      window.removeEventListener('resize', this.resizeHandler)
     },
     returnClick() {
-      window.history.go(-1)
+      this.$router.push({ path: '/home' })
     },
     closeClick() {
       // 关闭大屏
+      this.$router.push({ name: 'Dashboard' })
     }
   }
 }
 </script>
 
 <style lang="scss" scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  // font-size: 16px;
+  line-height: 1;
+  font-family: 'PingFang SC', 'Microsoft Yahei', sans-serif;
+  text-decoration: none;
+  color: #ffffff;
+}
 #detail {
   position: relative;
   display: flex;
@@ -154,7 +458,7 @@ export default {
   position: relative;
   height: 66%;
   width: 28%;
-  z-index: 1;
+  z-index: 0;
   .module {
     width: 100%;
   }

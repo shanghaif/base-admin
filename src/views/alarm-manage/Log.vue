@@ -94,6 +94,8 @@ export default {
         res = '成功'
       } else if (type === 'temperature_high') {
         res = '温度高'
+      } else if (type === 'fail') {
+        res = '失败'
       }
       return res
     }
@@ -146,6 +148,8 @@ export default {
         res = 'info'
       } else if (type === 'success') {
         res = 'success'
+      } else if (type === 'fail') {
+        res = 'danger'
       }
       return res
     }

@@ -1,7 +1,11 @@
 <template>
   <div id="module">
     <div class="title">告警点位温度曲线</div>
-    <div class="info">
+
+    <div
+      v-show="alarmList.length > 0"
+      class="info"
+    >
       <div class="left">
         <div class="position">{{ currentAlarmObj.Area }} / {{ currentAlarmObj.Bath }}</div>
         <div class="msg alarm-b">{{ currentAlarmObj.t_id }}: {{ currentAlarmObj.alarm_name }}</div>
@@ -129,6 +133,8 @@ export default {
 
         // this.newList = [...newName]
         if (newName.length > 0) {
+          this.alarmListIndex = 0
+
           this.init()
           this.timer = setInterval(() => {
             this.loop()
