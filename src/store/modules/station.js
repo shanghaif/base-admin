@@ -10,7 +10,8 @@ const state = {
   // currentFactory: {},
   alarmList: [],
   alarmItem: getAlarmItem(),
-  currentCell: getCell()
+  currentCell: getCell(),
+  tempHeight: 0
 }
 
 const mutations = {
@@ -36,6 +37,9 @@ const mutations = {
   },
   SET_ALARMLIST: (state, alarmList) => {
     state.alarmList = alarmList
+  },
+  SET_TEMPHEIGHT: (state, tempHeight) => {
+    state.tempHeight = tempHeight
   },
   SET_POINT: (state, currentPoint) => {
     state.currentPoint = currentPoint

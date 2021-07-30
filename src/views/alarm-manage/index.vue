@@ -203,7 +203,7 @@ export default {
     statusFilter(type) {
       let res = ''
       if (type === 'offline') {
-        res = '断线'
+        res = '离线'
       } else if (type === 'temperature_high') {
         res = '温度高'
       }
@@ -316,14 +316,15 @@ export default {
       //   return { value: v.uid, label: v.s_name }
       // })
     },
+
     typeFunc(type) {
       let res = ''
-      if (type === 'temperature_high') {
+      if (type === 'temperature_high' || type === 'abnormal') {
         res = 'danger'
-      } else if (type === 0) {
-        res = 'info'
-      } else if (type === 'offline') {
+      } else if (type === 'rate_high') {
         res = 'warning'
+      } else if (type === 'offline') {
+        res = 'info'
       }
       return res
     },

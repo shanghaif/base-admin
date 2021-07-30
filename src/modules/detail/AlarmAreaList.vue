@@ -44,10 +44,10 @@
     </div>
     <div class="right">
       {{ $dayjs(source.time_changed).format('YYYY-MM-DD HH:mm') }}
-      <span
+      <!-- <span
         v-if="!isArea"
         class="iconfont icon-arrow"
-      />
+      /> -->
     </div>
   </div>
 
@@ -57,7 +57,7 @@
 <script>
 import { mapState, mapActions, mapMutations } from 'vuex'
 export default {
-  name: 'AlarmFactory',
+  name: 'AlarmAreaList',
 
   filters: {
     typeText(val) {
@@ -137,9 +137,6 @@ export default {
     //   // console.log(this.alarm);
     // },
     itemClick(item) {
-      // window.location.href = '#/detail'
-      this.$router.push({ path: '/detail' })
-      this.$emit('current-row', item)
       this.SET_ALARMITEM(item)
     }
   }
@@ -175,6 +172,7 @@ export default {
       color: rgba(255, 255, 255, 0.7);
     }
     .msg {
+      font-size: 16px;
       display: flex;
       width: 100%;
       white-space: nowrap;

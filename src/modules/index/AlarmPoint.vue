@@ -8,13 +8,16 @@
     >
       <div class="left">
         <div class="position">{{ currentAlarmObj.Area }} / {{ currentAlarmObj.Bath }}</div>
-        <div class="msg alarm-b">{{ currentAlarmObj.t_id }}: {{ currentAlarmObj.alarm_name }}</div>
+        <div
+          class="msg"
+          :class="pointTextClass(currentAlarmObj)"
+        >{{ currentAlarmObj.t_id }}: {{ currentAlarmObj.alarm_id |typeText }}</div>
       </div>
       <div class="right">
         <div class="temp-text">当前温度</div>
         <div
-          class="temp alarm-b "
-          :class="{'alarm-b':nowTemp>warningVal}"
+          class="temp"
+          :class="pointTextClass(currentAlarmObj)"
         >{{ nowTemp }}</div>
       </div>
     </div>
@@ -41,7 +44,21 @@ import sortBy from 'lodash/sortBy'
 
 export default {
   name: 'AlarmPoint',
-
+  filters: {
+    typeText(val) {
+      let res = ''
+      if (val === 'temperature_high') {
+        res = '温度告警'
+      } else if (val === 'offline') {
+        res = '离线'
+      } else if (val === 'rate_high') {
+        res = '趋势预警'
+      } else if (val === 'abnormal') {
+        res = '设备异常'
+      }
+      return res
+    }
+  },
   data() {
     return {
       tempMin: 300,
@@ -51,7 +68,7 @@ export default {
       exportDialogVisible: false,
 
       value: Math.random() * 100,
-      step: 8 * 1000,
+      step: 60 * 1000,
       option: null,
       timer: null,
       // warningVal: 250,
@@ -86,9 +103,9 @@ export default {
   },
   computed: {
     ...mapState({
-      alarmList: (state) => state.station.alarmList
+      alarmList: (state) => state.station.alarmList,
+      tempHeight: (state) => state.station.tempHeight
     }),
-    ...mapGetters(['warningVal', 'unusualVal']),
 
     currentAlarmObj: {
       get() {
@@ -113,10 +130,9 @@ export default {
       })
     },
     nowTemp() {
-      const obj = this.allPointList.find(
-        (v) => v.tid === this.currentAlarmObj.t_id
+      return (
+        (this.list.length > 1 && this.list[this.list.length - 1]['fv']) || ''
       )
-      return obj ? obj.value : 0
     },
     averageTemp() {
       const sum = this.list.reduce((pre, cur) => {
@@ -152,6 +168,9 @@ export default {
   },
   mounted() {},
   methods: {
+    ...mapMutations({
+      SET_TEMPHEIGHT: 'station/SET_TEMPHEIGHT'
+    }),
     init() {
       // this.currentAlarmObj = this.alarmList[0]
       this.queryParams.sTime =
@@ -161,8 +180,35 @@ export default {
         this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
         ' 23:59'
 
-      this.queryPiont()
+      // this.allPointList.length < 1 && this.queryPiont()
+      // // this.queryPiont()
       this.queryPiontHistory()
+    },
+    pointTextClass(point) {
+      let res = ''
+      const val = point.alarm_id
+
+      if (val === 'rate_high') {
+        res = 'wram-text'
+      } else if (val === 'offline') {
+        res = ''
+      } else if (val === 'temperature_high') {
+        res = 'red-text'
+      } else if (val === 'abnormal') {
+        res = 'red-text'
+      } else {
+        res = 'null-text'
+      }
+
+      return res
+    },
+    styleStatus(val) {
+      const obj = {}
+      obj['alarm-a'] = val === 'offline'
+      obj['alarm-b'] = val === 'temperature_high' || val === 'abnormal'
+      obj['alarm-c'] = val === 'rate_high'
+
+      return obj
     },
     clickArrow(isAdd) {
       if (!this.hasAlarm) {
@@ -184,22 +230,23 @@ export default {
       }
       this.init()
     },
-    queryPiont() {
-      devicePoint(this.currentAlarmObj.BathID)
-        .then((res) => {
-          const arr = res.data.result || []
-          this.allPointList = arr
-          // this.setFuncOfpoint()
-        })
-        .catch((err) => {
-          this.$message(err)
-        })
-    },
+    // queryPiont() {
+    //   devicePoint(this.currentAlarmObj.BathID)
+    //     .then((res) => {
+    //       const arr = res.data.result || []
+    //       this.allPointList = arr
+    //       // this.setFuncOfpoint()
+    //     })
+    //     .catch((err) => {
+    //       this.$message(err)
+    //     })
+    // },
     queryPiontHistory(date) {
       this.queryParams.id = this.currentAlarmObj.t_id
       deviceHistory(this.queryParams)
         .then((res) => {
-          const arr = res.data.result || []
+          const arr = (res.data.result && res.data.result.list) || []
+          res.data.result && this.SET_TEMPHEIGHT(res.data.result.high)
           this.list = sortBy(arr, (v) => v.pick_time)
           this.initChart()
         })
@@ -314,12 +361,12 @@ export default {
               // { gte: -100, lte: 200, color: colorTheme }
               {
                 gt: 0,
-                lte: 250,
+                lte: that.tempHeight,
                 color: colorTheme
               },
               {
-                gt: 250,
-                lte: 500,
+                gt: that.tempHeight,
+                lte: 5000,
                 color: colorAlarmB
               }
             ]
@@ -382,7 +429,7 @@ export default {
               fontWeight: 600,
               color: colorAlarmB
             },
-            data: [{ yAxis: that.warningVal }]
+            data: [{ yAxis: that.tempHeight }]
           }
         }
       })

@@ -7,7 +7,9 @@
 import { Heart } from './heart'
 import { getToken } from '@/utils/auth'
 import qs from 'qs'
-const baseUrl = `${process.env.VUE_APP_SOCKET_API}/api/ws`
+const env = process.env.NODE_ENV === 'production' ? `ws://${location.host}` : process.env.VUE_APP_SOCKET_API
+const baseUrl = `${env}/api/ws`
+// const baseUrl = `/api/ws`
 const tk = getToken()
 const tokenParams = {api_token: tk}
 export class Socket extends Heart {

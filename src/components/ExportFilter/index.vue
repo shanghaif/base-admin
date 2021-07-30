@@ -116,8 +116,8 @@ export default {
     },
     changeExportDate(arr) {
       if (arr) {
-        this.exportDate[0] = this.$dayjs(arr[0]).format('YYYY-MM-DD')
-        this.exportDate[1] = this.$dayjs(arr[1]).format('YYYY-MM-DD')
+        this.exportDate[0] = this.$dayjs(arr[0]).format('YYYY-MM-DD') + ' 00:00'
+        this.exportDate[1] = this.$dayjs(arr[1]).format('YYYY-MM-DD') + ' 23:59'
       }
     },
     isExcel(res) {

@@ -54,11 +54,24 @@
       />
     </div>
     <div class="right">
-      <AlarmFactory
+      <!-- <AlarmFactory
         class="module"
         :list="alarmList"
         @current-row="clickAlarm"
-      />
+      /> -->
+      <div class="right-top">
+
+        <div class="title">分厂告警信息</div>
+        <virtual-list
+          style="height: 100%; overflow-y: auto;"
+          make
+          list
+          scrollable
+          :data-key="'uid'"
+          :data-sources="alarmList"
+          :data-component="itemComponent"
+        />
+      </div>
       <AlarmPoint
         ref="alarm_point"
         class="module"
@@ -96,6 +109,7 @@ import Info from '@/modules/index/Info'
 import AlarmFactory from '@/modules/index/AlarmFactory'
 import AlarmPoint from '@/modules/index/AlarmPoint'
 import { Socket } from '@/utils/socket'
+import VirtualList from 'vue-virtual-scroll-list'
 
 export default {
   name: 'Home',
@@ -106,11 +120,13 @@ export default {
     AlarmCount,
     Map,
     Info,
-    AlarmFactory,
+    // AlarmFactory,
+    VirtualList,
     AlarmPoint
   },
   data() {
     return {
+      itemComponent: AlarmFactory,
       areaKey: 0,
 
       resizeHandler: null,
@@ -223,7 +239,6 @@ export default {
       })
     },
     async queryFactory(arr) {
-      console.log('this.companyList.length :>> ', this.companyList.length)
       if (arr.length > 0) {
         try {
           // 工厂
@@ -273,7 +288,6 @@ export default {
 
       this.wsAreaDevice = new Socket(params)
       this.wsAreaDevice.onmessage((data) => {
-        console.log('data :>> ', data)
         // this.areaKey++
 
         this.areaDeviceData = data
@@ -290,8 +304,6 @@ export default {
       }
       this.wbSockeStatus = new Socket(params)
       this.wbSockeStatus.onmessage((data) => {
-        console.log('data :>> ', data)
-
         this.statusData = data
       })
     },
@@ -337,7 +349,8 @@ export default {
     },
     closeClick() {
       // 关闭大屏
-      this.$router.push({ name: 'Dashboard' })
+      // this.$router.push({ name: 'Dashboard' })
+      this.$router.push({ name: 'AddDevice' })
     }
   }
 }
@@ -374,6 +387,21 @@ export default {
   z-index: 1;
   .module {
     width: 100%;
+  }
+  .right-top {
+    height: calc(66% - 20px);
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.1);
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--theme);
+      font-family: 'PingFang SC', 'Microsoft Yahei', sans-serif;
+      margin-bottom: 20px;
+    }
   }
 }
 .top {

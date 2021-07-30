@@ -81,13 +81,15 @@ export default {
 
       this.dataBar = arrBar.reverse()
       this.dataLine = arrLine.reverse()
+      // this.dataBar = [0, 0, 0, 0, 0, 99999]
+      // this.dataLine = [0, 0, 0, 0, 0, 99999]
     },
     getDate() {
       const n = 7
       const arr = []
 
       for (let i = 0; i < n; i++) {
-        const today = this.$dayjs().subtract(i, 'day').format('YYYY.MM.DD')
+        const today = this.$dayjs().subtract(i, 'day').format('YYYY-MM-DD')
         arr.unshift(today)
       }
       this.dateList = arr
@@ -140,7 +142,18 @@ export default {
           data: that.dateList,
           axisLine: { lineStyle: { color: 'hsla(0, 100%, 100%, 0.1)' } },
           axisTick: { show: false },
-          axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } }
+          // axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } },
+          axisLabel: {
+            textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' },
+            // 坐标轴刻度标签的相关设置。
+            formatter: function (params) {
+              let res = ''
+              const top = that.$dayjs(params).format('YYYY')
+              const bottom = that.$dayjs(params).format('MM-DD')
+              res = top + '\n' + bottom
+              return res
+            }
+          }
         },
         yAxis: { show: false },
         series: [
@@ -152,6 +165,7 @@ export default {
             barGap: '30%',
             animation: false,
             label: {
+              // offset: [0, 0],
               show: true,
               position: 'top',
               fontFamily: 'DIN',
@@ -188,6 +202,7 @@ export default {
             barGap: '30%',
             animation: false,
             label: {
+              // offset: [0, -20],
               show: true,
               position: 'top',
               fontFamily: 'DIN',

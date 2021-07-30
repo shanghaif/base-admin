@@ -169,6 +169,13 @@ export default {
         this.clickActive = this.alarmItem.t_id
       },
       deep: true
+    },
+    alarmItem: {
+      handler(newName, oldName) {
+        this.clickActive = newName.t_id
+        // let point =
+      },
+      deep: true
     }
   },
   mounted() {},
@@ -181,11 +188,11 @@ export default {
       let res = ''
       const val = point.alarm_type && point.alarm_type[0]
 
-      if (val === 'temperature_high') {
+      if (val === 'rate_high') {
         res = 'wram-text'
       } else if (val === 'offline') {
         res = ''
-      } else if (val === 'rate_high') {
+      } else if (val === 'temperature_high') {
         res = 'red-text'
       } else if (val === 'abnormal') {
         res = 'red-text'
@@ -201,9 +208,9 @@ export default {
         none: point.empty,
         null: !point.alarm_type,
         red:
-          (point.alarm_type && point.alarm_type[0] === 'rate_high') ||
+          (point.alarm_type && point.alarm_type[0] === 'temperature_high') ||
           (point.alarm_type && point.alarm_type[0] === 'abnormal'),
-        wram: point.alarm_type && point.alarm_type[0] === 'temperature_high',
+        wram: point.alarm_type && point.alarm_type[0] === 'rate_high',
         offline: point.alarm_type && point.alarm_type[0] === 'offline',
         active: this.clickActive === point.tid,
         hover: this.hoverActive === point.tid
@@ -227,45 +234,6 @@ export default {
         this.hoverActive = id
       } else {
         this.hoverActive = ''
-      }
-    },
-    pointEnter(hasDevice, bIndex, pIndex, gIndex) {
-      if (hasDevice) {
-        this.$refs['top' + bIndex + pIndex][gIndex].style.borderColor =
-          'var(--theme)'
-        this.$refs['top' + bIndex + pIndex][gIndex].style.borderWidth = '2px'
-        this.$refs['top' + bIndex + pIndex][gIndex].style.background =
-          'var(--theme-50)'
-        this.$refs['top' + bIndex + pIndex][gIndex].style.cursor = 'pointer'
-        this.$refs['bottom' + bIndex + pIndex][gIndex].style.borderColor =
-          'var(--theme)'
-        this.$refs['bottom' + bIndex + pIndex][gIndex].style.borderWidth = '2px'
-        this.$refs['bottom' + bIndex + pIndex][gIndex].style.background =
-          'var(--theme-50)'
-        this.$refs['bottom' + bIndex + pIndex][gIndex].style.cursor = 'pointer'
-        this.$set(this.pointData[bIndex][gIndex][pIndex], 'showPop', true)
-      }
-    },
-    pointLeave(bIndex, pIndex, gIndex) {
-      this.$set(this.pointData[bIndex][gIndex][pIndex], 'showPop', false)
-      if (!this.pointData[bIndex][gIndex][pIndex].selected) {
-        this.$refs['top' + bIndex + pIndex][gIndex].removeAttribute('style')
-        this.$refs['bottom' + bIndex + pIndex][gIndex].removeAttribute('style')
-      }
-    },
-    pointClick(hasDevice, bIndex, pIndex, gIndex) {
-      if (hasDevice) {
-        const groupCount = this.pointTotal / this.pointGroup.length / 2
-        for (let i = 0; i < 2; i++) {
-          for (let j = 0; j < groupCount; j++) {
-            for (let k = 0; k < this.pointGroup.length; k++) {
-              this.$set(this.pointData[i][j][k], 'selected', false)
-              this.pointLeave(i, k, j)
-            }
-          }
-        }
-        this.$set(this.pointData[bIndex][gIndex][pIndex], 'selected', true)
-        this.pointEnter(true, bIndex, pIndex, gIndex)
       }
     }
   }

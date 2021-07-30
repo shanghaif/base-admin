@@ -55,6 +55,7 @@
           style="width: 100%"
           highlight-current-row
           :stripe="true"
+          max-height="600px"
           @row-click="currentChange"
         >
           <el-table-column
@@ -77,6 +78,34 @@
             show-overflow-tooltip
           />
           <el-table-column
+            prop="value"
+            label="温度 ℃"
+            class-name="n-wrap"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
+
+              <el-tag
+                :type="typeFunc(scope.row)"
+                plain
+              >{{ scope.row.value }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="alarm_type"
+            label="状态"
+            class-name="n-wrap"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
+
+              <el-tag
+                :type="typeFunc(scope.row)"
+                plain
+              >{{ scope.row.alarm_type && scope.row.alarm_type[0] | statusFilter }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
             prop="pick_time"
             label="时间"
             class-name="n-wrap"
@@ -84,11 +113,11 @@
           >
             <template slot-scope="scope">
 
-              <span>{{ $dayjs(scope.row.pick_time * 1000).format('YYYY-MM-DD mm:ss') }}</span>
+              <span>{{ $dayjs(scope.row.pick_time * 1000).format('YYYY-MM-DD HH:mm') }}</span>
             </template>
           </el-table-column>
         </el-table>
-        <div class="pagination-wrap">
+        <!-- <div class="pagination-wrap">
 
           <el-pagination
             :hide-on-single-page="total < 10"
@@ -97,7 +126,7 @@
             :total="total"
             @current-change="changePage"
           />
-        </div>
+        </div> -->
       </div>
     </div>
     <ExportFilter
@@ -117,12 +146,27 @@ export default {
   name: 'DataDevice',
   components: { ExportFilter },
   filters: {
+    // statusFilter(type) {
+    //   let res = ''
+    //   if (type === 'offline') {
+    //     res = '离线'
+    //   } else if (type === 'temperature_high') {
+    //     res = '温度高'
+    //   }
+    //   return res
+    // },
     statusFilter(type) {
       let res = ''
-      if (type === 'offline') {
-        res = '断线'
-      } else if (type === 'temperature_high') {
-        res = '温度高'
+      if (type === 'temperature_high') {
+        res = '温度告警'
+      } else if (type === 'rate_high') {
+        res = '趋势预警'
+      } else if (type === 'offline') {
+        res = '离线'
+      } else if (type === 'abnormal') {
+        res = '设备异常'
+      } else {
+        res = '正常'
       }
       return res
     }
@@ -220,6 +264,20 @@ export default {
   mounted() {},
 
   methods: {
+    typeFunc(point) {
+      let res = ''
+      const type = point.alarm_type && point.alarm_type[0]
+      if (type === 'temperature_high' || type === 'abnormal') {
+        res = 'danger'
+      } else if (type === 'rate_high') {
+        res = 'warning'
+      } else if (type === 'offline') {
+        res = 'info'
+      } else {
+        res = 'success'
+      }
+      return res
+    },
     changePage(page) {
       this.queryParams.page = page
     },
@@ -261,6 +319,7 @@ export default {
       devicePoint(id)
         .then((res) => {
           this.tableData = res.data.result || []
+          this.total = this.tableData.length
         })
         .catch((err) => {
           this.$message(err)

@@ -274,3 +274,30 @@
 .pagination-wrap {
   margin-top: 20px;
 }
+[scrollable] {
+  [role="group"] {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    // padding: 2px 8px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    margin: 4px 0 0 0;
+    width: calc(100% + 0);
+    overflow-y: auto;
+    min-height: 90%;
+  }
+}
+
+.null-text {
+  color: var(--theme);
+}
+.offline-text {
+  color: var(--alarmA);
+}
+.wram-text {
+  color: var(--alarmC);
+}
+.red-text {
+  color: var(--alarmB);
+}

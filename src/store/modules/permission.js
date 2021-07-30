@@ -41,41 +41,41 @@ export function filterAsyncRoutes(routes, roles) {
 // 定义全部的路由对应关系
 const routerMapComponents = {
   'add-device': () => import('@/views/add-device/index'),
-  'query-device': () => import('@/views/add-device/QueryDevice'),
+  'view-device': () => import('@/views/add-device/QueryDevice'),
   'alarm-history': () => import('@/views/alarm-manage/index'),
   'user-manage': () => import('@/views/permission-manage/AddUser'),
   'role-manage': () => import('@/views/permission-manage/AddRole'),
-  'log': () => import('@/views/alarm-manage/Log'),
-  'data-device': () => import('@/views/data-manage/index')
+  'log-history': () => import('@/views/alarm-manage/Log'),
+  'device_data': () => import('@/views/data-manage/index')
 }
 const nameMap = {
   device: 'Device',
   'add-device': 'AddDevice',
-  'query-device': 'QueryDevice',
+  'view-device': 'QueryDevice',
   'alarm': 'AlarmManage', // 告警管理
   'alarm-history': 'AlarmHistory', // 告警管理
   'permission': 'UserManage',
   'user-manage': 'AddUser',
   'role-manage': 'AddRole',
-  'data-manage': 'dataManage',
-  'data-device': 'dataDevice',
-  'log-manage': 'logManage',
-  'log': 'Log'
+  'data_manage': 'dataManage',
+  'device_data': 'dataDevice',
+  'log': 'logManage',
+  'log-history': 'Log'
 }
 const iconMap = {
   device: 'table',
   'alarm': 'el-icon-message-solid',
   'permission': 'el-icon-s-custom',
-  'log-manage': 'el-icon-s-opportunity',
-  'data-manage': 'el-icon-s-data'
+  'log': 'el-icon-s-opportunity',
+  'data_manage': 'el-icon-s-data'
 }
 
 // 递归将封装list
 const getList = function (menu) {
   const rootList = []
-  menu.push({path: 'log-manage', children: [{path: 'log'}]})
-  menu.push({path: 'data-manage', children: [{path: 'data-device'}]})
-  menu[0].children.push({path: 'query-device'})
+  // menu.push({path: 'log-manage', children: [{path: 'log'}]})
+  // menu.push({path: 'data-manage', children: [{path: 'device_data'}]})
+  // menu[0].children.push({path: 'query-device'})
   menu.forEach(v => {
     const childrenList = []
     const childrens = v.children

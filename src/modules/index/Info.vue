@@ -173,6 +173,10 @@ export default {
   text-shadow: 0 6px 6px rgba(0, 0, 0, 0.5);
   b {
     cursor: pointer;
+    color: #fff;
+    &:hover {
+      text-decoration: underline;
+    }
     span {
       display: inline-block;
       transform: rotate(-90deg);

@@ -215,7 +215,6 @@
             <el-select
               v-model="form.status"
               placeholder="状态"
-              style="width: 120px; margin-right: 10px"
               class="filter-item"
             >
               <el-option
@@ -230,6 +229,26 @@
                 label="维护"
                 :value="-1"
               /> -->
+            </el-select>
+          </el-form-item>
+          <el-form-item
+            label="绑定位置"
+            prop="bind_id"
+          >
+
+            <el-select
+              v-model="form.bind_id"
+              filterable
+              placeholder="选择"
+              class="filter-item"
+            >
+              <el-option
+                v-for="(item) in bindList"
+                :key="item + 'a'"
+                :label="item"
+                :value="item"
+              />
+
             </el-select>
           </el-form-item>
         </el-form>
@@ -263,6 +282,12 @@ export default {
   components: { ModelThings, ModelProtocol },
 
   props: {
+    bindList: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
     newItem: {
       type: Object,
       default() {
@@ -289,6 +314,7 @@ export default {
       activeModel: {},
       currentRow: {},
       list: [],
+
       defaultModel: '温度传感器',
       params: {
         s_name: '',
@@ -299,7 +325,8 @@ export default {
         s_name: '',
         status: '',
         value: 0,
-        uid: ''
+        uid: '',
+        bind_id: ''
       },
 
       deviceFormRules: {
@@ -323,6 +350,9 @@ export default {
         ],
         value: [
           { required: true, message: '请输入温度漂移值', trigger: 'blur' }
+        ],
+        bind_id: [
+          { required: true, message: '请输入选择绑定位置', trigger: 'change' }
         ]
       }
     }
@@ -341,12 +371,13 @@ export default {
   watch: {
     dialogVisible: {
       handler(val, oldVal) {
-        this.init()
         if (this.newDevice) {
+          this.init()
           this.form = {
             s_name: '新增_' + nanoid(),
             status: 1,
             value: 0,
+            bind_id: '',
             uid: 'm_' + nanoid()
           }
         } else {
@@ -355,6 +386,7 @@ export default {
               s_name: this.newItem.s_name,
               status: this.newItem.status_used,
               value: this.newItem.value,
+              bind_id: this.newItem.value,
               uid: this.newItem.uid
             },
             ...this.newItem
@@ -395,6 +427,7 @@ export default {
             thing_id: this.form.uid,
             s_name: this.form.s_name,
             value: this.form.value,
+            bind_id: this.form.bind_id,
             status: this.form.status
           }
           updateDevice(obj, this.newDevice)

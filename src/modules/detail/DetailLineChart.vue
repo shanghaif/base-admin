@@ -36,12 +36,12 @@
       <div class="info-item">当前温度:
         <span
           class="temp"
-          :class="pointTextClass(currentPoint)"
-        >{{ currentPoint.value }}</span>
+          :class="pointTextClass(alarmItem)"
+        >{{ nowTemp }}</span>
       </div>
       <div class="info-item">告警状态:
-        <span :class="pointTextClass(currentPoint)">
-          {{ currentPoint.alarm_type && currentPoint.alarm_type[0] | typeText }}
+        <span :class="pointTextClass(alarmItem)">
+          {{ alarmItem.alarm_id && alarmItem.alarm_id | typeText }}
         </span>
       </div>
     </div>
@@ -320,14 +320,19 @@ export default {
   computed: {
     ...mapState({
       alarmItem: (state) => state.station.alarmItem,
+      tempHeight: (state) => state.station.tempHeight,
       currentPoint: (state) => state.station.currentPoint
     }),
-    ...mapGetters(['warningVal', 'unusualVal']),
     xData() {
       return this.newList.map((v) => {
         const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm:ss')
         return { value: [time, v.fv] }
       })
+    },
+    nowTemp() {
+      return (
+        (this.list.length > 1 && this.list[this.list.length - 1]['fv']) || ''
+      )
     }
   },
   watch: {
@@ -404,13 +409,13 @@ export default {
     },
     pointTextClass(point) {
       let res = ''
-      const val = point.alarm_type && point.alarm_type[0]
+      const val = point.alarm_id
 
-      if (val === 'temperature_high') {
+      if (val === 'rate_high') {
         res = 'wram-text'
       } else if (val === 'offline') {
         res = ''
-      } else if (val === 'rate_high') {
+      } else if (val === 'temperature_high') {
         res = 'red-text'
       } else if (val === 'abnormal') {
         res = 'red-text'
@@ -487,12 +492,12 @@ export default {
               // { gte: -100, lte: 200, color: colorTheme }
               {
                 gt: 0,
-                lte: 250,
+                lte: that.tempHeight,
                 color: colorTheme
               },
               {
-                gt: 250,
-                lte: 500,
+                gt: that.tempHeight,
+                lte: 5000,
                 color: colorAlarmB
               }
             ]
@@ -608,7 +613,7 @@ export default {
                 fontWeight: 600,
                 color: colorAlarmB
               },
-              data: [{ yAxis: that.warningVal }]
+              data: [{ yAxis: that.tempHeight }]
             },
             markPoint: {
               silent: true,

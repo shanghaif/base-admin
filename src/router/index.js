@@ -70,44 +70,44 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/401'),
     hidden: true
   },
-  {
-    path: '/',
-    component: Layout,
-    redirect: '/dashboard',
-    children: [
-      {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index'),
-        name: 'Dashboard',
-        meta: { title: 'dashboard', icon: 'dashboard', affix: true }
-      }
-    ]
-  },
-  {
+  // {
+  //   path: '/',
+  //   component: Layout,
+  //   redirect: '/dashboard',
+  //   children: [
+  //     {
+  //       path: 'dashboard',
+  //       component: () => import('@/views/dashboard/index'),
+  //       name: 'Dashboard',
+  //       meta: { title: 'dashboard', icon: 'dashboard', affix: true }
+  //     }
+  //   ]
+  // },
+  // {
     
-    path: '/big-screen',
-    component: () => import('@/views/big-screen/index'),
-    hidden: true,
+  //   path: '/big-screen',
+  //   component: () => import('@/views/big-screen/index'),
+  //   hidden: true,
     
-    meta: {
+  //   meta: {
       
-      index: 1
-    }
-  },
-  {
+  //     index: 1
+  //   }
+  // },
+  // {
     
-    path: '/big-screen/detail',
-    component: () => import('@/views/big-screen/detail'),
-    hidden: true,
+  //   path: '/big-screen/detail',
+  //   component: () => import('@/views/big-screen/detail'),
+  //   hidden: true,
 
-    meta: {
+  //   meta: {
       
-      index: 2
-    }
-  },
+  //     index: 2
+  //   }
+  // },
   {
     
-    path: '/home',
+    path: '/',
     component: () => import('@/views/Home'),
     hidden: true,
 

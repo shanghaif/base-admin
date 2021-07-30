@@ -80,20 +80,17 @@ module.exports = {
         // target: 'http://10.53.31.114:18866',
         target: baseUrl,
         // target: 'http://127.0.0.1:18866',
-        changeOrigin: true,
-        ws: true
-      },
-      '/ws': {
-        // target: process.env.VUE_APP_TYPE === 'edge' ? "ws://127.0.0.1:16666" : "ws://127.0.0.1:18866",
-        // target: 'ws://10.53.31.114:18866',
-        // target: 'ws://127.0.0.1:18866',
-        target: socketUrl,
-        changeOrigin: true,
-        ws: true,
-        pathRewrite: {
-          '^/socketip': ''
-        }
+        changeOrigin: true
       }
+      // '/api/ws': {
+      //   // target: process.env.VUE_APP_TYPE === 'edge' ? "ws://127.0.0.1:16666" : "ws://127.0.0.1:18866",
+      //   // target: 'ws://10.53.31.114:18866',
+      //   // target: 'ws://127.0.0.1:18866',
+      //   target: 'ws://10.53.31.114:18866',
+      //   changeOrigin: true,
+      //   ws: true
+       
+      // }
     }
   },
   

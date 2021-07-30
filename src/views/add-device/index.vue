@@ -303,6 +303,7 @@
       :new-device="isNew"
       :node="currentNode"
       :new-item="dlgData"
+      :bind-list="bindData"
       @confirm="confirmAddDeviceDlg"
     />
     <ModelEditStation
@@ -326,6 +327,7 @@ import {
   countDevice,
   deleteThings,
   editThings,
+  bindList,
   deviceStatus
 } from '@/api/station'
 import { delStation } from '@/api/zmodel'
@@ -395,6 +397,7 @@ export default {
         uid: ''
       },
       tableData: [],
+      bindData: [],
       multipleSelection: [],
 
       props: {
@@ -447,14 +450,20 @@ export default {
   },
 
   created() {
-    // 生命周期钩子：组件实例创建完成，属性已绑定，但 DOM 还未生成，el 属性还不存在
-    // 初始化渲染页面
+    this.queryBindList()
   },
 
-  mounted() {
-    // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
-  },
+  mounted() {},
   methods: {
+    queryBindList() {
+      bindList()
+        .then((res) => {
+          this.bindData = res.data.result || []
+        })
+        .catch((err) => {
+          this.$message({ type: 'error', message: err })
+        })
+    },
     isShowBtn(str) {
       return this.isPermissions.includes(str)
     },

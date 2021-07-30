@@ -236,4 +236,10 @@ export function Log(params) {
     params
   })
 }
+export function bindList() { 
+  return request({
+    url: `api/cfg/bind_list`,
+    method: 'get'
+  })
+}
 

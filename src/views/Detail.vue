@@ -34,12 +34,31 @@
     </div>
     <div class="right">
       <!-- <AlarmArea class="module" /> -->
-      <AlarmFactory
+      <!-- <AlarmFactory
         class="module"
         :list="alarmList"
         :is-area="true"
         @current-row="clickAlarm"
-      />
+      /> -->
+      <div class="right-top">
+
+        <div class="title">分区告警信息</div>
+        <div
+          class="sub"
+          style="margin:10px 0"
+        >{{ alarmItem.Company }} / {{ alarmItem.Factory }} / {{ alarmItem.Area }}
+        </div>
+
+        <virtual-list
+          style="height: 100%; overflow-y: auto;"
+          make
+          list
+          scrollable
+          :data-key="'uid'"
+          :data-sources="alarmList"
+          :data-component="itemComponent"
+        />
+      </div>
     </div>
     <div class="bottom">
       <Bath
@@ -63,6 +82,8 @@
 </template>
 
 <script>
+import VirtualList from 'vue-virtual-scroll-list'
+
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import { getCell, setCell, removeCell, getCurrentFactory } from '@/utils/auth'
 
@@ -75,13 +96,12 @@ import Background from '@/modules/detail/Background'
 import BathList from '@/modules/detail/BathList'
 // import AlarmArea from '@/modules/detail/AlarmArea'
 import Bath from '@/modules/detail/Bath'
-import AlarmFactory from '@/modules/index/AlarmFactory'
+import AlarmAreaList from '@/modules/detail/AlarmAreaList'
 import DetailLineChart from '@/modules/detail/DetailLineChart'
 // import DetailPoint from '@/modules/detail/DetailPoint'
 
 // import Point from '@/modules/detail/Point'
 import { Socket } from '@/utils/socket'
-const baseUrl = `${process.env.VUE_APP_SOCKET_API}/ws/`
 function createCellList(len) {
   const n = len
   const arr = []
@@ -105,11 +125,13 @@ export default {
     // Point,
     // AlarmArea,
     Bath,
-    AlarmFactory,
+    VirtualList,
     DetailLineChart
   },
   data() {
     return {
+      itemComponent: AlarmAreaList,
+
       title: {
         text: '新视智科温度监测系统',
         logo: require('@/assets/logo.svg')
@@ -119,12 +141,7 @@ export default {
       alarmList: [],
 
       pointList: [],
-      allPointList: [
-        {
-          tid: '',
-          value: 0
-        }
-      ],
+      allPointList: [],
       allPointListFake: createCellList(168),
       piontHistoryList: [
         {
@@ -148,24 +165,22 @@ export default {
       alarmItem: (state) => state.station.alarmItem,
       currentPoint: (state) => state.station.currentPoint,
       currentFactory: (state) => state.station.currentFactory
-    }),
-    wsUrlAlarm() {
-      return `${baseUrl}alarm?tid=${getCurrentFactory().uid}`
+    })
+  },
+  watch: {
+    'alarmItem.t_id': {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          // this.init()
+          this.queryPiontHistory()
+        }
+      }
+      // deep: true
     }
   },
   created() {
     this.init()
   },
-  // watch: {
-  //   alarmItem: {
-  //     handler: function (newVal, oldVal) {
-  //       if (newVal) {
-  //         this.init()
-  //       }
-  //     },
-  //     deep: true
-  //   }
-  // },
   mounted() {
     this.updateTime = this.util.formatTime(new Date())
     this.resize()
@@ -183,16 +198,18 @@ export default {
   methods: {
     ...mapMutations({
       SET_ALARMITEM: 'station/SET_ALARMITEM',
+      SET_TEMPHEIGHT: 'station/SET_TEMPHEIGHT',
       SET_POINT: 'station/SET_POINT'
     }),
     init() {
       this.destroyWs()
-
-      // 第一次进入页面默认查询时间
-      this.queryParams.sTime =
-        this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 00:00'
-      this.queryParams.eTime =
-        this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 23:59'
+      if (!this.queryParams.sTime) {
+        // 第一次进入页面默认查询时间
+        this.queryParams.sTime =
+          this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 00:00'
+        this.queryParams.eTime =
+          this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 23:59'
+      }
       this.queryPiont()
       this.queryPiontHistory()
       this.sendWsAlarm()
@@ -296,7 +313,7 @@ export default {
       obj.t_id = point.tid
       this.SET_POINT(point)
       this.SET_ALARMITEM(obj)
-      this.queryPiontHistory()
+      // this.queryPiontHistory()
     },
     splitArr(data) {
       const result = []
@@ -312,14 +329,15 @@ export default {
       const len = this.allPointListFake.length // 默认168个点位
       const arr = this.allPointList
 
-      arr.forEach((v, i) => {
-        this.allPointListFake[i] = v
-      })
+      arr.length > 0 &&
+        arr.forEach((v, i) => {
+          // this.allPointListFake[i] = v
+          this.allPointListFake.splice(v.index - 1, 1, v)
+        })
       const arrFake1 = this.allPointListFake.slice(0, len / 2)
       const arrFake2 = this.allPointListFake.slice(len / 2, len)
       const newArr1 = this.splitArr(arrFake1)
       const newArr2 = this.splitArr(arrFake2)
-
       const pointListItem1 = newArr1.map((v, i) => {
         return { pointList: v }
       })
@@ -331,21 +349,23 @@ export default {
       this.SET_POINT(this.allPointList[0])
     },
     queryPiont() {
-      devicePoint(this.alarmItem.BathID)
-        .then((res) => {
-          const arr = res.data.result || []
-          this.allPointList = arr
-          this.setFuncOfpoint()
-        })
-        .catch((err) => {
-          this.$message(err)
-        })
+      this.allPointList.length < 1 &&
+        devicePoint(this.alarmItem.BathID)
+          .then((res) => {
+            const arr = res.data.result || []
+            this.allPointList = arr
+            this.setFuncOfpoint()
+          })
+          .catch((err) => {
+            this.$message(err)
+          })
     },
     queryPiontHistory(date) {
       this.queryParams.id = this.alarmItem.t_id
       deviceHistory(this.queryParams)
         .then((res) => {
-          const arr = res.data.result || []
+          const arr = (res.data.result && res.data.result.list) || []
+          res.data.result && this.SET_TEMPHEIGHT(res.data.result.high)
           this.piontHistoryList = sortBy(arr, (v) => v.pick_time)
         })
         .catch((err) => {
@@ -364,6 +384,8 @@ export default {
       const h = window.innerHeight / 900
       const w = window.innerWidth / 1600
       const rate = Math.floor((w < h ? w : h) / 0.01) / 100
+      // rate < 0.8 ? (rate = 0.8) : rate
+
       // let rate = 1
       document.getElementById('app').style.height = 100 / rate + 'vh'
       document.getElementById('app').style.width = 100 / rate + 'vw'
@@ -389,11 +411,12 @@ export default {
       window.removeEventListener('resize', this.resizeHandler)
     },
     returnClick() {
-      this.$router.push({ path: '/home' })
+      this.$router.push({ path: '/' })
     },
     closeClick() {
       // 关闭大屏
-      this.$router.push({ name: 'Dashboard' })
+      // this.$router.push({ name: 'Dashboard' })
+      this.$router.push({ name: 'AddDevice' })
     }
   }
 }
@@ -461,6 +484,21 @@ export default {
   z-index: 0;
   .module {
     width: 100%;
+  }
+  .right-top {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.1);
+    .title {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--theme);
+      font-family: 'PingFang SC', 'Microsoft Yahei', sans-serif;
+      // margin-bottom: 20px;
+    }
   }
 }
 .middle {

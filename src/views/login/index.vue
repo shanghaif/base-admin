@@ -225,7 +225,7 @@ export default {
               //   query: this.otherQuery
               // })
               this.$router.push({
-                path: '/home'
+                path: '/'
               })
               this.loading = false
             })

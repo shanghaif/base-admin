@@ -1,19 +1,26 @@
 <template>
+  <div
+    id="module"
+    :class="{'is-area':isArea}"
+  >
+    <div class="title">
+      {{ isArea? '分区告警信息' : '分厂告警信息' }}
 
-  <!-- <div
+    </div>
+    <div
       v-if="isArea"
       class="sub"
     >{{ alarmItem.Company }} / {{ alarmItem.Factory }} / {{ alarmItem.Area }}
-    </div> -->
-  <!-- <div class="alarm"> -->
-  <!-- <Status
+    </div>
+    <div class="alarm">
+      <Status
         v-if="alarm.length === 0"
         img="null"
         text="暂无告警信息"
-      /> -->
+      />
 
-  <!-- <div
-        v-for="(item, index) of renderList"
+      <div
+        v-for="(item, index) of alarm"
         v-else
         :key="index"
         class="alarm-item"
@@ -31,34 +38,20 @@
             class="iconfont icon-arrow"
           />
         </div>
-      </div> -->
-  <div
-    class="alarm-item"
-    :class="styleStatus(source.alarm_id)"
-    @click="itemClick(source)"
-  >
-    <div class="left">
-      <div class="position">{{ source.Area }} / {{ source.Bath }}</div>
-      <div class="msg"><span>{{ source.thing_name }}</span>: {{ source.alarm_id | typeText }}
       </div>
     </div>
-    <div class="right">
-      {{ $dayjs(source.time_changed).format('YYYY-MM-DD HH:mm') }}
-      <span
-        v-if="!isArea"
-        class="iconfont icon-arrow"
-      />
-    </div>
   </div>
-
-  <!-- </div> -->
 </template>
 
 <script>
+import Status from '@/components/Status'
 import { mapState, mapActions, mapMutations } from 'vuex'
+
 export default {
   name: 'AlarmFactory',
-
+  components: {
+    Status
+  },
   filters: {
     typeText(val) {
       let res = ''
@@ -81,33 +74,37 @@ export default {
         return []
       }
     },
-    source: {
-      type: Object,
-      default() {
-        return {}
-      }
-    },
     isArea: { type: Boolean, default: false }
   },
   data() {
-    return {}
+    return {
+      alarm: []
+    }
   },
-
+  computed: {
+    ...mapState({
+      alarmItem: (state) => state.station.alarmItem
+    })
+  },
+  watch: {
+    list: {
+      handler: function (newVal, oldVal) {
+        if (newVal) {
+          this.alarm = newVal
+        }
+      },
+      deep: true
+    }
+  },
   mounted() {
     // this.updateValue()
   },
   methods: {
-    ...mapMutations({
-      SET_ALARMITEM: 'station/SET_ALARMITEM',
-      SET_ALARMLIST: 'station/SET_ALARMLIST',
-      SET_FACTORY: 'station/SET_FACTORY',
-      SET_CELL: 'station/SET_CELL'
-    }),
     styleStatus(val) {
       const obj = {}
+      obj['alarm-c'] = val === 'temperature_high' || val === 'abnormal'
+      obj['alarm-b'] = val === 'rate_high'
       obj['alarm-a'] = val === 'offline'
-      obj['alarm-b'] = val === 'temperature_high' || val === 'abnormal'
-      obj['alarm-c'] = val === 'rate_high'
 
       return obj
     },
@@ -140,7 +137,6 @@ export default {
       // window.location.href = '#/detail'
       this.$router.push({ path: '/detail' })
       this.$emit('current-row', item)
-      this.SET_ALARMITEM(item)
     }
   }
 }
@@ -149,84 +145,106 @@ export default {
 <style lang="scss" scoped>
 #module {
   height: calc(66% - 20px);
+  &.is-area {
+    height: 100%;
+    .alarm {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 2px 8px;
+      margin: 4px -8px 0 -8px;
+      height: calc(100% - 58px);
+      width: calc(100% + 16px);
+    }
+  }
 }
 .sub {
   margin: 10px 0;
 }
-.alarm-item {
+.alarm {
   display: flex;
-  padding: 14px;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  transition: all ease, 0.3s;
-  &:hover {
-    // margin: 4px auto;
-    transform: scale(1.03);
-  }
-  .left {
-    width: calc(100% - 138px);
-    .position {
-      margin-bottom: 8px;
-      font-size: 14px;
-      color: rgba(255, 255, 255, 0.7);
+  flex-direction: column;
+  gap: 10px;
+  padding: 2px 8px;
+  margin: 20px -8px 0 -8px;
+  height: calc(100% - 32px);
+  width: calc(100% + 16px);
+  overflow-y: auto;
+
+  &-item {
+    display: flex;
+    padding: 14px;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+    transition: all ease, 0.3s;
+    &:hover {
+      // margin: 4px auto;
+      transform: scale(1.03);
     }
-    .msg {
-      display: flex;
-      width: 100%;
-      white-space: nowrap;
-      span {
-        overflow: hidden;
+    .left {
+      width: calc(100% - 138px);
+      .position {
+        margin-bottom: 8px;
+        font-size: 14px;
+        color: rgba(255, 255, 255, 0.7);
+      }
+      .msg {
+        display: flex;
+        width: 100%;
         white-space: nowrap;
-        text-overflow: ellipsis;
+        span {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+    .right {
+      display: flex;
+      margin: auto 0 auto 0;
+      gap: 4px;
+      width: 124px;
+      font-size: 14px;
+      font-family: 'DIN', 'PingFang SC', 'Microsoft Yahei', sans-serif;
+      white-space: nowrap;
+      align-items: center;
+      opacity: 0.7;
+      span {
+        font-size: 14px;
+        display: inline-block;
+        transform: rotate(-90deg);
       }
     }
   }
-  .right {
-    display: flex;
-    margin: auto 0 auto 0;
-    gap: 4px;
-    width: 124px;
-    font-size: 14px;
-    font-family: 'DIN', 'PingFang SC', 'Microsoft Yahei', sans-serif;
-    white-space: nowrap;
-    align-items: center;
-    opacity: 0.7;
-    span {
-      font-size: 14px;
-      display: inline-block;
-      transform: rotate(-90deg);
+  .alarm-a {
+    background: var(--alarmA-bg);
+    box-shadow: inset 0 0 0 1px var(--alarmA-20);
+    .left .msg,
+    .left .msg span {
+      color: var(--alarmA);
     }
   }
-}
-
-.alarm-a {
-  background: var(--alarmA-bg);
-  box-shadow: inset 0 0 0 1px var(--alarmA-20);
-  .left .msg,
-  .left .msg span {
-    color: var(--alarmA);
+  .alarm-b {
+    background: var(--alarmB-bg);
+    box-shadow: inset 0 0 0 1px var(--alarmB-20);
+    .left .msg,
+    .left .msg span {
+      color: var(--alarmB);
+      font-weight: 800;
+    }
   }
-}
-.alarm-b {
-  background: var(--alarmB-bg);
-  box-shadow: inset 0 0 0 1px var(--alarmB-20);
-  .left .msg,
-  .left .msg span {
-    color: var(--alarmB);
-    font-weight: 800;
-  }
-}
-.alarm-c {
-  background: var(--alarmC-bg);
-  box-shadow: inset 0 0 0 1px var(--alarmC-20);
-  .left .msg,
-  .left .msg span {
-    color: var(--alarmC);
-    font-weight: 600;
+  .alarm-c {
+    background: var(--alarmC-bg);
+    box-shadow: inset 0 0 0 1px var(--alarmC-20);
+    .left .msg,
+    .left .msg span {
+      color: var(--alarmC);
+      font-weight: 600;
+    }
   }
 }
 </style>
