@@ -138,9 +138,9 @@ export default {
     // },
     itemClick(item) {
       // window.location.href = '#/detail'
-      this.$router.push({ path: '/detail' })
       this.$emit('current-row', item)
       this.SET_ALARMITEM(item)
+      this.$router.push({ path: '/detail' })
     }
   }
 }

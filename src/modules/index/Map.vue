@@ -80,6 +80,7 @@ export default {
         if (newVal) {
           this.factoryList = newVal
           this.factoryId = this.current.uid
+          this.calcWidth()
         }
       },
       deep: true
@@ -91,13 +92,15 @@ export default {
     // })
   },
   mounted() {
-    const n = Math.floor(Math.sqrt(this.popItem.length) + 0.5)
-    this.$refs.list.style.width = n * 102 + 16 + 'px'
-    this.$refs.list.style.left = -n * 51 + 'px'
     this.$echarts.registerMap('China', China)
     this.draw()
   },
   methods: {
+    calcWidth() {
+      const n = Math.floor(Math.sqrt(this.factoryList.length) + 0.5)
+      this.$refs.list.style.width = n * 102 + 16 + 'px'
+      this.$refs.list.style.left = -n * 51 + 'px'
+    },
     // ...mapMutations({
     //   SET_FACTORY: 'station/SET_FACTORY',
     //   SET_CELL: 'station/SET_CELL'

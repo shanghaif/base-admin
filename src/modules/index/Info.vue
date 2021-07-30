@@ -1,6 +1,16 @@
 <template>
   <div id="info">
     <div class="title">{{ company }} {{ currentFactory.s_name }}</div>
+    <div class="area-container">
+      <div
+        v-for="(item, index) of currentObj.area_infos"
+        :key="index"
+        class="area"
+        @click="areaClick(item)"
+      >
+        {{ item.name }}<span>详情</span>
+      </div>
+    </div>
     <div class="sub">告警信息统计时间: {{ $dayjs().format('YYYY年MM月DD日') }}
       <b @click="logClick()">告警信息日志<span class="iconfont icon-arrow" /></b>
     </div>
@@ -58,7 +68,8 @@ export default {
       date: '',
       bath: { total: 0, online: 0, running: 0, alarm: 0 },
       rate: { online: 0, running: 0, alarm: 0 },
-      currentObj: {}
+      currentObj: {},
+      area: ['一分区', '二分区', '三分区', '四分区', '五分区']
     }
   },
   computed: {
@@ -97,6 +108,23 @@ export default {
     // this.updateColor()
   },
   methods: {
+    ...mapMutations({
+      SET_ALARMITEM: 'station/SET_ALARMITEM'
+    }),
+    areaClick(item) {
+      const obj = {
+        Area: '二分区',
+        AreaID: '85633c06-a142-4e22-84ab-c668b37a4a46',
+        Bath: '电解槽2001',
+        BathID: 'b27b27bb-20ed-4eb1-832b-b4e7affc0df1',
+        Company: '云南分公司',
+        CompanyID: 'yunnan_branch_company_BaseStation',
+        Factory: '电解铝二厂',
+        t_id: ''
+      }
+      this.SET_ALARMITEM(obj)
+      this.$router.push({ path: '/detail' })
+    },
     getRate() {
       if (this.currentObj.all_bath) {
         const total = this.currentObj.all_bath
@@ -168,18 +196,48 @@ export default {
   text-shadow: 0 6px 6px rgba(0, 0, 0, 0.5);
 }
 .sub {
-  margin-top: 16px;
+  margin-top: 8px;
   color: rgba(255, 255, 255, 0.7);
   text-shadow: 0 6px 6px rgba(0, 0, 0, 0.5);
   b {
     cursor: pointer;
-    color: #fff;
-    &:hover {
-      text-decoration: underline;
-    }
     span {
       display: inline-block;
       transform: rotate(-90deg);
+    }
+  }
+}
+
+.area-container {
+  display: flex;
+  padding: 12px 0;
+  gap: 10px;
+  .area {
+    display: flex;
+    flex-wrap: nowrap;
+    padding: 10px 16px;
+    font-size: 14px;
+    white-space: nowrap;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.05);
+    transition: all ease, 0.2s;
+    cursor: pointer;
+    span {
+      overflow: hidden;
+      width: 0;
+      font-size: 14px;
+      font-weight: 800;
+      white-space: nowrap;
+      color: var(--theme);
+      transition: all ease, 0.2s;
+    }
+    &:hover {
+      background: var(--theme-bg);
+      box-shadow: 0 0 0 1px var(--theme);
+      span {
+        margin-left: 10px;
+        width: 28px;
+      }
     }
   }
 }
@@ -188,7 +246,7 @@ export default {
   display: flex;
   gap: 0.5%;
   margin-top: 18px;
-  height: calc(100% - 80px);
+  height: calc(100% - 130px);
   width: 100%;
 }
 .rate {

@@ -506,14 +506,24 @@ export default {
       this.queryCountDevice()
     },
     delDevice(row) {
-      deleteThings(row.uid)
+      const uid = encodeURIComponent(row.uid)
+      debugger
+      deleteThings(uid)
         .then((res) => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!',
-            duration: 5000
-          })
-          this.clickNode(this.currentNode)
+          if (res.data.result === 'ok') {
+            this.$message({
+              type: 'success',
+              message: '删除成功!',
+              duration: 5000
+            })
+            this.clickNode(this.currentNode)
+          } else {
+            this.$message({
+              type: 'error',
+              message: '删除失败!',
+              duration: 5000
+            })
+          }
         })
         .catch((err) => {
           alert(err)

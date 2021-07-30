@@ -1,4 +1,4 @@
-// import { company, factory, area, device } from '@/api/station'
+import { company, factory, area, device } from '@/api/station'
 // import { companyData, factoryData, areaData, deviceData } from '@/api/data'
 import { getCell, setCell, getAlarmItem, setAlarmItem, getCurrentFactory} from '@/utils/auth'
 

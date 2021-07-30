@@ -380,6 +380,8 @@ export default {
             bind_id: '',
             uid: 'm_' + nanoid()
           }
+          this.radio = ''
+          this.$refs.ruleForm.resetFields()
         } else {
           this.form = {
             ...{

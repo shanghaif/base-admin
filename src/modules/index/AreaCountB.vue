@@ -183,7 +183,7 @@ export default {
             type: 'bar',
             barWidth: '25%',
             barMaxWidth: 16,
-            barGap: '100%',
+            barGap: '50%',
             animation: false,
             label: {
               show: true,
@@ -219,7 +219,7 @@ export default {
             type: 'bar',
             barWidth: '25%',
             barMaxWidth: 16,
-            barGap: '100%',
+            barGap: '50%',
             animation: false,
             label: {
               show: true,

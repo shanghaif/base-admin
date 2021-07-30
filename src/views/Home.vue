@@ -71,6 +71,11 @@
           :data-sources="alarmList"
           :data-component="itemComponent"
         />
+        <Status
+          v-if="alarmList.length === 0"
+          img="null"
+          text="暂无告警信息"
+        />
       </div>
       <AlarmPoint
         ref="alarm_point"
@@ -395,6 +400,7 @@ export default {
     padding: 20px;
     border-radius: 2px;
     background: rgba(0, 0, 0, 0.1);
+    position: relative;
     .title {
       font-size: 24px;
       font-weight: 800;

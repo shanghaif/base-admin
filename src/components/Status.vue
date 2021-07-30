@@ -1,10 +1,13 @@
 <template>
-  <div id="status">
-    <img
-      class="status-img"
-      :src="imgList[img]"
-    >
-    <p class="status-text">{{ text }}</p>
+  <div class="status">
+    <div class="status-box">
+
+      <img
+        class="status-img"
+        :src="imgList[img]"
+      >
+      <p class="status-text">{{ text }}</p>
+    </div>
   </div>
 </template>
 
@@ -37,10 +40,24 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-#status {
+.status {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  height: 100%;
+  width: 100%;
+  z-index: 1;
   display: flex;
   flex-direction: column;
-  margin: auto;
+  align-items: center;
+  justify-content: center;
+  .status-box {
+    @include flex();
+    flex-direction: column;
+  }
 }
 .status-img {
   margin: auto auto 0 auto;

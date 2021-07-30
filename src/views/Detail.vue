@@ -492,6 +492,7 @@ export default {
     padding: 20px;
     border-radius: 2px;
     background: rgba(0, 0, 0, 0.1);
+    position: relative;
     .title {
       font-size: 24px;
       font-weight: 800;

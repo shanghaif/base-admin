@@ -191,7 +191,7 @@ export default {
             type: 'bar',
             // barWidth: '30%',
             barMaxWidth: 14,
-            barGap: '30%',
+            barGap: '50%',
             animation: false,
             label: {
               show: true,
@@ -227,7 +227,7 @@ export default {
             type: 'bar',
             // barWidth: '30%',
             barMaxWidth: 14,
-            barGap: '30%',
+            barGap: '50%',
             animation: false,
             label: {
               show: true,
@@ -263,7 +263,7 @@ export default {
             type: 'bar',
             // barWidth: '30%',
             barMaxWidth: 14,
-            barGap: '30%',
+            barGap: '50%',
             animation: false,
             label: {
               show: true,
@@ -299,7 +299,7 @@ export default {
             type: 'bar',
             // barWidth: '30%',
             barMaxWidth: 14,
-            barGap: '30%',
+            barGap: '50%',
             animation: false,
             label: {
               show: true,
