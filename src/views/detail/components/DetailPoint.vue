@@ -110,7 +110,6 @@
 </template>
 
 <script>
-import { Alert } from 'element-ui'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 
 export default {

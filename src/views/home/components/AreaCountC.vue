@@ -1,9 +1,9 @@
 <template>
   <div
     id="module"
-    class="module-b"
+    class="module-c"
   >
-    <div class="sub">分区测温点位数</div>
+    <div class="sub">分区告警测温点位数</div>
     <div class="chart">
       <div
         v-if="isEmpty"
@@ -11,7 +11,7 @@
       >
         <Status
           img="null"
-          text="暂无分区测温点位信息哦~"
+          text="暂无分区告警测温点位信息哦~"
         />
       </div>
       <div
@@ -19,12 +19,20 @@
         class="info"
       >
         <div class="info-item">
-          <div class="info-item-num total">{{ currentObj.area_infos[0].all_point }}</div>
-          总测温点位
+          <div class="info-item-num alarm-a">{{ currentObj.area_infos[0].offline_point }}</div>
+          离线点位
         </div>
         <div class="info-item">
-          <div class="info-item-num online">{{ currentObj.area_infos[0].online_point }}</div>
-          在线测温点位
+          <div class="info-item-num alarm-b">{{ currentObj.area_infos[0].temp_point }}</div>
+          温度告警
+        </div>
+        <div class="info-item">
+          <div class="info-item-num alarm-c">{{ currentObj.area_infos[0].abnormal_point }}</div>
+          设备异常
+        </div>
+        <div class="info-item">
+          <div class="info-item-num alarm-b">{{ currentObj.area_infos[0].rate_point }}</div>
+          趋势预警
         </div>
       </div>
       <div
@@ -36,17 +44,14 @@
 </template>
 
 <script>
-import Status from '@/components/Status'
 export default {
-  name: 'AreaCountB',
+  name: 'AreaCountC',
 
-  components: {
-    Status
-  },
+  components: {},
   props: {
     id: {
       type: String,
-      default: 'area-count-b'
+      default: 'area-count-c'
     },
     obj: {
       type: Object,
@@ -60,8 +65,10 @@ export default {
       chart: null,
       currentObj: {},
       axisData: [],
-      onLineData: [],
-      allData: []
+      offlineData: [],
+      alarmData: [],
+      abnormalData: [],
+      rateData: []
     }
   },
   computed: {
@@ -82,12 +89,6 @@ export default {
   watch: {
     obj: {
       handler: function (newVal, oldVal) {
-        // if (newVal) {
-        //   this.currentObj = newVal
-        //   setTimeout(() => {
-        //     this.draw()
-        //   }, 100)
-        // }
         if (newVal) {
           this.currentObj = newVal
 
@@ -105,39 +106,43 @@ export default {
       deep: true
     }
   },
-  mounted() {
-    // this.randomData()
-  },
+  mounted() {},
   methods: {
     getxAxisData(list) {
       const arr1 = []
       const arr2 = []
       const arr3 = []
+      const arr4 = []
+      const arr5 = []
 
       list &&
         list.map((v) => {
           arr1.push(v.name)
-          arr2.push(v.all_point)
-          arr3.push(v.online_point)
+          arr2.push(v.offline_point)
+          arr3.push(v.alarm_point)
+          arr4.push(v.abnormal_point)
+          arr5.push(v.rate_point)
         })
       this.axisData = arr1
-      this.allData = arr2
-
-      this.onLineData = arr3
+      this.offlineData = arr2
+      this.alarmData = arr3
+      this.abnormalData = arr4
+      this.rateData = arr5
     },
     draw() {
       const that = this
       this.getxAxisData(this.currentObj.area_infos)
-
       this.chart = this.$echarts.init(document.getElementById(that.id), {
         renderer: 'svg'
       })
 
       // 处理颜色
-      const colorTotal = 'hsla(250, 90%, 70%, 1)'
-      const colorTotal2 = colorTotal.slice(0, -2) + '0.3)'
-      const colorOnline = 'hsla(190, 80%, 48%, 1)'
-      const colorOnline2 = colorOnline.slice(0, -2) + '0.3)'
+      const colorAlarmA = 'hsla(0, 0%, 90%, 1)'
+      const colorAlarmA2 = colorAlarmA.slice(0, -2) + '0.3)'
+      const colorAlarmB = 'hsla(354, 100%, 57%, 1)'
+      const colorAlarmB2 = colorAlarmB.slice(0, -2) + '0.3)'
+      const colorAlarmC = 'hsla(40, 80%, 52%, 1)'
+      const colorAlarmC2 = colorAlarmC.slice(0, -2) + '0.3)'
 
       this.chart.setOption({
         grid: { borderWidth: 0, top: 50, left: 10, right: 10, bottom: 20 },
@@ -179,10 +184,10 @@ export default {
         yAxis: { show: false },
         series: [
           {
-            name: '总测温点位',
+            name: '离线',
             type: 'bar',
-            barWidth: '25%',
-            barMaxWidth: 16,
+            // barWidth: '30%',
+            barMaxWidth: 14,
             barGap: '50%',
             animation: false,
             label: {
@@ -190,7 +195,7 @@ export default {
               position: 'top',
               fontFamily: 'DIN',
               fontWeight: 800,
-              color: colorTotal
+              color: colorAlarmA
             },
             itemStyle: {
               barBorderRadius: [100, 100, 0, 0],
@@ -202,23 +207,23 @@ export default {
                 [
                   {
                     offset: 1,
-                    color: colorTotal
+                    color: colorAlarmA
                   },
                   {
                     offset: 0,
-                    color: colorTotal2
+                    color: colorAlarmA2
                   }
                 ],
                 false
               )
             },
-            data: that.allData
+            data: that.offlineData
           },
           {
-            name: '在线测温点位',
+            name: '温度告警',
             type: 'bar',
-            barWidth: '25%',
-            barMaxWidth: 16,
+            // barWidth: '30%',
+            barMaxWidth: 14,
             barGap: '50%',
             animation: false,
             label: {
@@ -226,7 +231,7 @@ export default {
               position: 'top',
               fontFamily: 'DIN',
               fontWeight: 800,
-              color: colorOnline
+              color: colorAlarmB
             },
             itemStyle: {
               barBorderRadius: [100, 100, 0, 0],
@@ -238,17 +243,89 @@ export default {
                 [
                   {
                     offset: 1,
-                    color: colorOnline
+                    color: colorAlarmB
                   },
                   {
                     offset: 0,
-                    color: colorOnline2
+                    color: colorAlarmB2
                   }
                 ],
                 false
               )
             },
-            data: that.onLineData
+            data: that.alarmData
+          },
+          {
+            name: '设备异常',
+            type: 'bar',
+            // barWidth: '30%',
+            barMaxWidth: 14,
+            barGap: '50%',
+            animation: false,
+            label: {
+              show: true,
+              position: 'top',
+              fontFamily: 'DIN',
+              fontWeight: 800,
+              color: colorAlarmC
+            },
+            itemStyle: {
+              barBorderRadius: [100, 100, 0, 0],
+              color: new this.$echarts.graphic.LinearGradient(
+                0,
+                1,
+                0,
+                0,
+                [
+                  {
+                    offset: 1,
+                    color: colorAlarmC
+                  },
+                  {
+                    offset: 0,
+                    color: colorAlarmC2
+                  }
+                ],
+                false
+              )
+            },
+            data: that.abnormalData
+          },
+          {
+            name: '趋势预警',
+            type: 'bar',
+            // barWidth: '30%',
+            barMaxWidth: 14,
+            barGap: '50%',
+            animation: false,
+            label: {
+              show: true,
+              position: 'top',
+              fontFamily: 'DIN',
+              fontWeight: 800,
+              color: colorAlarmB
+            },
+            itemStyle: {
+              barBorderRadius: [100, 100, 0, 0],
+              color: new this.$echarts.graphic.LinearGradient(
+                0,
+                1,
+                0,
+                0,
+                [
+                  {
+                    offset: 1,
+                    color: colorAlarmB
+                  },
+                  {
+                    offset: 0,
+                    color: colorAlarmB2
+                  }
+                ],
+                false
+              )
+            },
+            data: that.rateData
           }
         ]
       })
@@ -260,16 +337,15 @@ export default {
 <style lang="scss" scoped>
 #module {
   position: relative;
-  padding: 10px 20px;
   margin-top: -20px;
-  height: calc(22% - 31.33px);
+  height: calc(22% - 11.33px);
 }
 
 .chart {
   position: relative;
   height: calc(100% - 16px);
   width: 100%;
-  #area-count-b {
+  #area-count-c {
     height: 100%;
     width: 100%;
   }
@@ -281,24 +357,28 @@ export default {
       display: flex;
       flex-direction: column;
       height: 100%;
-      width: 50%;
+      width: 25%;
       align-items: center;
       justify-content: center;
       color: rgba(255, 255, 255, 0.7);
-      &:nth-child(1) {
-        box-shadow: 31px 0 0 -30px rgba(255, 255, 255, 0.1);
+      box-shadow: 31px 0 0 -30px rgba(255, 255, 255, 0.1);
+      &:nth-last-child(1) {
+        box-shadow: none;
       }
       &-num {
         padding-bottom: 14px;
-        font-size: 40px;
+        font-size: 38px;
         font-family: 'DIN';
         font-weight: 800;
       }
-      .total {
-        color: var(--total);
+      .alarm-a {
+        color: var(--alarmA);
       }
-      .online {
-        color: var(--theme);
+      .alarm-b {
+        color: var(--alarmB);
+      }
+      .alarm-c {
+        color: var(--alarmC);
       }
     }
   }

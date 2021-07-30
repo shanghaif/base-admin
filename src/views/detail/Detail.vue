@@ -91,16 +91,16 @@ import sortBy from 'lodash/sortBy'
 import { devicePoint, deviceHistory, exportPointInfo } from '@/api/station'
 import { debounce } from '@/utils'
 
-import Background from '@/modules/detail/Background'
+import Background from './components/Background'
 
-import BathList from '@/modules/detail/BathList'
-// import AlarmArea from '@/modules/detail/AlarmArea'
-import Bath from '@/modules/detail/Bath'
-import AlarmAreaList from '@/modules/detail/AlarmAreaList'
-import DetailLineChart from '@/modules/detail/DetailLineChart'
-// import DetailPoint from '@/modules/detail/DetailPoint'
+import BathList from './components/BathList'
+// import AlarmArea from './components/AlarmArea'
+import Bath from './components/Bath'
+import AlarmAreaList from './components/AlarmAreaList'
+import DetailLineChart from './components/DetailLineChart'
+// import DetailPoint from './components/DetailPoint'
 
-// import Point from '@/modules/detail/Point'
+// import Point from './components/Point'
 import { Socket } from '@/utils/socket'
 function createCellList(len) {
   const n = len

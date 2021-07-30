@@ -30,11 +30,8 @@
 </template>
 
 <script>
-import Status from '@/components/Status'
 export default {
-  components: {
-    Status
-  },
+  components: {},
   data() {
     return {
       title: '分区告警信息',

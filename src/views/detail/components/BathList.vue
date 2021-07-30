@@ -99,14 +99,12 @@
 import { mapState, mapActions, mapMutations } from 'vuex'
 import { cellInfo } from '@/api/station'
 
-import Status from '@/components/Status'
 // import ZSelect from '@/components/ZSelect'
 import BathIcon from '@/components/BathIcon'
 import { Socket } from '@/utils/socket'
 
 export default {
   components: {
-    Status,
     // ZSelect,
     BathIcon
   },
