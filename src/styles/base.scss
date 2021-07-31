@@ -301,3 +301,35 @@
 .red-text {
   color: var(--alarmB);
 }
+
+.home .corner-btn,
+.new-detail .corner-btn {
+  position: absolute;
+  display: flex;
+  gap: 4px;
+  padding: 15px;
+  top: 0;
+  font-size: 20px;
+  align-items: center;
+  color: rgba(255, 255, 255, 1);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: all ease, 0.3s;
+  z-index: 3;
+  &:hover {
+    opacity: 1;
+  }
+  &.close {
+    right: 0;
+    .icon-close {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+  &.return {
+    left: 0;
+    .icon-arrow {
+      color: rgba(255, 255, 255, 0.7);
+      transform: rotate(90deg);
+    }
+  }
+}

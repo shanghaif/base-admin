@@ -357,7 +357,6 @@ export default {
       treeId: 0,
       isNew: false,
       isNewStation: false,
-      treeData: [],
       companyList: [],
       factoryList: [],
       areaList: [],
@@ -433,10 +432,18 @@ export default {
       permissions: (state) => state.user.permissions
     }),
     isPermissions() {
-      return this.permissions.find((v) => v.id === 'station').Permission
+      return (
+        (this.permissions.length > 0 &&
+          this.permissions.find((v) => v.id === 'station').Permission) ||
+        false
+      )
     },
-    isPermissionsDvice() {
-      return this.permissions.find((v) => v.id === 'thing').Permission
+    isPermissionsDevice() {
+      return (
+        (this.permissions.length > 0 &&
+          this.permissions.find((v) => v.id === 'thing').Permission) ||
+        false
+      )
     },
     isCheck() {
       return Object.keys(this.currentNode).length > 0
@@ -465,10 +472,12 @@ export default {
         })
     },
     isShowBtn(str) {
-      return this.isPermissions.includes(str)
+      return this.permissions.length > 0 && this.isPermissions.includes(str)
     },
     isShowBtnDvice(str) {
-      return this.isPermissionsDvice.includes(str)
+      return (
+        this.permissions.length > 0 && this.isPermissionsDevice.includes(str)
+      )
     },
     confirmAddDeviceDlg() {
       this.refreshDevice()
@@ -507,7 +516,6 @@ export default {
     },
     delDevice(row) {
       const uid = encodeURIComponent(row.uid)
-      debugger
       deleteThings(uid)
         .then((res) => {
           if (res.data.result === 'ok') {

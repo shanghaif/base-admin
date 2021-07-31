@@ -241,6 +241,16 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 1;
+  font-family: 'PingFang SC', 'Microsoft Yahei', sans-serif;
+  text-decoration: none;
+  color: #ffffff;
+}
 #module {
   height: 100%;
   width: 100%;

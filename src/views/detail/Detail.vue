@@ -1,10 +1,13 @@
 <template>
   <div
     id="detail"
-    class="now-detail"
+    class="new-detail"
   >
     <Background />
-    <div class="top">
+    <div
+      class="top"
+      style="font-size:16px"
+    >
       <div class="main-title">
         <img
           :src="title.logo"
@@ -27,9 +30,7 @@
       <detail-line-chart
         ref="DetailLineChart"
         :list="piontHistoryList"
-        @refresh="refresh"
         @changeDate="changeDateQuery"
-        @exportPoint="exportPoint"
       />
     </div>
     <div class="right">
@@ -58,6 +59,11 @@
           :data-sources="alarmList"
           :data-component="itemComponent"
         />
+        <Status
+          v-if="alarmList.length === 0"
+          img="null"
+          text="暂无告警信息"
+        />
       </div>
     </div>
     <div class="bottom">
@@ -68,16 +74,20 @@
         @pointClick="pointClick"
       />
     </div>
+
     <div
-      class="return"
+      class="corner-btn return"
+      style="color:#fff"
       @click="returnClick()"
     >
       <div class="iconfont icon-arrow" />返回首页
     </div>
     <div
-      class="iconfont icon-close"
+      class="corner-btn close"
       @click="closeClick()"
-    />
+    >
+      <div class="iconfont icon-close" />关闭大屏
+    </div>
   </div>
 </template>
 
@@ -210,6 +220,7 @@ export default {
         this.queryParams.eTime =
           this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 23:59'
       }
+
       this.queryPiont()
       this.queryPiontHistory()
       this.sendWsAlarm()
@@ -231,6 +242,7 @@ export default {
         console.log('data :>> ', data)
         this.alarmList = data.filter((v) => v.Area === this.alarmItem.Area)
         // this.SET_ALARMLIST(this.alarmList)
+        //  !this.alarmItem.BathID && this.alarmList
       })
     },
     clickAlarm(obj) {
@@ -311,6 +323,7 @@ export default {
       // this.SET_ALARMITEM(bath)
       const obj = { ...this.alarmItem }
       obj.t_id = point.tid
+      obj.alarm_id = (point.alarm_type && point.alarm_type[0]) || null
       this.SET_POINT(point)
       this.SET_ALARMITEM(obj)
       // this.queryPiontHistory()
@@ -398,7 +411,7 @@ export default {
       this.$nextTick(() => {
         try {
           this.$refs.DetailLineChart &&
-            this.$refs.DetailLineChart.chart.resize()
+            this.$refs.DetailLineChart.$refs.HistoryChart.chart.resize()
         } catch (err) {
           console.log('resize :>> ', err)
         }
@@ -416,7 +429,7 @@ export default {
     closeClick() {
       // 关闭大屏
       // this.$router.push({ name: 'Dashboard' })
-      this.$router.push({ name: 'AddDevice' })
+      this.$router.push({ name: 'AlarmHistory' })
     }
   }
 }
@@ -516,41 +529,5 @@ export default {
   width: 100%;
   // background: rgba(255, 255, 255, 0.7);
   z-index: 1;
-}
-
-.return {
-  position: absolute;
-  display: flex;
-  gap: 2px;
-  padding: 13px;
-  top: 0;
-  left: 0;
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  opacity: 0.3;
-  transition: all ease, 0.3s;
-  z-index: 3;
-  &:hover {
-    opacity: 1;
-  }
-  .icon-arrow {
-    color: rgba(255, 255, 255, 0.7);
-    transform: rotate(90deg);
-  }
-}
-.icon-close {
-  position: absolute;
-  padding: 13px;
-  top: 0;
-  right: 0;
-  font-size: 24px;
-  background: rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  opacity: 0.3;
-  transition: all ease, 0.3s;
-  z-index: 3;
-  &:hover {
-    opacity: 1;
-  }
 }
 </style>

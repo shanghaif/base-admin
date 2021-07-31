@@ -2,47 +2,14 @@
   <div id="module">
     <div class="title">{{ title }}</div>
     <div class="sub">{{ alarmItem.Company }} / {{ alarmItem.Factory }} / {{ alarmItem.Area }}</div>
-    <!-- <div class="content-crumbs">
-      <div class="content-crumb">{{ alarmItem.Company }}</div>
-      <div class="content-crumb">{{ alarmItem.Factory }}</div>
-      <div class="content-crumb">{{ alarmItem.Area }}</div>
-    </div> -->
-    <div class="content-filter">
-
-      <div class="content-select">
-
-        <!-- <Select
-          v-model="selectType"
-          placeholder="所有状态"
-          filterable
-          @on-change="getType"
-        >
-          <Option
-            v-for="item in cellTypeOptions"
-            :key="item.value + '所有状态'"
-            :value="item.value"
-          >{{ item.label }}</Option>
-        </Select> -->
-        <ZSelect
-          v-model="selectType"
-          :list="cellTypeOptions"
-          text="电解槽状态"
-          @update="getType"
-        />
-      </div>
-      <!-- <div class="content-search">
-        <Select
-          v-model="searchCell"
-          placeholder="搜索电解槽"
-          @on-change="getSearch"
-        >
-          <Option
-            v-for="item in searchOptions"
-            :key="item.value + '搜索电解槽'"
-            :value="item.value"
-          >{{ item.label }}</Option>
-        </Select>
-      </div> -->
+    <div class="filter">
+      <ZSelect
+        v-model="selectType"
+        :list="cellTypeOptions"
+        text="电解槽状态"
+        class="filter-status"
+        @update="getType"
+      />
       <div class="filter-keyword">
         <input
           v-model="searchCell"
@@ -54,7 +21,6 @@
         <p class="iconfont icon-search" />
       </div>
     </div>
-
     <div class="area">
       <Status
         v-if="list.length === 0"
@@ -84,7 +50,7 @@
             >
               <div
                 class="point-value"
-                :style="{color: point.value > 0 ? point.color : 'var(--theme)'}"
+                :style="{color: point.value > 0 ? point.color : item.isRunning ? 'var(--theme)' : 'var(--alarmA)'}"
               >{{ point.value }}</div>
               {{ point.text }}
             </div>
@@ -260,7 +226,14 @@ export default {
 
 <style lang="scss" scoped>
 * {
-  color: #fff;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-size: 16px;
+  line-height: 1;
+  font-family: 'PingFang SC', 'Microsoft Yahei', sans-serif;
+  text-decoration: none;
+  color: #ffffff;
 }
 #module {
   height: 100%;
@@ -273,9 +246,12 @@ export default {
   font-weight: 800;
   color: var(--theme);
 }
-.content-filter {
+.filter {
   @include flex(space-between, center);
-
+  display: flex;
+  gap: 20px;
+  margin: 6px auto 10px auto;
+  width: 100%;
   .content-select {
     width: 40%;
   }

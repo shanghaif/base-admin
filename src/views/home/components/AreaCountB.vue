@@ -180,7 +180,7 @@ export default {
             type: 'bar',
             barWidth: '25%',
             barMaxWidth: 16,
-            barGap: '50%',
+            barGap: '100%',
             animation: false,
             label: {
               show: true,
@@ -216,7 +216,7 @@ export default {
             type: 'bar',
             barWidth: '25%',
             barMaxWidth: 16,
-            barGap: '50%',
+            barGap: '100%',
             animation: false,
             label: {
               show: true,

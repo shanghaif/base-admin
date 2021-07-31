@@ -1,40 +1,12 @@
 <template>
-  <el-card>
+  <el-card class="wrap">
+    <div class="left">
+      <StationTree @clickNode="clickNode" />
+    </div>
     <div class="right">
-      <!-- <div class="count-container">
-        <div
-          class="count-item blue"
-          style="width: 32%"
-        >
-          <span>温度高</span>
-          <p class="count-num">{{ total }}</p>
-          <i class="el-icon-info" />
-        </div>
-        <div
-          class="count-item gray"
-          style="width: 32%"
-        >
-          <span>离线</span>
-          <p class="count-num">936</p>
-          <i class="el-icon-success" />
-        </div>
-        <div
-          class="count-item red"
-          style="width: 32%"
-        >
-          <span>趋势异常</span>
-          <p class="count-num">68</p>
-          <i class="el-icon-warning" />
-        </div>
-      </div> -->
+
       <div class="right-content">
         <div class="filter-container">
-
-          <el-cascader
-            :props="props"
-            style="width:400px"
-            @change="cascaderChange"
-          />
 
           <el-button
             :disabled="!radio"
@@ -50,12 +22,13 @@
 
         <el-table
           ref="multipleTable"
+          v-loading="loading"
           :data="tableData"
           tooltip-effect="dark"
           style="width: 100%"
           highlight-current-row
           :stripe="true"
-          max-height="600px"
+          height="600px"
           @row-click="currentChange"
         >
           <el-table-column
@@ -140,21 +113,13 @@
 <script>
 import { company, factory, area, cell } from '@/api/station'
 import ExportFilter from '@/components/ExportFilter'
+import StationTree from '@/components/StationTree'
 import { devicePoint, deviceHistory, exportPointInfo } from '@/api/station'
 
 export default {
   name: 'DataDevice',
-  components: { ExportFilter },
+  components: { ExportFilter, StationTree },
   filters: {
-    // statusFilter(type) {
-    //   let res = ''
-    //   if (type === 'offline') {
-    //     res = '离线'
-    //   } else if (type === 'temperature_high') {
-    //     res = '温度高'
-    //   }
-    //   return res
-    // },
     statusFilter(type) {
       let res = ''
       if (type === 'temperature_high') {
@@ -174,10 +139,12 @@ export default {
   props: {},
   data() {
     return {
+      loading: false,
       total: 0,
       currenRow: null,
       factoryStr: '',
       radio: '',
+      currentNode: {},
       tableData: [],
       queryParams: {
         page: 1,
@@ -185,71 +152,7 @@ export default {
       },
       chooseDate: {},
       companyList: [],
-      factoryList: [],
-      props: {
-        lazy: true,
-        lazyLoad(node, resolve) {
-          const { level } = node
-          let keysArr = []
-          // setTimeout(() => {
-          //   const nodes = Array.from({ length: level + 1 }).map((item) => ({
-          //     value: ++id,
-          //     label: `选项${id}`,
-          //     leaf: level >= 2
-          //   }))
-          //   // 通过调用resolve将子节点数据返回，通知组件数据加载完成
-          //   resolve(nodes)
-          // }, 1000)
-          if (level === 0) {
-            company(1).then((res) => {
-              const arr = (res.data.result && res.data.result.stations) || []
-              keysArr = arr.map((v) => ({
-                value: v.uid,
-                label: v.s_name
-              }))
-
-              resolve(keysArr)
-            })
-          } else if (node.level === 1) {
-            const { value } = node.data
-            factory(value, 1).then((res) => {
-              const arr = (res.data.result && res.data.result.stations) || []
-
-              keysArr = arr.map((v) => ({
-                value: v.uid,
-                label: v.s_name
-              }))
-
-              resolve(keysArr)
-            })
-          } else if (node.level === 2) {
-            const { value } = node.data
-
-            area(value, 1).then((res) => {
-              const arr = (res.data.result && res.data.result.stations) || []
-              keysArr = arr.map((v) => ({
-                value: v.uid,
-                label: v.s_name
-              }))
-
-              return resolve(keysArr)
-            })
-          } else if (node.level === 3) {
-            const { value } = node.data
-
-            cell(value, 1).then((res) => {
-              const arr = (res.data.result && res.data.result.stations) || []
-              keysArr = arr.map((v) => ({
-                value: v.uid,
-                label: v.s_name,
-                leaf: true
-              }))
-
-              return resolve(keysArr)
-            })
-          }
-        }
-      }
+      factoryList: []
     }
   },
 
@@ -280,6 +183,12 @@ export default {
     },
     changePage(page) {
       this.queryParams.page = page
+    },
+    clickNode(node) {
+      if (node.level === 3) {
+        this.currentNode = { ...node }
+        this.query(node)
+      }
     },
     currentChange(row) {
       this.currenRow = row
@@ -314,15 +223,17 @@ export default {
       }
       this.$refs.ExportFilter.show()
     },
-    cascaderChange(arr) {
-      const id = arr[3]
-      devicePoint(id)
+    query() {
+      this.loading = true
+      devicePoint(this.currentNode.uid)
         .then((res) => {
           this.tableData = res.data.result || []
           this.total = this.tableData.length
+          this.loading = false
         })
         .catch((err) => {
           this.$message(err)
+          this.loading = false
         })
     }
   }
@@ -332,5 +243,22 @@ export default {
 <style lang="scss" scoped>
 .svg {
   margin-right: 8px;
+}
+.wrap {
+  width: 100%;
+  height: calc(100vh - 84px);
+
+  .left {
+    float: left;
+    width: 240px;
+    margin-right: 30px;
+    height: 100%;
+    min-height: calc(100vh - 84px);
+    border-right: 1px solid #000;
+  }
+  .right {
+    float: left;
+    width: calc(100% - 270px);
+  }
 }
 </style>

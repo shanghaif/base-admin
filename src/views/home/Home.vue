@@ -81,11 +81,14 @@
         ref="alarm_point"
         class="module"
       />
+
     </div>
     <div
-      class="iconfont icon-close"
+      class="corner-btn close"
       @click="closeClick()"
-    />
+    >
+      <div class="iconfont icon-close" />关闭大屏
+    </div>
   </div>
 </template>
 
@@ -206,6 +209,7 @@ export default {
     ...mapMutations({
       SET_ALARMITEM: 'station/SET_ALARMITEM',
       SET_ALARMLIST: 'station/SET_ALARMLIST',
+      SET_COMPANY: 'station/SET_COMPANY',
       SET_FACTORY: 'station/SET_FACTORY',
       SET_CELL: 'station/SET_CELL'
     }),
@@ -355,7 +359,7 @@ export default {
     closeClick() {
       // 关闭大屏
       // this.$router.push({ name: 'Dashboard' })
-      this.$router.push({ name: 'AddDevice' })
+      this.$router.push({ name: 'AlarmHistory' })
     }
   }
 }
@@ -446,7 +450,7 @@ export default {
 }
 .bottom {
   margin: auto auto 0 auto;
-  height: 40%;
+  height: 44%;
   width: 44%;
   // background: rgba(255, 255, 255, 0.1);
   z-index: 1;
@@ -459,20 +463,5 @@ export default {
   top: 0;
   left: 0;
   overflow: hidden;
-}
-.icon-close {
-  position: absolute;
-  padding: 13px;
-  top: 0;
-  right: 0;
-  font-size: 24px;
-  background: rgba(255, 255, 255, 0.1);
-  cursor: pointer;
-  opacity: 0.3;
-  transition: all ease, 0.3s;
-  z-index: 3;
-  &:hover {
-    opacity: 1;
-  }
 }
 </style>

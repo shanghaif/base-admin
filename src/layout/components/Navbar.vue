@@ -15,13 +15,13 @@
     <div class="right-menu">
 
       <template v-if="device!=='mobile'">
-        <router-link
+        <!-- <router-link
           to="/"
           class="right-menu-item link"
         >
           {{ $t('navbar.bigScreen') }}
 
-        </router-link>
+        </router-link> -->
         <!-- <search
           id="header-search"
           class="right-menu-item"
@@ -56,7 +56,7 @@
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown">
-          <router-link to="/big-screen">
+          <router-link to="/">
             <el-dropdown-item>
               {{ $t('navbar.dashboard') }}
             </el-dropdown-item>
@@ -95,11 +95,11 @@
 import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
-import ErrorLog from '@/components/ErrorLog'
-import Screenfull from '@/components/Screenfull'
+// import ErrorLog from '@/components/ErrorLog'
+// import Screenfull from '@/components/Screenfull'
 // import SizeSelect from '@/components/SizeSelect'
 // import LangSelect from '@/components/LangSelect'
-import Search from '@/components/HeaderSearch'
+// import Search from '@/components/HeaderSearch'
 
 export default {
   components: {

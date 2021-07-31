@@ -1,63 +1,36 @@
 <template>
-  <el-card>
-    <div class="">
+  <el-card class="wrap">
+    <div class="left">
+      <StationTree @clickNode="clickNode" />
 
-      <div class="filter-container">
-        <StationTree @select="selectTree" />
-        <!-- <el-input
-          v-model="filterParams.device"
-          placeholder="请输入设备名称"
-          style="width: 160px; margin-right: 10px"
-          class="filter-item"
-        />
+    </div>
+    <div class="right">
 
-        <el-select
-          v-model="filterParams.factory"
-          placeholder="厂区"
-          clearable
-          style="width: 120px; margin-right: 10px"
-          class="filter-item"
+      <div class="count-container">
+        <div
+          class="count-item blue"
+          style="width: 32%"
         >
-          <el-option
-            v-for="(item,i) in factoryList"
-            :key="item.value + i"
-            :label="item.label"
-            :value="item.value"
-          />
-
-        </el-select>
-        <el-select
-          v-model="filterParams.status"
-          placeholder="状态"
-          clearable
-          style="width: 120px; margin-right: 10px"
-          class="filter-item"
+          <span>设备总数</span>
+          <p class="count-num">{{ rightTopInfo.devices_count }}</p>
+          <i class="el-icon-info" />
+        </div>
+        <div
+          class="count-item gray"
+          style="width: 32%"
         >
-          <el-option
-            v-for="(item,i) in statusList"
-            :key="item.value + i"
-            :label="item.label"
-            :value="item.value"
-          />
-
-        </el-select> -->
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-search"
-          @click="handleFilter"
+          <span>绑定设备数</span>
+          <p class="count-num">{{ rightTopInfo.devices_online_count }}</p>
+          <i class="el-icon-success" />
+        </div>
+        <div
+          class="count-item red"
+          style="width: 32%"
         >
-          搜索
-        </el-button>
-
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-download"
-        >
-          导出
-        </el-button>
-
+          <span>解绑设备数</span>
+          <p class="count-num">{{ rightTopInfo.devices_offline_count }}</p>
+          <i class="el-icon-warning" />
+        </div>
       </div>
 
       <el-table
@@ -171,7 +144,8 @@ import {
   editThings,
   deviceStatus
 } from '@/api/station'
-import StationTree from '@/components/stationTree'
+import StationTree from '@/components/StationTree'
+
 export default {
   name: 'QueryDevice',
   components: { StationTree },
@@ -192,7 +166,11 @@ export default {
     return {
       total: 1,
       loading: false,
-
+      rightTopInfo: {
+        devices_count: 0,
+        devices_offline_count: 0,
+        devices_online_count: 0
+      },
       tableData: [],
       companyList: [],
       factoryList: [],
@@ -230,38 +208,26 @@ export default {
   },
 
   methods: {
-    selectTree(arr) {
-      // this.queryDeviceParams.arr
-      this.queryDeviceParams.page = 1
-      this.queryDeviceParams.level = 3
-
-      this.queryDeviceParams.uid = arr[3]
+    clickNode(node) {
+      this.queryDeviceParams.level = node.level
+      this.queryDeviceParams.uid = node.uid
+      this.query(node)
     },
     changePage(page) {
       this.queryDeviceParams.page = page
-      this.queryCountDevice()
+      this.query()
     },
-    queryCompany() {
-      company(1).then((res) => {
-        this.companyList = (res.data.result && res.data.result.stations) || []
-        this.queryDeviceParams.level = 0
-        this.queryDeviceParams.uid =
-          this.companyList.length > 0 && this.companyList[0].uid
-        this.queryCountDevice()
-      })
-    },
-    handleSelectionChange(item) {
-      console.log('item :>> ', item)
-    },
-    handleFilter() {
-      this.queryCountDevice()
-    },
-    queryCountDevice() {
+    query() {
       this.loading = true
       countDevice(this.queryDeviceParams)
         .then((res) => {
           this.tableData = (res.data.result && res.data.result.devices) || []
           this.total = (res.data.result && res.data.result.devices_count) || 0
+          this.rightTopInfo = (res.data.result && res.data.result.info) || {
+            devices_count: 0,
+            devices_offline_count: 0,
+            devices_online_count: 0
+          }
           this.loading = false
         })
         .catch((err) => {
@@ -286,7 +252,21 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.filter-container {
-  @include flex(flex-start, center);
+.wrap {
+  width: 100%;
+  height: calc(100vh - 84px);
+
+  .left {
+    float: left;
+    width: 240px;
+    margin-right: 30px;
+    height: 100%;
+    min-height: calc(100vh - 84px);
+    border-right: 1px solid #000;
+  }
+  .right {
+    float: left;
+    width: calc(100% - 270px);
+  }
 }
 </style>

@@ -12,7 +12,10 @@
       </div>
     </div>
     <div class="sub">告警信息统计时间: {{ $dayjs().format('YYYY年MM月DD日') }}
-      <b @click="logClick()">告警信息日志<span class="iconfont icon-arrow" /></b>
+      <b
+        style="color:#fff"
+        @click="logClick()"
+      >告警信息日志<span class="iconfont icon-arrow" /></b>
     </div>
     <div class="rate-container">
       <div class="rate">
@@ -68,8 +71,7 @@ export default {
       date: '',
       bath: { total: 0, online: 0, running: 0, alarm: 0 },
       rate: { online: 0, running: 0, alarm: 0 },
-      currentObj: {},
-      area: ['一分区', '二分区', '三分区', '四分区', '五分区']
+      currentObj: {}
     }
   },
   computed: {
@@ -113,17 +115,14 @@ export default {
     }),
     areaClick(item) {
       const obj = {
-        Area: '二分区',
-        AreaID: '85633c06-a142-4e22-84ab-c668b37a4a46',
-        Bath: '电解槽2001',
-        BathID: 'b27b27bb-20ed-4eb1-832b-b4e7affc0df1',
+        Area: item.name,
+        AreaID: item.id,
         Company: '云南分公司',
-        CompanyID: 'yunnan_branch_company_BaseStation',
-        Factory: '电解铝二厂',
+        Factory: this.currentFactory.s_name,
         t_id: ''
       }
       this.SET_ALARMITEM(obj)
-      this.$router.push({ path: '/detail' })
+      this.$router.push({ path: '/detail', isInfoClick: true })
     },
     getRate() {
       if (this.currentObj.all_bath) {

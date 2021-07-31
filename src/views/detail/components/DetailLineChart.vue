@@ -1,6 +1,6 @@
 <template>
   <div class="detail-chart">
-    <div class="chart-tool">
+    <!-- <div class="chart-tool">
       <div class="left-text">
 
         <div class="title">测温点温度曲线</div>
@@ -11,26 +11,8 @@
         </div>
       </div>
 
-      <!-- <div class="right-btns">
-        <div
-          class="btn"
-          @click="refresh"
-        >
-          <svg-icon
-            class="svg"
-            icon-class="refresh"
-          /> 刷新
-        </div>
-        <div
-          class="btn"
-          @click="exportChart"
-        >
-          <svg-icon
-            class="svg"
-            icon-class="export"
-          /> 导出
-        </div>
-      </div> -->
+    </div> -->
+    <div class="title">电解槽点位详情 <div class="sub">{{ alarmItem.Bath }} / {{ alarmItem.t_id }}</div>
     </div>
     <div class="info">
       <div class="info-item">当前温度:
@@ -66,9 +48,10 @@
         class="date-range-box"
         @on-change="changeDate"
       />
+
     </div>
     <div class="detail-chart-box">
-      <div
+      <!-- <div
         v-if="xData.length < 1"
         class="no-data"
       >
@@ -81,121 +64,25 @@
         :id="id"
         :class="className"
         :style="{height:height,width:width}"
+      /> -->
+      <HistoryChart
+        id="detailHistoryChart"
+        ref="HistoryChart"
+        :list="list"
+        :size="14"
       />
     </div>
-    <Modal
-      v-model="exportDialogVisible"
-      title="导出"
-      width="40%"
-      center
-    >
-      <div class="export-filter">
-        <div class="filter-items">
-          <div class="filter-item">
-            <div class="filter-item-label">
-              导出点位
-            </div>
-            <div class="filter-item-content">
 
-              <div class="content-crumbs">
-                <div class="content-crumb">{{ alarmItem.Company }}</div>
-                <div class="content-crumb">{{ alarmItem.Factory }}</div>
-                <div class="content-crumb">{{ alarmItem.Area }}</div>
-                <div class="content-crumb">{{ alarmItem.Bath }}</div>
-                <div class="content-crumb">{{ alarmItem.t_id }}</div>
-              </div>
-            </div>
-          </div>
-          <div class="filter-item">
-            <div class="filter-item-label">
-              时间范围
-            </div>
-            <div class="filter-item-content">
-              <!-- <el-date-picker
-                v-model="exportDate"
-                type="daterange"
-                :picker-options="pickerOptions"
-                range-separator="至"
-                placeholder="选择日期"
-                class="screen-select"
-                unlink-panels
-                @change="changeExportDate"
-              >
-                />
-              </el-date-picker> -->
-              <Date-picker
-                :clearable="false"
-                :value="exportDate"
-                type="daterange"
-                :options="pickerOptions"
-                placeholder="选择日期"
-                style="width: 200px"
-                @on-change="changeExportDate"
-              />
-            </div>
-          </div>
-          <!-- <div class="filter-item">
-            <div class="filter-item-label">
-              温度数据
-            </div>
-            <div class="filter-item-content">
-              <el-checkbox-group
-                v-model="checkedTemp"
-                @change="handleCheckedTempChange"
-              >
-                <el-checkbox
-                  v-for="temp in Temps"
-                  :key="temp"
-                  :label="temp"
-                >{{ temp }}</el-checkbox>
-              </el-checkbox-group>
-
-            </div>
-          </div> -->
-        </div>
-      </div>
-      <span
-        slot="footer"
-        class="dialog-footer"
-      >
-        <!-- <el-button
-          class="detail-ok-btn"
-          @click="exportPoint"
-        >导出</el-button> -->
-        <Dropdown
-          trigger="click"
-          @on-click="exportPoint"
-        >
-          <!-- <span class="el-dropdown-link">
-            导出<i class="el-icon-arrow-down el-icon--right" />
-          </span> -->
-          <Button class="detail-ok-btn">导出</Button>
-          <DropdownMenu slot="list">
-            <DropdownItem name="1">压缩</DropdownItem>
-            <DropdownItem name="0">不压缩</DropdownItem>
-
-          </DropdownMenu>
-        </Dropdown>
-        <Button
-          class="detail-cancel-btn"
-          @click="exportDialogVisible = false"
-        >取消</Button>
-      </span>
-    </Modal>
   </div>
 
 </template>
 
 <script>
-import * as echarts from 'echarts'
-// import resize from './mixins/resize'
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
-// import { color } from 'echarts'
-
-const alarmColor = '#ff2f14'
+import HistoryChart from '@/components/HistoryChart'
 export default {
   name: 'DetailLineChart',
-  components: {},
+  components: { HistoryChart },
   filters: {
     typeText(val) {
       let res = ''
@@ -220,35 +107,12 @@ export default {
       default() {
         return []
       }
-    },
-    // warningVal: {
-    //   type: Number,
-    //   default: 0
-    // },
-    className: {
-      type: String,
-      default: 'chart'
-    },
-    id: {
-      type: String,
-      default: 'DetailLineChart'
-    },
-    width: {
-      type: String,
-      default: '100%'
-    },
-    height: {
-      type: String,
-      default: '100%'
     }
   },
   data() {
     return {
-      chart: null,
       exportDialogVisible: false,
-
       option: null,
-      timer: null,
       // warningVal: 250,
       // xData: [],
       newList: [],
@@ -323,31 +187,14 @@ export default {
       tempHeight: (state) => state.station.tempHeight,
       currentPoint: (state) => state.station.currentPoint
     }),
-    xData() {
-      return this.newList.map((v) => {
-        const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm:ss')
-        return { value: [time, v.fv] }
-      })
-    },
+
     nowTemp() {
       return (
         (this.list.length > 1 && this.list[this.list.length - 1]['fv']) || ''
       )
     }
   },
-  watch: {
-    list: {
-      handler(newName, oldName) {
-        this.newList = [...newName]
-        // this.xData = newName.map((v) => {
-        //   const time = this.$dayjs(v.pick_time).indexOf()
-        //   return { value: [time, v.fv] }
-        // })
-        this.initChart()
-      },
-      deep: true
-    }
-  },
+
   mounted() {
     const sDate =
       this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 00:00'
@@ -355,57 +202,10 @@ export default {
       this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 23:59'
     this.date = [sDate, eDate]
   },
-  beforeDestroy() {
-    if (!this.chart) {
-      return
-    }
-    this.chart.dispose()
-    this.chart = null
-    clearInterval(this.timer)
-  },
+  beforeDestroy() {},
   methods: {
-    exportPoint(is_compress) {
-      const flag = is_compress === '1'
-      if (this.exportDate.length < 1) {
-        this.$message.error('请先选择日期')
-        return
-      }
-      const params = { arr: this.exportDate, is_compress: flag }
-      this.$emit('exportPoint', params)
-    },
     changeDate(date) {
       this.$emit('changeDate', date)
-    },
-    changeExportDate(arr) {
-      this.exportDate = arr
-    },
-    refresh(val) {
-      this.$emit('refresh', val)
-    },
-    hideExport(val) {
-      this.exportDialogVisible = false
-    },
-    handleCheckedTempChange(val) {},
-    // 生成从minNum到maxNum的随机数
-    exportChart(Min, Max) {
-      this.exportDialogVisible = true
-    },
-
-    randomNum(Min, Max) {
-      var Range = Max - Min
-      var Rand = Math.random()
-      var num = Min + Math.round(Rand * Range) // 四舍五入
-      return num
-    },
-
-    randomData() {
-      this.now += this.step
-      this.value = this.randomNum(50, 150)
-      return {
-        name: this.now.toString(),
-        // name: '小明',
-        value: [this.now, Math.round(this.value)]
-      }
     },
     pointTextClass(point) {
       let res = ''
@@ -424,236 +224,30 @@ export default {
       }
 
       return res
-    },
-    initChart() {
-      const that = this
-      this.chart = echarts.init(document.getElementById(this.id))
-      this.now = this.$dayjs().valueOf()
-      // for (let i = 0; i < 100; i++) {
-      //   this.xData.push(this.randomData())
-      // }
-      // this.xData = this.newList.map((v) => {
-      //   const time = that.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm')
-      //   return { value: [time, v.fv] }
-      // })
-      // 处理颜色
-      const colorAlarmB = 'hsla(354, 100%, 57%, 1)'
-      const colorTheme = 'hsla(190, 80%, 48%, 1)'
-      const colorTheme2 = colorTheme.slice(0, -2) + '0.1)'
-      const colorTheme3 = colorTheme.slice(0, -2) + '0.2)'
-      this.option = {
-        color: ['#18BAD7'],
-
-        // tooltip: {
-        //   trigger: 'axis',
-        //   axisPointer: {
-        //     type: 'cross',
-        //     axisPointer: {
-        //       type: 'cross',
-        //       label: {
-        //         backgroundColor: '#000'
-        //       }
-        //     }
-        //   }
-        // },
-        tooltip: {
-          trigger: 'axis',
-          formatter: function (params) {
-            // bubble-temp 的样式在 style.css
-            return `
-              <div style="padding: 10px; border-radius: 4px; background: rgba(0, 0, 0, 0.5);">
-                <div style="font-family: 'DIN'; font-size: 14px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5)">
-                  ${that.util.formatTime(params[0].value[0])}
-                </div>
-                <div class="bubble-temp" style="color: ${params[0].color};">
-                  ${parseFloat(params[0].value[1]).toFixed(2)}
-                </div>
-              </div>
-            `
-          },
-          backgroundColor: 'transparent',
-          axisPointer: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } }
-        },
-        // grid: {
-        //   top: '10%',
-        //   left: '2%',
-        //   right: '5%',
-        //   bottom: '5%',
-        //   containLabel: true
-        // },
-        grid: { borderWidth: 0, top: 20, left: 76, right: 40, bottom: 20 },
-
-        visualMap: [
-          {
-            show: false,
-            dimension: 1,
-            pieces: [
-              // { gte: that.warningVal, lte: 5000, color: colorAlarmB },
-              // { gte: -100, lte: 200, color: colorTheme }
-              {
-                gt: 0,
-                lte: that.tempHeight,
-                color: colorTheme
-              },
-              {
-                gt: that.tempHeight,
-                lte: 5000,
-                color: colorAlarmB
-              }
-            ]
-          }
-        ],
-        calculable: true,
-        lineStyle: {
-          width: 1
-        },
-
-        xAxis: {
-          type: 'time',
-          // name: '年-月-日',
-          boundaryGap: false,
-          splitNumber: 9,
-          axisLabel: {
-            textStyle: {
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: 10
-            },
-            formatter(value) {
-              // const time = that.$dayjs(value).format('HH:mm:ss')
-              const time = that.$dayjs(value).format('HH:mm')
-              return time
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
-
-          splitLine: {
-            show: false
-          }
-        },
-        yAxis: {
-          type: 'value',
-          scale: true,
-
-          // name: '温度',
-          min: 0,
-          boundaryGap: false,
-          axisLabel: {
-            formatter: '{value}°C',
-            textStyle: {
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: 10
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          axisLine: {
-            show: false
-          },
-          splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.1)' } }
-        },
-        series: [
-          {
-            name: '温度',
-            type: 'line',
-            symbol: 'none',
-            lineStyle: { width: 2, join: 'round' },
-
-            xAxisIndex: 0,
-            yAxisIndex: 0,
-            itemStyle: {
-              opacity: 0
-              // normal: {
-              //   // color: '#6cb041',
-              //   lineStyle: {
-              //     width: 3 // 设置线条粗细
-              //   }
-              // }
-            },
-
-            areaStyle: {
-              color: new this.$echarts.graphic.LinearGradient(
-                0,
-                0,
-                1,
-                0,
-                [
-                  {
-                    offset: 1,
-                    color: colorTheme2
-                  },
-                  {
-                    offset: 0,
-                    color: colorTheme3
-                  }
-                ],
-                false
-              )
-            },
-            data: this.xData,
-            smooth: false,
-            // 标记的线
-            markLine: {
-              silent: true,
-              symbol: 'none',
-              lineStyle: {
-                type: 'solid',
-                width: 1,
-                color: colorAlarmB
-              },
-              label: {
-                type: 'value',
-                position: 'start',
-                distance: 5,
-                formatter: '{c}°C',
-                fontSize: 14,
-                fontWeight: 600,
-                color: colorAlarmB
-              },
-              data: [{ yAxis: that.tempHeight }]
-            },
-            markPoint: {
-              silent: true,
-              symbol: 'rect',
-              symbolSize: [70, 26],
-              label: {
-                formatter: '{c}°C',
-                padding: [16, 16, 12, 16],
-                fontSize: 16,
-                fontfamily: 'DIN',
-                fontWeight: 600,
-                borderRadius: 4,
-                color: 'rgba(255, 255, 255, 1)',
-                backgroundColor: 'rgba(30, 30, 30, 0.7 )'
-              },
-              itemStyle: { color: 'transparent' },
-              data: [
-                { type: 'max', name: '最高温度' },
-                { type: 'min', name: '最低温度' }
-              ]
-            }
-          }
-        ]
-      }
-
-      this.chart.setOption(this.option, true)
-
-      // this.timer = setInterval(() => {
-      //   for (let i = 0; i < 5; i++) {
-      //     this.xData.shift()
-      //     this.xData.push(this.randomData())
-      //   }
-
-      //   this.chart.setOption(this.option, true)
-      // }, this.step)
     }
   }
 }
 </script>
 <style lang="scss" scoped>
+::v-deep .date-range-box {
+  .ivu-input {
+    font-size: 14px;
+  }
+}
+::v-deep .ivu-select-dropdown {
+}
+.title {
+  font-size: 24px;
+  font-weight: 800;
+  color: var(--theme);
+  display: flex;
+  gap: 14px;
+  align-items: flex-end;
+  .sub {
+    color: #fff;
+    font-size: 16px;
+  }
+}
 .svg {
   margin-right: 8px;
 }
@@ -683,10 +277,9 @@ export default {
 .detail-chart {
   height: 100%;
   width: 100%;
-
+  padding: 0 20px;
   .chart-tool {
     @include flex(space-between, center);
-    margin-bottom: 15px;
     .left-text {
       @include flex(flex-start, baseline);
       .content-crumbs {
@@ -736,9 +329,10 @@ export default {
   .detail-chart-box {
     @include flex(space-between, center);
     flex-direction: column;
-    width: 100%;
-    height: calc(100% - 150px);
+    width: calc(100% + 60px);
+    height: calc(100% - 146px);
     position: relative;
+    margin: 0 -30px;
     .no-data {
       @include flex();
 

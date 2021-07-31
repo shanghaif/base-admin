@@ -54,26 +54,13 @@ export default {
       img: require('@/assets/bg.jpg'),
       chart: null,
       factoryId: '',
-      center: [103.3, 23.4],
+      center: [103.3, 23],
       companyList: [],
       factoryList: [],
-      popTitle: '云南分公司',
-      popItem: [
-        { name: '电解铝一厂', canUse: true },
-        { name: '电解铝二厂', canUse: true },
-        { name: '电解铝三厂', canUse: false },
-        { name: '电解铝四厂', canUse: true },
-        { name: '电解铝五厂', canUse: false },
-        { name: '电解铝六厂', canUse: false },
-        { name: '电解铝七厂', canUse: true }
-      ]
+      popTitle: '云南分公司'
     }
   },
-  computed: {
-    // ...mapState({
-    //   currentFactory: (state) => state.station.currentFactory
-    // })
-  },
+  computed: {},
   watch: {
     data: {
       handler: function (newVal, oldVal) {
@@ -86,11 +73,7 @@ export default {
       deep: true
     }
   },
-  created() {
-    // this.queryCompany().then((res) => {
-    //   this.queryFactory(res)
-    // })
-  },
+  created() {},
   mounted() {
     this.$echarts.registerMap('China', China)
     this.draw()
@@ -101,45 +84,7 @@ export default {
       this.$refs.list.style.width = n * 102 + 16 + 'px'
       this.$refs.list.style.left = -n * 51 + 'px'
     },
-    // ...mapMutations({
-    //   SET_FACTORY: 'station/SET_FACTORY',
-    //   SET_CELL: 'station/SET_CELL'
-    // }),
-    // queryCompany() {
-    //   return new Promise((resolve, reject) => {
-    //     company(1)
-    //       .then((res) => {
-    //         this.companyList =
-    //           (res.data.result && res.data.result.stations) || []
-    //         resolve(this.companyList)
-    //       })
-    //       .catch((error) => {
-    //         reject(error)
-    //       })
-    //   })
-    // },
-    // async queryFactory(arr) {
-    //   console.log('this.companyList.length :>> ', this.companyList.length)
-    //   if (arr.length > 0) {
-    //     try {
-    //       // 工厂
-    //       const id_company = this.companyList.find(
-    //         (v) => v.s_name === '云南分公司'
-    //       ).uid
-    //       const factoryResult = await factory(id_company, 1)
-    //       this.factoryList = factoryResult.data.result.stations || []
-    //       const len = this.factoryList.length
 
-    //       // const hasData = len > 1 ? this.factoryList[1] : this.factoryList[0]
-    //       const hasData = len > 1 ? this.factoryList[0] : this.factoryList[0]
-    //       this.SET_FACTORY(hasData)
-    //       setCurrentFactory(hasData)
-    //       this.factoryId = hasData.uid
-    //     } catch (err) {
-    //       this.$message('工厂错误')
-    //     }
-    //   }
-    // },
     draw() {
       this.chart = this.$echarts.init(document.getElementById('chart-map'), {
         renderer: 'svg'
@@ -166,7 +111,7 @@ export default {
           roam: false,
           center: this.center,
           label: { emphasis: { show: false } },
-          zoom: 1.6,
+          zoom: 1.9,
           itemStyle: {
             normal: {
               borderWidth: 1,
@@ -187,7 +132,7 @@ export default {
             selectedMode: 'single',
             showLegendSymbol: false,
             label: { emphasis: { show: false } },
-            zoom: 1.6,
+            zoom: 1.9,
             itemStyle: {
               normal: {
                 areaColor: 'rgba(28, 34, 38, 1)',
@@ -295,37 +240,53 @@ export default {
 
 .pop {
   position: absolute;
-  height: 12px;
-  width: 12px;
-  top: calc(45% - 16px);
-  left: calc(50% + 60px);
-  border-radius: 50%;
-  background: var(--theme);
-  box-shadow: 4px 6px 6px 4px rgba(0, 0, 0, 0.6);
-  &:after {
+  height: 120px;
+  width: 120px;
+  top: calc(45% - 86px);
+  left: calc(50% + 18px);
+  &:before {
     position: absolute;
     content: '-';
-    height: 20px;
-    width: 20px;
-    top: -4px;
-    left: -4px;
+    height: 24px;
+    width: 24px;
+    top: 48px;
+    left: 48px;
     border-radius: 50%;
     color: transparent;
     background: var(--theme);
     opacity: 0.25;
   }
+  &:after {
+    position: absolute;
+    content: '-';
+    height: 16px;
+    width: 16px;
+    top: 52px;
+    left: 52px;
+    border-radius: 50%;
+    color: transparent;
+    background: var(--theme);
+    box-shadow: 4px 6px 6px 4px rgba(0, 0, 0, 0.6);
+  }
+  &:hover > &-arrow,
+  &:hover > &-list {
+    opacity: 1;
+  }
   &-arrow {
     position: absolute;
     height: 12px;
     width: 12px;
-    left: 0;
-    bottom: 8px;
+    left: 54px;
+    bottom: 62px;
     background: linear-gradient(
       45deg,
       transparent 50%,
       rgba(20, 20, 20, 0.8) 50%
     );
     transform: rotate(135deg);
+    transition: all ease, 0.3s;
+    z-index: 1;
+    opacity: 0;
   }
   &-list {
     position: absolute;
@@ -333,12 +294,12 @@ export default {
     flex-wrap: wrap;
     gap: 12px;
     padding: 14px;
-    // width: 260px;
-    // left: -124px;
-    bottom: 14px;
+    bottom: 68px;
     color: rgba(255, 255, 255, 1);
     border-radius: 4px;
     background: rgba(20, 20, 20, 0.8);
+    transition: all ease, 0.3s;
+    opacity: 0;
     &-title {
       width: 100%;
       opacity: 0.7;

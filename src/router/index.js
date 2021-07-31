@@ -70,6 +70,16 @@ export const constantRoutes = [
     component: () => import('@/views/error-page/401'),
     hidden: true
   },
+  {
+    path: 'dashboard',
+    component: Layout,
+    children: [
+      {
+        path: '/',
+        meta: { title: 'dashboard', icon: 'dashboard' }
+      }
+    ]
+  },
   // {
   //   path: '/',
   //   component: Layout,
