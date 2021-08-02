@@ -69,7 +69,7 @@
         id="detailHistoryChart"
         ref="HistoryChart"
         :list="list"
-        :size="14"
+        :options="{fontSize:14,splitNumber_x:12,splitNumber_y:5,lineWidth:3,isShowMax:true}"
       />
     </div>
 

@@ -344,7 +344,8 @@ export default {
           this.$refs.area_count_b && this.$refs.area_count_b.chart.resize()
           this.$refs.area_count_c && this.$refs.area_count_c.chart.resize()
           this.$refs.alarm_count && this.$refs.alarm_count.chart.resize()
-          this.$refs.alarm_point && this.$refs.alarm_point.chart.resize()
+          this.$refs.alarm_point.$refs.HistoryChart &&
+            this.$refs.alarm_point.$refs.HistoryChart.chart.resize()
         } catch (err) {
           console.log('resize :>> ', err)
         }

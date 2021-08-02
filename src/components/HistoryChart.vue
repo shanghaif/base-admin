@@ -6,7 +6,6 @@
       text="暂无数据"
     />
     <div
-      v-else
       :id="id"
       :class="className"
       :style="{height:height,width:width}"
@@ -30,10 +29,13 @@ export default {
         return []
       }
     },
-    size: {
-      type: Number,
-      default: 10
+    options: {
+      type: Object,
+      default() {
+        return {}
+      }
     },
+
     className: {
       type: String,
       default: 'chart'
@@ -72,13 +74,25 @@ export default {
       handler(newName, oldName) {
         this.newList = [...newName]
 
-        if (this.newList.length > 0) {
-          this.xData = this.newList.map((v) => {
+        if (newName.length > 0) {
+          const sDate =
+            this.$dayjs(this.newList[0].pick_time).format('YYYY-MM-DD') +
+            ' 00:00'
+          const eDate =
+            this.$dayjs(this.newList[this.newList.length - 1].pick_time).format(
+              'YYYY-MM-DD'
+            ) + ' 23:59'
+          this.xData = this.newList.map((v, i) => {
             const temp = v.fv
+
             const time = this.$dayjs(v.pick_time).format('YYYY-MM-DD HH:mm:ss')
             this.tempMin = this.tempMin < temp ? this.tempMin : temp
+
             return { value: [time, temp] }
           })
+          this.xData.unshift({ value: [sDate, null] })
+
+          this.xData.push({ value: [eDate, null] })
           this.initChart()
         }
       },
@@ -96,27 +110,54 @@ export default {
   methods: {
     initChart() {
       const that = this
-      this.chart = this.$echarts.init(document.getElementById(this.id))
+      this.chart = this.$echarts.init(document.getElementById(that.id))
       this.now = this.$dayjs().valueOf()
       const colorAlarmB = 'hsla(354, 100%, 57%, 1)'
       const colorTheme = 'hsla(190, 80%, 48%, 1)'
       const colorTheme2 = colorTheme.slice(0, -2) + '0.1)'
       const colorTheme3 = colorTheme.slice(0, -2) + '0.2)'
+      let markPoint
+      if (this.options.isShowMax) {
+        markPoint = {
+          silent: true,
+          symbol: 'rect',
+          symbolSize: [70, 26],
+          label: {
+            formatter: '{c}°C',
+            padding: [16, 16, 12, 16],
+            fontSize: 16,
+            fontfamily: 'DIN',
+            fontWeight: 600,
+            borderRadius: 4,
+            color: 'rgba(255, 255, 255, 1)',
+            backgroundColor: 'rgba(30, 30, 30, 0.7 )'
+          },
+          itemStyle: { color: 'transparent' },
+          data: [
+            { type: 'max', name: '最高温度' },
+            { type: 'min', name: '最低温度' }
+          ]
+        }
+      } else {
+        markPoint = ''
+      }
       const option = {
         tooltip: {
           trigger: 'axis',
           formatter: function (params) {
             // bubble-temp 的样式在 style.css
-            return `
-              <div style="padding: 10px; border-radius: 4px; background: rgba(0, 0, 0, 0.5);">
-                <div style="font-family: 'DIN'; font-size: 14px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5)">
-                  ${that.util.formatTime(params[0].value[0])}
-                </div>
-                <div class="bubble-temp" style="color: ${params[0].color};">
-                  ${parseFloat(params[0].value[1]).toFixed(2)}
-                </div>
-              </div>
-            `
+            if (params[0].value[1] != null) {
+              return `
+                 <div style="padding: 10px; border-radius: 4px; background: rgba(0, 0, 0, 0.5);">
+                   <div style="font-family: 'DIN'; font-size: 14px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5)">
+                     ${that.util.formatTime(params[0].value[0])}
+                   </div>
+                   <div class="bubble-temp" style="color: ${params[0].color};">
+                     ${parseFloat(params[0].value[1]).toFixed(2)}
+                   </div>
+                 </div>
+               `
+            }
           },
           backgroundColor: 'transparent',
           axisPointer: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } }
@@ -127,7 +168,7 @@ export default {
         visualMap: [
           {
             show: false,
-            dimension: 1,
+            // dimension: 1,
             pieces: [
               {
                 gt: 0,
@@ -142,18 +183,18 @@ export default {
             ]
           }
         ],
-        calculable: true,
-        lineStyle: {
-          width: 1
-        },
+        // calculable: true,
+        // lineStyle: {
+        //   width: 1
+        // },
         xAxis: {
           type: 'time',
           boundaryGap: false,
-          splitNumber: 12,
+          splitNumber: this.options.splitNumber_x,
           axisLabel: {
             textStyle: {
               color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: this.size
+              fontSize: this.options.fontSize
             },
             // 坐标轴刻度标签的相关设置。
             formatter: function (params) {
@@ -176,11 +217,12 @@ export default {
           type: 'value',
           scale: true,
           boundaryGap: false,
+          splitNumber: this.options.splitNumber_y,
           axisLabel: {
             formatter: '{value}°C',
             textStyle: {
               color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: this.size
+              fontSize: this.options.fontSize
             }
           },
           axisTick: {
@@ -197,7 +239,8 @@ export default {
             name: '温度',
             type: 'line',
             symbol: 'none',
-            lineStyle: { width: 2, join: 'round' },
+            symbolSize: 0,
+            lineStyle: { width: this.options.lineWidth, join: 'round' },
 
             xAxisIndex: 0,
             yAxisIndex: 0,
@@ -252,26 +295,7 @@ export default {
               },
               data: [{ yAxis: that.tempHeight }]
             },
-            markPoint: {
-              silent: true,
-              symbol: 'rect',
-              symbolSize: [70, 26],
-              label: {
-                formatter: '{c}°C',
-                padding: [16, 16, 12, 16],
-                fontSize: 16,
-                fontfamily: 'DIN',
-                fontWeight: 600,
-                borderRadius: 4,
-                color: 'rgba(255, 255, 255, 1)',
-                backgroundColor: 'rgba(30, 30, 30, 0.7 )'
-              },
-              itemStyle: { color: 'transparent' },
-              data: [
-                { type: 'max', name: '最高温度' },
-                { type: 'min', name: '最低温度' }
-              ]
-            }
+            markPoint
           }
         ]
       }

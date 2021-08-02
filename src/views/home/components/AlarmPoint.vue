@@ -22,7 +22,13 @@
       </div>
     </div>
     <div class="chart">
-      <div id="alarm-point" />
+      <!-- <div id="alarm-point" /> -->
+      <HistoryChart
+        :id="'homeHistoryChart'"
+        ref="HistoryChart"
+        :list="list"
+        :options="{fontSize:10,splitNumber_x:9,splitNumber_y:5,lineWidth:2,isShowMax:false}"
+      />
       <div
         v-show="alarmListIndex !== 0 && hasAlarm"
         class="iconfont icon-arrow left"
@@ -40,10 +46,14 @@
 <script>
 import { mapGetters, mapState, mapActions, mapMutations } from 'vuex'
 import { deviceHistory, devicePoint } from '@/api/station'
+import HistoryChart from '@/components/HistoryChart'
+
 import sortBy from 'lodash/sortBy'
 
 export default {
   name: 'AlarmPoint',
+  components: { HistoryChart },
+
   filters: {
     typeText(val) {
       let res = ''
@@ -71,8 +81,7 @@ export default {
       step: 60 * 1000,
       option: null,
       timer: null,
-      // warningVal: 250,
-      // xData: [],
+
       newList: [],
       checkedTemp: [],
       Temps: ['原始温度数据', '最高温度', '最低温度', '平均温度'],
@@ -85,14 +94,7 @@ export default {
           value: 0
         }
       ],
-      list: [
-        // {
-        //   fv: 0,
-        //   pick_time: '',
-        //   pid: '',
-        //   tid: ''
-        // }
-      ],
+      list: [],
 
       queryParams: {
         sTime: '',
@@ -133,13 +135,6 @@ export default {
       return (
         (this.list.length > 1 && this.list[this.list.length - 1]['fv']) || ''
       )
-    },
-    averageTemp() {
-      const sum = this.list.reduce((pre, cur) => {
-        return cur.fv + pre
-      }, 0)
-      const res = sum ? (sum / this.list.length).toFixed(1) : 0
-      return Number(res)
     }
   },
   watch: {
@@ -157,7 +152,7 @@ export default {
           }, this.step)
         } else {
           this.list = []
-          this.initChart()
+          // this.initChart()
         }
       },
       deep: true
@@ -172,7 +167,6 @@ export default {
       SET_TEMPHEIGHT: 'station/SET_TEMPHEIGHT'
     }),
     init() {
-      // this.currentAlarmObj = this.alarmList[0]
       this.queryParams.sTime =
         this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
         ' 00:00'
@@ -180,8 +174,6 @@ export default {
         this.$dayjs(this.currentAlarmObj.AlarmTime).format('YYYY-MM-DD') +
         ' 23:59'
 
-      // this.allPointList.length < 1 && this.queryPiont()
-      // // this.queryPiont()
       this.queryPiontHistory()
     },
     pointTextClass(point) {
@@ -230,209 +222,18 @@ export default {
       }
       this.init()
     },
-    // queryPiont() {
-    //   devicePoint(this.currentAlarmObj.BathID)
-    //     .then((res) => {
-    //       const arr = res.data.result || []
-    //       this.allPointList = arr
-    //       // this.setFuncOfpoint()
-    //     })
-    //     .catch((err) => {
-    //       this.$message(err)
-    //     })
-    // },
-    queryPiontHistory(date) {
+
+    queryPiontHistory() {
       this.queryParams.id = this.currentAlarmObj.t_id
       deviceHistory(this.queryParams)
         .then((res) => {
           const arr = (res.data.result && res.data.result.list) || []
           res.data.result && this.SET_TEMPHEIGHT(res.data.result.high)
           this.list = sortBy(arr, (v) => v.pick_time)
-          this.initChart()
         })
         .catch((err) => {
           this.$message(err)
         })
-    },
-    initChart() {
-      const that = this
-      this.now = this.$dayjs().valueOf()
-
-      this.chart = this.$echarts.init(document.getElementById('alarm-point'), {
-        renderer: 'svg'
-      })
-
-      // 处理颜色
-      const colorAlarmB = 'hsla(354, 100%, 57%, 1)'
-      const colorTheme = 'hsla(190, 80%, 48%, 1)'
-      const colorTheme2 = colorTheme.slice(0, -2) + '0.1)'
-      const colorTheme3 = colorTheme.slice(0, -2) + '0.2)'
-
-      this.chart.setOption({
-        grid: { borderWidth: 0, top: 20, left: 56, right: 20, bottom: 20 },
-        legend: { show: false },
-        tooltip: {
-          trigger: 'axis',
-          formatter: function (params) {
-            // bubble-temp 的样式在 style.css
-            return `
-              <div style="padding: 10px; border-radius: 4px; background: rgba(0, 0, 0, 0.5);">
-                <div style="font-family: 'DIN'; font-size: 14px; text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5)">
-                  ${that.util.formatTime(params[0].value[0])}
-                </div>
-                <div class="bubble-temp" style="color: ${params[0].color};">
-                  ${parseFloat(params[0].value[1]).toFixed(2)}
-                </div>
-              </div>
-            `
-          },
-          backgroundColor: 'transparent',
-          axisPointer: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } }
-        },
-        xAxis: {
-          type: 'time',
-          axisLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.3)' } },
-          axisTick: { show: false },
-          splitNumber: 9,
-          axisLabel: {
-            textStyle: {
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: 10
-            },
-            formatter(value) {
-              // const time = that.$dayjs(value).format('HH:mm:ss')
-              const time = that.$dayjs(value).format('HH:mm')
-              return time
-            }
-          },
-          splitLine: { show: false }
-        },
-        // yAxis: {
-        //   type: 'value',
-        //   axisLine: { show: false },
-        //   splitLine: { lineStyle: { color: 'rgba(255, 255, 255, 0.2)' } },
-        //   splitNumber: 5,
-        //   interval: 20,
-        //   axisLabel: {
-        //     formatter: '{value}°C',
-        //     textStyle: {
-        //       color: 'rgba(255, 255, 255, 0.6)',
-        //       fontSize: 10
-        //     }
-        //   },
-        //   min: Math.floor(this.tempMin / 10 - 2) * 10
-        // },
-        yAxis: {
-          type: 'value',
-          scale: true,
-
-          // name: '温度',
-          // min: 0,
-          boundaryGap: false,
-          axisLabel: {
-            formatter: '{value}°C',
-            textStyle: {
-              color: 'rgba(255, 255, 255, 0.6)',
-              fontSize: 10
-            }
-          },
-          axisTick: {
-            show: false
-          },
-          axisLine: {
-            show: true,
-            lineStyle: {
-              color: '#394056'
-            }
-          },
-          splitLine: {
-            show: true,
-            lineStyle: {
-              color: '#394056'
-            }
-          }
-        },
-        visualMap: [
-          {
-            show: false,
-            dimension: 1,
-            pieces: [
-              // { gte: that.warningVal, lte: 5000, color: colorAlarmB },
-              // { gte: -100, lte: 200, color: colorTheme }
-              {
-                gt: 0,
-                lte: that.tempHeight,
-                color: colorTheme
-              },
-              {
-                gt: that.tempHeight,
-                lte: 5000,
-                color: colorAlarmB
-              }
-            ]
-          }
-        ],
-        // visualMap: {
-        //   show: false,
-        //   pieces: [
-        //     {
-        //       gt: 0,
-        //       lte: this.tempHigh,
-        //       color: colorTheme
-        //     },
-        //     {
-        //       gt: this.tempHigh,
-        //       lte: 500,
-        //       color: colorAlarmB
-        //     }
-        //   ]
-        // },
-        series: {
-          name: '温度',
-          type: 'line',
-          data: this.xData,
-          symbolSize: 0,
-          lineStyle: { width: 2, join: 'round' },
-          areaStyle: {
-            color: new this.$echarts.graphic.LinearGradient(
-              0,
-              0,
-              1,
-              0,
-              [
-                {
-                  offset: 1,
-                  color: colorTheme2
-                },
-                {
-                  offset: 0,
-                  color: colorTheme3
-                }
-              ],
-              false
-            )
-          },
-          markLine: {
-            silent: true,
-            symbol: 'none',
-            lineStyle: {
-              type: 'solid',
-              width: 1,
-              color: colorAlarmB
-            },
-            label: {
-              type: 'value',
-              position: 'start',
-              distance: 5,
-              formatter: '{c}°C',
-              fontSize: 14,
-              fontWeight: 600,
-              color: colorAlarmB
-            },
-            data: [{ yAxis: that.tempHeight }]
-          }
-        }
-      })
     }
   }
 }
