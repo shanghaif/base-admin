@@ -7,6 +7,8 @@
       :highlight-current="true"
       :check-on-click-node="true"
       :default-expanded-keys="expandedKeys"
+      :expand-on-click-node="false"
+      :current-node-key="currentId"
       lazy
       node-key="uid"
       @node-click="clickNode"
@@ -30,7 +32,9 @@ import {
 export default {
   name: 'StationTree',
   components: {},
-
+  props: {
+    currentId: { type: String, default: '' }
+  },
   data() {
     return {
       currentNode: null,
@@ -124,4 +128,13 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" >
+.el-tree--highlight-current {
+  .el-tree-node.is-current {
+    & > .el-tree-node__content {
+      background: #1890ff;
+      color: #fff;
+    }
+  }
+}
+</style>

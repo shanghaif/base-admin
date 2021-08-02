@@ -28,7 +28,7 @@
         />
       </el-button-group>
 
-      <el-tree
+      <!-- <el-tree
         :key="treeId"
         ref="tree"
         :props="props"
@@ -39,6 +39,10 @@
         lazy
         node-key="uid"
         @node-click="clickNode"
+      /> -->
+      <StationTree
+        :key="treeId"
+        @clickNode="clickNode"
       />
     </div>
     <div class="right">
@@ -717,14 +721,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-::v-deep .el-tree--highlight-current {
-  .el-tree-node.is-current {
-    & > .el-tree-node__content {
-      background: #1890ff;
-      color: #fff;
-    }
-  }
-}
 .device-wrap {
   min-height: calc(100vh - 84px);
   .btns-wrap {

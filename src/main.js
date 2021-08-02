@@ -29,6 +29,7 @@ import echarts from 'echarts'
 import util from '@/util'
 import Status from '@/components/Status'
 import ZSelect from '@/components/ZSelect'
+import StationTree from '@/components/StationTree'
 
 // 大屏暗黑主题使用ivew
 import { Button, DatePicker, Modal, Dropdown, DropdownMenu, DropdownItem, Select, OptionGroup, Option, Poptip} from 'iview'
@@ -44,6 +45,7 @@ Vue.component('Option', Option)
 Vue.component('Poptip', Poptip)
 Vue.component('Status', Status)
 Vue.component('ZSelect', ZSelect)
+Vue.component('StationTree', StationTree)
 
 
 /**

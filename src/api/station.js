@@ -174,8 +174,7 @@ export function deviceInfo(id) { // 获取单个设备信息
     method: 'get'
   })
 }
-export function warningAll(obj) { // 获取告警   
-  const params = {...{factory: true, alarm_id: 'all'}, ...obj}
+export function warningAll(params) { // 获取告警   
   return request({
     url: `api/alarm/history`,
     method: 'get',

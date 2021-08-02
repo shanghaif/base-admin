@@ -143,11 +143,9 @@ import {
   editThings,
   deviceStatus
 } from '@/api/station'
-import StationTree from '@/components/StationTree'
 
 export default {
   name: 'QueryDevice',
-  components: { StationTree },
 
   filters: {
     statusFilter(type) {

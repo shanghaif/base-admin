@@ -9,6 +9,7 @@
         <div class="filter-container">
 
           <el-button
+            style="vertical-align:top"
             :disabled="!radio"
             type="primary"
             @click="openExportDlg"
@@ -18,12 +19,23 @@
               icon-class="export"
             />导出
           </el-button>
+          <el-input
+            v-if="tableData.length>0"
+            v-model="searchVal"
+            style="width:200px;margin-left:30px"
+            placeholder="输入设备名称搜索"
+          >
+            <i
+              slot="prefix"
+              class="el-input__icon el-icon-search"
+            />
+          </el-input>
         </div>
 
         <el-table
           ref="multipleTable"
           v-loading="loading"
-          :data="tableData"
+          :data="searchResult"
           tooltip-effect="dark"
           style="width: 100%"
           highlight-current-row
@@ -113,12 +125,11 @@
 <script>
 import { company, factory, area, cell } from '@/api/station'
 import ExportFilter from '@/components/ExportFilter'
-import StationTree from '@/components/StationTree'
 import { devicePoint, deviceHistory, exportPointInfo } from '@/api/station'
 
 export default {
   name: 'DataDevice',
-  components: { ExportFilter, StationTree },
+  components: { ExportFilter },
   filters: {
     statusFilter(type) {
       let res = ''
@@ -141,6 +152,7 @@ export default {
     return {
       loading: false,
       total: 0,
+      searchVal: '',
       currenRow: null,
       factoryStr: '',
       radio: '',
@@ -156,7 +168,15 @@ export default {
     }
   },
 
-  computed: {},
+  computed: {
+    searchResult() {
+      return this.tableData.filter(
+        (data) =>
+          !this.searchVal ||
+          data.s_name.toLowerCase().includes(this.searchVal.toLowerCase())
+      )
+    }
+  },
   watch: {},
 
   created() {
@@ -167,6 +187,9 @@ export default {
   mounted() {},
 
   methods: {
+    searchTable() {
+      // this.data.filters(v)
+    },
     typeFunc(point) {
       let res = ''
       const type = point.alarm_type && point.alarm_type[0]
@@ -188,6 +211,8 @@ export default {
       if (node.level === 3) {
         this.currentNode = { ...node }
         this.query(node)
+      } else {
+        this.tableData = []
       }
     },
     currentChange(row) {

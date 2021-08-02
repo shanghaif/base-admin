@@ -1,61 +1,17 @@
 <template>
-  <el-card>
+  <el-card class="wrap">
+    <div class="left">
+      <StationTree
+        :current-id="currentNode.t_id"
+        @clickNode="clickNode"
+      />
+
+    </div>
     <div class="right">
-      <!-- <div class="count-container">
-        <div
-          class="count-item blue"
-          style="width: 32%"
-        >
-          <span>温度高</span>
-          <p class="count-num">{{ total }}</p>
-          <i class="el-icon-info" />
-        </div>
-        <div
-          class="count-item gray"
-          style="width: 32%"
-        >
-          <span>离线</span>
-          <p class="count-num">936</p>
-          <i class="el-icon-success" />
-        </div>
-        <div
-          class="count-item red"
-          style="width: 32%"
-        >
-          <span>趋势异常</span>
-          <p class="count-num">68</p>
-          <i class="el-icon-warning" />
-        </div>
-      </div> -->
+
       <div class="right-content">
         <div class="filter-container">
-          <!-- <el-button
-            type="primary"
-            @click="addNewDevice()"
-          >增加设备</el-button>
-          <el-button
-            type="primary"
-            @click="refreshDevice"
-          >刷新</el-button> -->
-          <!-- <el-button
-            v-if="multipleSelection.length>0"
-            type="danger"
-          >删除已选</el-button> -->
-          <el-select
-            v-model="factoryStr"
-            placeholder="选择厂区"
-            style="width: 120px; margin-right: 10px"
-            class="filter-item"
-            @change="selectFactory"
-          >
-            <el-option
-              v-for="(item,i) in factoryList"
-              :key="'a' + i"
-              :label="item.s_name"
-              :value="item.uid"
-            />
 
-          </el-select>
           <el-date-picker
             v-model="dateRange"
             type="daterange"
@@ -80,10 +36,6 @@
           style="width: 100%"
           :stripe="true"
         >
-          <!-- <el-table-column
-            type="selection"
-            width="55"
-          /> -->
 
           <el-table-column
             sortable
@@ -135,6 +87,17 @@
                 :type="typeFunc(scope.row.alarm_id)"
                 plain
               >{{ scope.row.alarm_id | statusFilter }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="alarm_obj"
+            label="时间"
+            class-name="n-wrap"
+            show-overflow-tooltip
+          >
+            <template slot-scope="scope">
+
+              <span>{{ $dayjs(scope.row.alarm_obj.time * 1000).format('YYYY-MM-DD HH:mm') }}</span>
             </template>
           </el-table-column>
 
@@ -215,15 +178,17 @@ export default {
     return {
       total: 0,
       factoryStr: '',
+      currentId: '',
+      currentNode: {},
       tableData: [],
       queryParams: {
         page: 1,
         size: 10
       },
       dateRange: [],
+      levelMap: ['company', 'factory', 'area', 'bath'],
       chooseDate: {},
-      companyList: [],
-      factoryList: [],
+
       pickerOptions: {}
     }
   },
@@ -236,15 +201,16 @@ export default {
   watch: {},
 
   created() {
-    // 生命周期钩子：组件实例创建完成，属性已绑定，但 DOM 还未生成，el 属性还不存在
-    // 初始化渲染页面
+    this.currentNode = {
+      t_id: getCurrentFactory().uid,
+      factory: true
+    }
   },
 
   mounted() {
     // 生命周期钩子：模板编译、挂载之后（此时不保证已在 document 中）
     this.pickerOptions = this.getPickerOptions()
-    this.factoryStr = getCurrentFactory().uid
-    this.queryCompany()
+
     this.getDate('day')
     this.queryWarning()
 
@@ -252,6 +218,14 @@ export default {
   },
 
   methods: {
+    clickNode(node) {
+      this.currentNode = {
+        alarm_id: 'all',
+        t_id: node.uid,
+        [this.levelMap[node.level]]: true
+      }
+      this.queryWarning()
+    },
     getPickerOptions() {
       const that = this
       return {
@@ -296,26 +270,6 @@ export default {
       this.chooseDate = obj
       this.queryWarning()
     },
-    selectFactory(val) {
-      const obj = this.factoryList.find((v) => v.uid === val)
-      setCurrentFactory(obj)
-      this.queryWarning(val)
-    },
-    async queryCompany() {
-      const res = await company(1)
-
-      this.companyList = (res.data.result && res.data.result.stations) || []
-
-      const id_company = this.companyList.find(
-        (v) => v.s_name === '云南分公司'
-      ).uid
-      const factoryResult = await factory(id_company, 1)
-      this.factoryList =
-        (factoryResult.data.result && factoryResult.data.result.stations) || []
-      // this.factoryList = list.map((v) => {
-      //   return { value: v.uid, label: v.s_name }
-      // })
-    },
 
     typeFunc(type) {
       let res = ''
@@ -328,26 +282,18 @@ export default {
       }
       return res
     },
-    refreshDevice(item) {
-      console.log('item :>> ', item)
-    },
-    addNewDevice(item) {
-      console.log('item :>> ', item)
-    },
-    delDevice(item) {
-      console.log('item :>> ', item)
-    },
+
     changePage(page) {
       this.queryWarning()
     },
     async queryWarning(factoryId) {
       // {factory: true, tid, page, size: 8, begin_time, begin_time, alarm_id: 'all' }
-      const obj = {
-        begin_time: '',
-        t_id: factoryId || getCurrentFactory().uid
-      }
+      // const obj = {
+      //   begin_time: '',
+      //   t_id: factoryId || getCurrentFactory().uid
+      // }
       const parmas = {
-        ...obj,
+        ...this.currentNode,
         ...this.chooseDate,
         ...this.queryParams
       }
@@ -385,4 +331,22 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.wrap {
+  width: 100%;
+  height: calc(100vh - 84px);
+
+  .left {
+    float: left;
+    width: 240px;
+    margin-right: 30px;
+    height: 100%;
+    min-height: calc(100vh - 84px);
+    border-right: 1px solid #000;
+  }
+  .right {
+    float: left;
+    width: calc(100% - 270px);
+  }
+}
+</style>
