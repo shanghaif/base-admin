@@ -85,7 +85,6 @@ export default {
         if (newVal) {
           this.currentObj = newVal
           this.getRate()
-          this.updateColor()
         }
       },
       deep: true
@@ -97,17 +96,6 @@ export default {
     const d = new Date()
     this.date =
       d.getFullYear() + '年' + (d.getMonth() + 1) + '月' + d.getDay() + '日'
-    // this.bath.total = Math.floor(Math.random() * 100 + 800)
-    // this.bath.online = this.bath.total - Math.floor(Math.random() * 80)
-    // this.bath.running = this.bath.online - Math.floor(Math.random() * 90)
-    // this.bath.alarm = this.bath.running - Math.floor(Math.random() * 100 + 600)
-    // this.rate.online =
-    //   Math.floor((this.bath.online / this.bath.total) * 1000) / 10
-    // this.rate.running =
-    //   Math.floor((this.bath.running / this.bath.total) * 1000) / 10
-    // this.rate.alarm =
-    //   Math.floor((this.bath.alarm / this.bath.total) * 1000) / 10
-    // this.updateColor()
   },
   methods: {
     ...mapMutations({
@@ -119,10 +107,11 @@ export default {
         AreaID: item.id,
         Company: '云南分公司',
         Factory: this.currentFactory.s_name,
-        t_id: ''
+        t_id: '',
+        isInfoClick: true
       }
       this.SET_ALARMITEM(obj)
-      this.$router.push({ path: '/detail', isInfoClick: true })
+      this.$router.push({ path: '/detail', query: { isInfoClick: true, obj } })
     },
     getRate() {
       if (this.currentObj.all_bath) {
@@ -132,9 +121,9 @@ export default {
         const online = this.currentObj.online_bath
         this.bath = { total, online, running, alarm }
         this.rate = {
-          online: ((online * 100) / total).toFixed(0),
-          running: ((running * 100) / total).toFixed(0),
-          alarm: ((alarm * 100) / total).toFixed(0)
+          online: +((online * 100) / total).toFixed(0),
+          running: +((running * 100) / total).toFixed(0),
+          alarm: +((alarm * 100) / total).toFixed(0)
         }
       } else {
         this.rate = {
@@ -143,6 +132,11 @@ export default {
           alarm: 0
         }
       }
+      this.updateColor()
+    },
+    logClick() {
+      // 跳转告警日志
+      this.$router.push({ path: '/alarm/alarm-history' })
     },
     updateColor() {
       const colorOnline = 'hsla(250, 80%, 44%, 1)'
@@ -174,10 +168,6 @@ export default {
         '%, var(--alarmB) ' +
         this.rate.alarm +
         '%, rgba(50, 50, 50, 1) 0 100%)'
-    },
-    logClick() {
-      // 跳转告警日志
-      this.$router.push({ name: 'AlarmHistory' })
     }
   }
 }

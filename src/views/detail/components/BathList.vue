@@ -74,6 +74,14 @@ export default {
     // ZSelect,
     BathIcon
   },
+  props: {
+    lists: {
+      type: Array,
+      default() {
+        return []
+      }
+    }
+  },
   data() {
     return {
       title: '分区电解槽总览',
@@ -81,17 +89,12 @@ export default {
       factory: '电解铝二厂',
       area: '二分区',
       bathStatus: { selected: 0, status: ['全部', '正常', '离线'] },
-      // list: [],
-      // list: [],
+
       bathWs: null,
       currentBath: null,
       keyword: '',
       currentbathID: 0,
-
-      data: [],
       list: [],
-      // searchOptions: [],
-
       selectType: 'all',
       selectFreshTime: '',
       selectTime: '',
@@ -119,17 +122,23 @@ export default {
       })
     }
   },
+  watch: {
+    lists: {
+      handler(newName, oldName) {
+        this.list = newName
+        this.buildData()
+      },
+      deep: true
+    }
+  },
   mounted() {
     this.currentBath = { ...this.alarmItem }
     this.currentbathID = this.currentBath.BathID
-    this.sendWs()
   },
-  beforeDestroy() {
-    this.destroyWs()
-  },
+  beforeDestroy() {},
   methods: {
     buildData() {
-      this.list = this.data.map((v) => {
+      this.list = this.lists.map((v) => {
         return {
           bath_id: v.bath_id,
           name: v.bath_name,
@@ -164,25 +173,25 @@ export default {
       //   return { value: `${item.name}`, label: `${item.name}` }
       // })
     },
-    sendWs() {
-      const url = '/area_info'
-      const params = {
-        url,
+    // sendWs() {
+    //   const url = '/area_info'
+    //   const params = {
+    //     url,
 
-        data: {
-          area_id: this.currentBath.AreaID
-        }
-      }
-      this.bathWs = new Socket(params)
-      this.bathWs.onmessage((data) => {
-        console.log('data :>> ', data)
-        this.data = data || []
-        this.buildData()
-      })
-    },
-    destroyWs() {
-      this.bathWs && this.bathWs.destroy()
-    },
+    //     data: {
+    //       area_id: this.currentBath.AreaID
+    //     }
+    //   }
+    //   this.bathWs = new Socket(params)
+    //   this.bathWs.onmessage((data) => {
+    //     console.log('data :>> ', data)
+    //     this.data = data || []
+    //     this.buildData()
+    //   })
+    // },
+    // destroyWs() {
+    //   this.bathWs && this.bathWs.destroy()
+    // },
     // 根据状态过滤
     getType(type) {
       if (type === 'off') {

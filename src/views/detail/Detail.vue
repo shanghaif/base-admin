@@ -22,6 +22,7 @@
     <div class="left">
       <BathList
         class="module"
+        :lists="bathData"
         @onClick="clickBath"
       />
 
@@ -148,7 +149,9 @@ export default {
       },
       updateTime: '',
       wsAlarm: null,
+      wsBath: null,
       alarmList: [],
+      bathData: [],
 
       pointList: [],
       allPointList: [],
@@ -221,12 +224,12 @@ export default {
           this.$dayjs(this.alarmItem.AlarmTime).format('YYYY-MM-DD') + ' 23:59'
       }
 
-      this.queryPiont()
-      this.queryPiontHistory()
       this.sendWsAlarm()
+      this.sendWsBathList()
     },
     destroyWs() {
       this.wsAlarm && this.wsAlarm.destroy()
+      this.wsBath && this.wsBath.destroy()
     },
     sendWsAlarm() {
       const url = '/alarm'
@@ -239,10 +242,24 @@ export default {
       }
       this.wsAlarm = new Socket(params)
       this.wsAlarm.onmessage((data) => {
-        console.log('data :>> ', data)
         this.alarmList = data.filter((v) => v.Area === this.alarmItem.Area)
         // this.SET_ALARMLIST(this.alarmList)
         //  !this.alarmItem.BathID && this.alarmList
+      })
+    },
+    sendWsBathList() {
+      const url = '/area_info'
+      const params = {
+        url,
+
+        data: {
+          area_id: this.alarmItem.AreaID
+        }
+      }
+      this.wsBath = new Socket(params)
+      this.wsBath.onmessage((data) => {
+        this.bathData = data || []
+        this.queryPiont()
       })
     },
     clickAlarm(obj) {
@@ -274,24 +291,7 @@ export default {
         window.URL.revokeObjectURL(href)
       }
     },
-    exportPoint(obj) {
-      const { arr, is_compress } = obj
-      const params = {
-        id: this.alarmItem.t_id,
-        is_compress,
-        sTime: arr[0],
-        eTime: arr[1]
-      }
 
-      exportPointInfo(params)
-        .then((res) => {
-          this.isExcel(res)
-          this.$refs.DetailLineChart.hideExport()
-        })
-        .catch((err) => {
-          this.$message(err)
-        })
-    },
     refresh() {
       this.queryPiontHistory()
     },
@@ -362,19 +362,40 @@ export default {
       this.SET_POINT(this.allPointList[0])
     },
     queryPiont() {
+      let id, name, alarm
+      if (this.alarmItem.isInfoClick) {
+        id = this.bathData.length && this.bathData[0].bath_id
+        name = this.bathData.length && this.bathData[0].bath_name
+        alarm = { ...this.alarmItem, ...{ Bath: name } }
+        this.SET_ALARMITEM(alarm)
+      } else {
+        id = this.alarmItem.BathID
+      }
       this.allPointList.length < 1 &&
-        devicePoint(this.alarmItem.BathID)
+        devicePoint(id)
           .then((res) => {
             const arr = res.data.result || []
             this.allPointList = arr
+
             this.setFuncOfpoint()
+            this.queryPiontHistory()
           })
           .catch((err) => {
             this.$message(err)
           })
     },
-    queryPiontHistory(date) {
-      this.queryParams.id = this.alarmItem.t_id
+    queryPiontHistory() {
+      if (this.alarmItem.isInfoClick) {
+        this.queryParams.id =
+          this.allPointList.length && this.allPointList[0].tid
+        this.SET_ALARMITEM({
+          ...this.alarmItem,
+          ...{ t_id: this.queryParams.id }
+        })
+      } else {
+        this.queryParams.id = this.alarmItem.t_id
+      }
+
       deviceHistory(this.queryParams)
         .then((res) => {
           const arr = (res.data.result && res.data.result.list) || []

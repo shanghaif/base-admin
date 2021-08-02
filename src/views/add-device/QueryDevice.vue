@@ -40,7 +40,6 @@
         tooltip-effect="dark"
         style="width: 100%"
         :stripe="true"
-        @selection-change="handleSelectionChange"
       >
         <!-- <el-table-column
           type="selection"

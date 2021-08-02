@@ -85,7 +85,8 @@ export function removeCell() {
 export function getAlarmItem() {
   let res = {}
   try {
-    res = JSON.parse( Cookies.get(alarmItem))
+    res = JSON.parse(Cookies.get(alarmItem))
+    console.log('getAlarmItem :>> ', res)
   } catch (err) {
     console.log('cookie undefind')
   }
