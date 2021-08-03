@@ -99,16 +99,13 @@ export default {
       selectFreshTime: '',
       selectTime: '',
       searchCell: '',
-      loading: false,
       cellTypeOptions: [
         { value: 'all', label: '全部' },
         { value: 'good', label: '正常' },
         { value: 'off', label: '离线' }
       ],
       cacheList: [],
-      imgUrl: null,
-
-      curCell: '10000'
+      imgUrl: null
     }
   },
   computed: {
@@ -126,6 +123,12 @@ export default {
     lists: {
       handler(newName, oldName) {
         this.list = newName
+        this.selectType = 'all'
+        if (this.alarmItem.isInfoClick) {
+          this.currentbathID = this.lists[0].bath_id
+        } else {
+          this.currentbathID = this.currentBath.BathID
+        }
         this.buildData()
       },
       deep: true
@@ -133,7 +136,6 @@ export default {
   },
   mounted() {
     this.currentBath = { ...this.alarmItem }
-    this.currentbathID = this.currentBath.BathID
   },
   beforeDestroy() {},
   methods: {

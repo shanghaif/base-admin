@@ -14,14 +14,13 @@
         ref="ruleForm"
         :model="saveParams"
         :rules="rules"
-        label-width="120px"
+        label-width="140px"
         label-position="right"
         style="width:60%"
       >
         <el-form-item
           label="名称"
           prop="name"
-          :label-width="formLabelWidth"
         >
           <el-input
             v-model="saveParams.name"
@@ -32,7 +31,6 @@
         <el-form-item
           label="id"
           prop="uid"
-          :label-width="formLabelWidth"
         >
           <el-input
             v-model="saveParams.uid"
@@ -40,12 +38,38 @@
             :disabled="!isNew"
           />
         </el-form-item>
+        <el-form-item
+          prop="rate_low"
+          label="趋势时间范围"
+        >
 
+          <el-input
+            v-model="saveParams.rate_low"
+            v-num
+            autocomplete="off"
+          >
+            <template slot="append">分钟</template>
+          </el-input>
+
+        </el-form-item>
+        <el-form-item
+          label="趋势温度变化范围"
+          prop="rate_high"
+        >
+
+          <el-input
+            v-model="saveParams.rate_high"
+            v-num
+            autocomplete="off"
+          >
+            <template slot="append">℃</template>
+          </el-input>
+        </el-form-item>
         <div class="rage-box">
 
           <el-form-item
             prop="temperature_low"
-            label="温度告警范围"
+            label="温度安全范围"
           >
 
             <el-input
@@ -54,7 +78,10 @@
               autocomplete="off"
               @input="handleChange('temperature_low')"
             >
-              <template slot="append">最小值</template>
+              <template
+                slot="append"
+                style="width:100px"
+              >最小值</template>
             </el-input>
 
           </el-form-item>
@@ -73,7 +100,8 @@
             </el-input>
           </el-form-item>
         </div>
-        <div class="rage-box">
+
+        <!-- <div class="rage-box">
 
           <el-form-item
             prop="rate_low"
@@ -104,12 +132,9 @@
               <template slot="append">最大值</template>
             </el-input>
           </el-form-item>
-        </div>
+        </div> -->
 
-        <el-form-item
-          label="说明"
-          :label-width="formLabelWidth"
-        >
+        <el-form-item label="说明">
           <el-input
             v-model="saveParams.desc"
             type="textarea"

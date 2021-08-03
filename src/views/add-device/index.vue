@@ -28,22 +28,23 @@
         />
       </el-button-group>
 
-      <!-- <el-tree
+      <el-tree
         :key="treeId"
         ref="tree"
         :props="props"
         :load="loadNode"
         :highlight-current="true"
         :check-on-click-node="true"
+        :expand-on-click-node="false"
         :default-expanded-keys="expandedKeys"
         lazy
         node-key="uid"
         @node-click="clickNode"
-      /> -->
-      <StationTree
+      />
+      <!-- <StationTree
         :key="treeId"
         @clickNode="clickNode"
-      />
+      /> -->
     </div>
     <div class="right">
       <div class="count-container">
@@ -629,15 +630,17 @@ export default {
 
       this.queryCountDevice()
     },
-    queryCountDevice() {
+    queryCountDevice(isCompany) {
       countDevice(this.queryDeviceParams)
         .then((res) => {
           this.tableData = (res.data.result && res.data.result.devices) || []
           this.total = (res.data.result && res.data.result.devices_count) || 0
-          this.rightTopInfo = (res.data.result && res.data.result.info) || {
-            devices_count: 0,
-            devices_offline_count: 0,
-            devices_online_count: 0
+          if (isCompany) {
+            this.rightTopInfo = (res.data.result && res.data.result.info) || {
+              devices_count: 0,
+              devices_offline_count: 0,
+              devices_online_count: 0
+            }
           }
         })
         .catch((err) => {
@@ -657,7 +660,7 @@ export default {
           this.queryDeviceParams.level = 0
           this.queryDeviceParams.uid =
             this.companyList.length > 0 && this.companyList[0].uid
-          this.queryCountDevice()
+          this.queryCountDevice(1)
 
           resolve(this.companyList)
         })

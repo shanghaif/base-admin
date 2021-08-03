@@ -120,14 +120,6 @@ export default {
       default() {
         return [{ arr: [] }]
       }
-    },
-    min: {
-      type: Number,
-      default: 0
-    },
-    max: {
-      type: Number,
-      default: 0
     }
   },
   data() {

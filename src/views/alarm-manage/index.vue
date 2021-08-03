@@ -86,7 +86,7 @@
               <el-tag
                 :type="typeFunc(scope.row.alarm_id)"
                 plain
-              >{{ scope.row.alarm_id | statusFilter }}</el-tag>
+              >{{ scope.row.alarm_id | typeText }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column
@@ -163,12 +163,18 @@ export default {
   name: 'AlarmHistory',
   components: {},
   filters: {
-    statusFilter(type) {
+    typeText(val) {
       let res = ''
-      if (type === 'offline') {
+      if (val === 'temperature_high') {
+        res = '温度告警'
+      } else if (val === 'offline') {
         res = '离线'
-      } else if (type === 'temperature_high') {
-        res = '温度高'
+      } else if (val === 'rate_high') {
+        res = '趋势预警'
+      } else if (val === 'abnormal') {
+        res = '设备异常'
+      } else {
+        res = '正常'
       }
       return res
     }

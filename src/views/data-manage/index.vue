@@ -7,7 +7,29 @@
 
       <div class="right-content">
         <div class="filter-container">
+          <el-input
+            v-if="searchResult.length>0"
+            v-model="searchVal"
+            style="width:200px;margin-right:30px"
+            placeholder="输入设备名称搜索"
+          >
+            <i
+              slot="prefix"
+              class="el-input__icon el-icon-search"
+            />
+          </el-input>
 
+          <el-button
+            v-if="searchResult.length>0"
+            style="vertical-align:top"
+            type="primary"
+            @click="searchTable"
+          >
+            <svg-icon
+              class="svg"
+              icon-class="search"
+            />搜索
+          </el-button>
           <el-button
             style="vertical-align:top"
             :disabled="!radio"
@@ -19,17 +41,6 @@
               icon-class="export"
             />导出
           </el-button>
-          <el-input
-            v-if="tableData.length>0"
-            v-model="searchVal"
-            style="width:200px;margin-left:30px"
-            placeholder="输入设备名称搜索"
-          >
-            <i
-              slot="prefix"
-              class="el-input__icon el-icon-search"
-            />
-          </el-input>
         </div>
 
         <el-table
@@ -58,11 +69,13 @@
 
           <el-table-column
             sortable
+            :sort-method="(a, b) => sortName(a, b, 's_name')"
             prop="s_name"
             label="设备名称"
             show-overflow-tooltip
           />
           <el-table-column
+            sortable
             prop="value"
             label="温度 ℃"
             class-name="n-wrap"
@@ -91,6 +104,7 @@
             </template>
           </el-table-column>
           <el-table-column
+            sortable
             prop="pick_time"
             label="时间"
             class-name="n-wrap"
@@ -158,6 +172,7 @@ export default {
       radio: '',
       currentNode: {},
       tableData: [],
+      searchResult: [],
       queryParams: {
         page: 1,
         size: 10
@@ -168,15 +183,7 @@ export default {
     }
   },
 
-  computed: {
-    searchResult() {
-      return this.tableData.filter(
-        (data) =>
-          !this.searchVal ||
-          data.s_name.toLowerCase().includes(this.searchVal.toLowerCase())
-      )
-    }
-  },
+  computed: {},
   watch: {},
 
   created() {
@@ -187,8 +194,18 @@ export default {
   mounted() {},
 
   methods: {
+    sortName(a, b) {
+      const start = a.s_name.replace(/[^\d]/g, '')
+      const end = b.s_name.replace(/[^\d]/g, '')
+      return start - end
+    },
     searchTable() {
       // this.data.filters(v)
+      this.searchResult = this.tableData.filter(
+        (data) =>
+          !this.searchVal ||
+          data.s_name.toLowerCase().includes(this.searchVal.toLowerCase())
+      )
     },
     typeFunc(point) {
       let res = ''
@@ -253,6 +270,7 @@ export default {
       devicePoint(this.currentNode.uid)
         .then((res) => {
           this.tableData = res.data.result || []
+          this.searchResult = this.tableData
           this.total = this.tableData.length
           this.loading = false
         })

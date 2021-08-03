@@ -70,8 +70,6 @@
     <div class="bottom">
       <Bath
         :list="pointList"
-        :min="unusualVal"
-        :max="warningVal"
         @pointClick="pointClick"
       />
     </div>
@@ -148,8 +146,10 @@ export default {
         logo: require('@/assets/logo.svg')
       },
       updateTime: '',
+      step: 60 * 15,
       wsAlarm: null,
       wsBath: null,
+      timer: null,
       alarmList: [],
       bathData: [],
 
@@ -172,8 +172,6 @@ export default {
     }
   },
   computed: {
-    ...mapGetters(['warningVal', 'unusualVal']),
-
     ...mapState({
       alarmItem: (state) => state.station.alarmItem,
       currentPoint: (state) => state.station.currentPoint,
@@ -292,9 +290,6 @@ export default {
       }
     },
 
-    refresh() {
-      this.queryPiontHistory()
-    },
     changeDateQuery(date) {
       this.queryParams.sTime = date[0] + ' 00:00'
       this.queryParams.eTime = date[1] + ' 23:59'
@@ -384,8 +379,9 @@ export default {
             this.$message(err)
           })
     },
-    queryPiontHistory() {
-      if (this.alarmItem.isInfoClick) {
+    queryPiontHistory(now) {
+      clearInterval(this.timer)
+      if (this.alarmItem.isInfoClick && !this.alarmItem.t_id) {
         this.queryParams.id =
           this.allPointList.length && this.allPointList[0].tid
         this.SET_ALARMITEM({
@@ -400,11 +396,24 @@ export default {
         .then((res) => {
           const arr = (res.data.result && res.data.result.list) || []
           res.data.result && this.SET_TEMPHEIGHT(res.data.result.high)
-          this.piontHistoryList = sortBy(arr, (v) => v.pick_time)
+          if (arr.length === 1) {
+            // 每隔15分钟请求一次
+            this.piontHistoryList.shift(arr[0])
+            this.piontHistoryList.push(arr[0])
+          } else {
+            this.piontHistoryList = sortBy(arr, (v) => v.pick_time)
+          }
         })
         .catch((err) => {
           this.$message(err)
         })
+      this.timer = setInterval(() => {
+        this.queryParams.eTime = this.$dayjs().format('YYYY-MM-DD HH:mm')
+        this.queryParams.sTime = this.$dayjs(this.queryParams.eTime)
+          .subtract(this.step, 'seconds')
+          .format('YYYY-MM-DD HH:mm')
+        deviceHistory(this.queryParams)
+      }, this.step * 1000)
     },
     autoSize(cancle) {
       if (cancle) {
