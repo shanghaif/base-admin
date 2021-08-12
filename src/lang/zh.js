@@ -1,6 +1,6 @@
 export default {
   route: {
-    dashboard: '大屏数据',
+    dashboard: '生产驾驶舱',
     Device: '设备管理',
     AddDevice: '添加设备',
     QueryDevice: '查询设备',

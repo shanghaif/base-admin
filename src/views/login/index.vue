@@ -27,7 +27,7 @@
           name="username"
           type="text"
           tabindex="1"
-          autocomplete="on"
+          autocomplete
         />
       </el-form-item>
 
@@ -49,7 +49,7 @@
             :placeholder="$t('login.password')"
             name="password"
             tabindex="2"
-            autocomplete="on"
+            autocomplete
             @keyup.native="checkCapslock"
             @blur="capsTooltip = false"
             @keyup.enter.native="handleLogin"

@@ -43,7 +43,11 @@ export default {
       current: { label: '', value: '' }
     }
   },
-
+  watch: {
+    value(newVal, oldVal) {
+      this.current = this.list.find((v) => v.value === newVal)
+    }
+  },
   mounted() {
     document.addEventListener('click', (e) => {
       if (!this.$el.contains(e.target)) {

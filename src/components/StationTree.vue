@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="tree-box">
     <el-tree
       ref="tree"
       :props="props"
@@ -7,7 +7,6 @@
       :highlight-current="true"
       :check-on-click-node="true"
       :default-expanded-keys="expandedKeys"
-      :expand-on-click-node="false"
       :current-node-key="currentId"
       lazy
       node-key="uid"
@@ -99,7 +98,24 @@ export default {
 
         area(uid, 1).then((res) => {
           const data = res.data.result.stations || []
-
+          // const data = []
+          // for (let i = 0; i < 100; i++) {
+          //   const obj = {
+          //     area_id: 1,
+          //     area_name: '云端',
+          //     area_path: '',
+          //     area_whole_name: '云端',
+          //     lat: '0',
+          //     level: 3,
+          //     lon: '0',
+          //     model_id: 'm_BaseControlStation',
+          //     parent_id: 'e5ce427a-9999-4238-a8a9-6fe94ce651b9',
+          //     s_name: '电解槽1001',
+          //     status_used: 1,
+          //     uid: i
+          //   }
+          //   data.push(obj)
+          // }
           return resolve(data)
         })
       } else if (node.level === 3) {

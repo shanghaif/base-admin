@@ -52,6 +52,7 @@
           </el-table-column>
           <el-table-column
             sortable
+            :sort-method="(a, b) => sortTime(a, b, 'UpdatedAt')"
             prop="UpdatedAt"
             label="时间"
             show-overflow-tooltip
@@ -130,6 +131,11 @@ export default {
       const res = await Log(this.queryParams)
       this.tableData = (res.data.result && res.data.result.list) || []
       this.total = (res.data.result && res.data.result.count) || 0
+    },
+    sortTime(a, b) {
+      const s = this.$dayjs(a.UpdatedAt).valueOf()
+      const e = this.$dayjs(b.UpdatedAt).valueOf()
+      return e - s
     },
     changePage(page) {
       this.queryParams.page = page

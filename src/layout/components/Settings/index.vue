@@ -42,7 +42,7 @@
         />
       </a> -->
 
-      <div
+      <!-- <div
         v-if="lang === 'zh'"
         class="drawer-item"
       >
@@ -51,7 +51,7 @@
           v-model="supportPinyinSearch"
           class="drawer-switch"
         />
-      </div>
+      </div> -->
 
     </div>
   </div>

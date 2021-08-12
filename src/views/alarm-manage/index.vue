@@ -1,12 +1,18 @@
 <template>
-  <el-card class="wrap">
-    <div class="left">
+  <div class="has-tree-wrap">
+    <!-- <div class="left">
       <StationTree
         :current-id="currentNode.t_id"
         @clickNode="clickNode"
       />
 
-    </div>
+    </div> -->
+    <el-scrollbar class="left">
+      <StationTree
+        :current-id="currentNode.t_id"
+        @clickNode="clickNode"
+      />
+    </el-scrollbar>
     <div class="right">
 
       <div class="right-content">
@@ -20,12 +26,23 @@
             placeholder="选择日期"
             class="screen-select"
             unlink-panels
-            value-format="yyyy-MM-dd HH:mm"
-            :default-time="['00:00:00','23:59:59']"
             @change="changeDate"
           >
             />
           </el-date-picker>
+          <!-- <el-date-picker
+                v-model="exportDate"
+                type="daterange"
+                format="yyyy-MM-dd"
+                :picker-options="pickerOptions"
+                range-separator="至"
+                placeholder="选择日期"
+                class="screen-select"
+                unlink-panels
+                @change="changeExportDate"
+              >
+                />
+              </el-date-picker> -->
 
         </div>
 
@@ -90,6 +107,7 @@
             </template>
           </el-table-column>
           <el-table-column
+            sortable
             prop="alarm_obj"
             label="时间"
             class-name="n-wrap"
@@ -140,9 +158,9 @@
           />
         </div>
       </div>
-    </div>
 
-  </el-card>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -271,8 +289,12 @@ export default {
     },
     changeDate(arr) {
       const obj = {}
-      obj.begin_time = arr[0]
-      obj.end_time = arr[1]
+
+      if (arr) {
+        obj.begin_time = this.$dayjs(arr[0]).format('YYYY-MM-DD') + ' 00:00'
+        obj.end_time = this.$dayjs(arr[1]).format('YYYY-MM-DD') + ' 23:59'
+      }
+
       this.chooseDate = obj
       this.queryWarning()
     },

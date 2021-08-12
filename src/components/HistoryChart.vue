@@ -94,6 +94,8 @@ export default {
 
           this.xData.push({ value: [eDate, null] })
           this.initChart()
+        } else {
+          this.chart && this.chart.dispose()
         }
       },
       deep: true

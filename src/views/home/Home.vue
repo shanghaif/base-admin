@@ -87,7 +87,7 @@
       class="corner-btn close"
       @click="closeClick()"
     >
-      <div class="iconfont icon-close" />关闭大屏
+      后台管理
     </div>
   </div>
 </template>

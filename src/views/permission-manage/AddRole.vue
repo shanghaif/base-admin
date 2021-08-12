@@ -12,7 +12,7 @@
       :data="tableData"
       tooltip-effect="dark"
       style="width: 100%"
-      :stripe="true"
+      stripe
     >
       <!-- <el-table-column
             type="selection"
@@ -58,30 +58,6 @@
               >无权限</el-tag>
             </span>
           </div>
-          <!-- <div>
-            协议权限
-            <span v-for="(item,i) in scope.row.permission" :key="'tmodel' + i"></span>
-          </div>
-          <div>
-            场站权限
-            <span v-for="(item,i) in scope.row.permission" :key="'tmodel' + i"></span>
-          </div>
-          <div>
-            用户权限
-            <span v-for="(item,i) in scope.row.permission" :key="'tmodel' + i"></span>
-          </div>
-          <div>
-            角色权限
-            <span v-for="(item,i) in scope.row.permission" :key="'tmodel' + i"></span>
-          </div>
-          <div>
-            设备权限
-            <span v-for="(item,i) in scope.row.permission" :key="'tmodel' + i"></span>
-          </div> -->
-          <!-- <el-tag
-            :type="typeFunc(scope.row.alarm_id)"
-            plain
-          >{{ scope.row.alarm_id | statusFilter }}</el-tag> -->
 
         </template>
       </el-table-column>
@@ -97,18 +73,33 @@
             :props="defaultProps"
           /> -->
           <div
+            v-if="isAllArea(scope.row.stations)"
+            class="role-station"
+            style="padding-left:40px"
+          >
+
+            <el-tag plain>{{ getTrFactory(scope.row.stations) }}</el-tag>
+          </div>
+          <div
             v-for="(cell,j) in scope.row.stations"
             :key="'tmodel_child' + j"
             class="role-station"
+            :style="{'padding-left':(cell.level+1)*20 + 'px'}"
           >
 
             <el-tag plain>{{ cell.s_name }}</el-tag>
           </div>
-          <el-tag
+          <div
             v-if="scope.row.stations.length < 1"
-            plain
-            type="info"
-          >无权限</el-tag>
+            class="role-station"
+            style="padding-left:60px"
+          >
+
+            <el-tag
+              plain
+              type="info"
+            >无权限</el-tag>
+          </div>
         </template>
       </el-table-column>
       <el-table-column
@@ -241,6 +232,7 @@ export default {
       total: 0,
       tableData: [],
       treeData: [],
+      treeTr: [],
       companyList: [],
       factoryList: [],
       areaList: [],
@@ -297,7 +289,6 @@ export default {
   created() {
     // 生命周期钩子：组件实例创建完成，属性已绑定，但 DOM 还未生成，el 属性还不存在
     // 初始化渲染页面
-    this.init()
   },
 
   mounted() {},
@@ -306,6 +297,23 @@ export default {
     init() {
       this.query()
     },
+    isAllArea(arr) {
+      if (arr.length < 1) {
+        return false
+      }
+      const flag = arr.some((v) => v.level === 0 || v.level === 1)
+      return !flag
+    },
+    getTrFactory(arr) {
+      const len = arr.length
+      if (len < 1) {
+        return ''
+      }
+      const id = arr[len - 1].parent_id
+      const f = this.factoryList[0].find((v) => v.uid === id)
+      return f.s_name
+    },
+    stationPermissions(item) {},
     isShowBtn(str) {
       return this.isPermissions.includes(str)
     },
@@ -385,6 +393,7 @@ export default {
           data.map((v, i) => {
             return (v.leaf = true)
           })
+          this.init()
 
           return resolve(data)
         })

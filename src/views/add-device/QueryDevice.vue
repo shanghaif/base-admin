@@ -1,9 +1,9 @@
 <template>
-  <el-card class="wrap">
-    <div class="left">
+  <div class="has-tree-wrap">
+    <el-scrollbar class="left">
       <StationTree @clickNode="clickNode" />
 
-    </div>
+    </el-scrollbar>
     <div class="right">
 
       <div class="count-container">
@@ -128,7 +128,7 @@
         />
       </div>
     </div>
-  </el-card>
+  </div>
 </template>
 
 <script>
@@ -249,21 +249,4 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.wrap {
-  width: 100%;
-  height: calc(100vh - 84px);
-
-  .left {
-    float: left;
-    width: 240px;
-    margin-right: 30px;
-    height: 100%;
-    min-height: calc(100vh - 84px);
-    border-right: 1px solid #000;
-  }
-  .right {
-    float: left;
-    width: calc(100% - 270px);
-  }
-}
 </style>

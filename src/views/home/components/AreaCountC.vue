@@ -179,7 +179,7 @@ export default {
           data: that.axisData,
           axisLine: { lineStyle: { color: 'hsla(0, 100%, 100%, 0.1)' } },
           axisTick: { show: false },
-          axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } }
+          axisLabel: { textStyle: { color: '#fff' } }
         },
         yAxis: { show: false },
         series: [

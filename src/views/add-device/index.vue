@@ -1,8 +1,6 @@
 <template>
-  <el-card class="device-wrap">
-
-    <div class="left">
-
+  <div class="has-tree-wrap">
+    <div class="add-box">
       <el-button-group class="btns-wrap">
         <el-button
           :disabled="canAdd || !isShowBtn('add')"
@@ -27,24 +25,25 @@
           @click="delNode"
         />
       </el-button-group>
+      <el-scrollbar class="left">
 
-      <el-tree
-        :key="treeId"
-        ref="tree"
-        :props="props"
-        :load="loadNode"
-        :highlight-current="true"
-        :check-on-click-node="true"
-        :expand-on-click-node="false"
-        :default-expanded-keys="expandedKeys"
-        lazy
-        node-key="uid"
-        @node-click="clickNode"
-      />
-      <!-- <StationTree
+        <el-tree
+          :key="treeId"
+          ref="tree"
+          :props="props"
+          :load="loadNode"
+          :highlight-current="true"
+          :check-on-click-node="true"
+          :default-expanded-keys="expandedKeys"
+          lazy
+          node-key="uid"
+          @node-click="clickNode"
+        />
+        <!-- <StationTree
         :key="treeId"
         @clickNode="clickNode"
       /> -->
+      </el-scrollbar>
     </div>
     <div class="right">
       <div class="count-container">
@@ -317,7 +316,7 @@
       :new-item="currentNode"
       @confirm="confirmStationDlg"
     />
-  </el-card>
+  </div>
 </template>
 
 <script>
@@ -683,6 +682,24 @@ export default {
 
         area(uid, 1).then((res) => {
           const data = res.data.result.stations || []
+          // const data = []
+          // for (let i = 0; i < 100; i++) {
+          //   const obj = {
+          //     area_id: 1,
+          //     area_name: '云端',
+          //     area_path: '',
+          //     area_whole_name: '云端',
+          //     lat: '0',
+          //     level: 3,
+          //     lon: '0',
+          //     model_id: 'm_BaseControlStation',
+          //     parent_id: 'e5ce427a-9999-4238-a8a9-6fe94ce651b9',
+          //     s_name: '电解槽1001',
+          //     status_used: 1,
+          //     uid: i
+          //   }
+          //   data.push(obj)
+          // }
 
           return resolve(data)
         })
@@ -724,22 +741,30 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.device-wrap {
-  min-height: calc(100vh - 84px);
-  .btns-wrap {
-    margin-bottom: 20px;
+.btns-wrap {
+  margin-bottom: 20px;
+}
+
+.has-tree-wrap {
+  width: 100%;
+  height: calc(100vh - 124px);
+  padding: 20px;
+  .add-box {
+    float: left;
+    width: 240px;
+    margin-right: 30px;
+    border-right: 1px solid #000;
+    height: 100%;
+    height: calc(100vh - 150px);
+
+    .left {
+      height: 100%;
+      overflow: auto;
+    }
   }
-}
-.left {
-  float: left;
-  width: 240px;
-  margin-right: 30px;
-  height: 100%;
-  min-height: calc(100vh - 84px);
-  border-right: 1px solid #000;
-}
-.right {
-  float: left;
-  width: calc(100% - 270px);
+  .right {
+    float: left;
+    width: calc(100% - 270px);
+  }
 }
 </style>

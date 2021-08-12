@@ -9,7 +9,7 @@ const xsrfHeaderName = 'Authorization'
 const service = axios.create({
   // baseURL: env, // url = base url + request url
   // withCredentials: true, // send cookies when cross-domain requests
-  timeout: 8000, // request timeout
+  timeout: 15000, // request timeout
   xsrfHeaderName: xsrfHeaderName, 
   xsrfCookieName: xsrfHeaderName, 
   headers: {

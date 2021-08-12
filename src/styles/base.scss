@@ -334,3 +334,23 @@
     }
   }
 }
+
+.has-tree-wrap {
+  width: 100%;
+  height: calc(100vh - 124px);
+  padding: 20px;
+  .left {
+    float: left;
+    width: 240px;
+    margin-right: 30px;
+    border-right: 1px solid #000;
+    height: 100%;
+    height: calc(100vh - 150px);
+
+    overflow: auto;
+  }
+  .right {
+    float: left;
+    width: calc(100% - 270px);
+  }
+}

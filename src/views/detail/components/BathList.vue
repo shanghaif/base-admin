@@ -311,6 +311,7 @@ export default {
   height: calc(100% - 58px);
   width: calc(100% + 16px);
   overflow-y: auto;
+  position: relative;
   .bath {
     display: flex;
     gap: 14px;

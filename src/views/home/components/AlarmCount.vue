@@ -141,7 +141,7 @@ export default {
           axisTick: { show: false },
           // axisLabel: { textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' } },
           axisLabel: {
-            textStyle: { color: 'hsla(0, 100%, 100%, 0.4)' },
+            textStyle: { color: '#fff' },
             // 坐标轴刻度标签的相关设置。
             formatter: function (params) {
               let res = ''

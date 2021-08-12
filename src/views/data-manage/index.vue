@@ -1,8 +1,8 @@
 <template>
-  <el-card class="wrap">
-    <div class="left">
+  <div class="has-tree-wrap">
+    <el-scrollbar class="left">
       <StationTree @clickNode="clickNode" />
-    </div>
+    </el-scrollbar>
     <div class="right">
 
       <div class="right-content">
@@ -51,7 +51,7 @@
           style="width: 100%"
           highlight-current-row
           :stripe="true"
-          height="600px"
+          height="calc(100vh - 200px)"
           @row-click="currentChange"
         >
           <el-table-column
@@ -86,7 +86,7 @@
               <el-tag
                 :type="typeFunc(scope.row)"
                 plain
-              >{{ scope.row.value }}</el-tag>
+              >{{ scope.row.value.toFixed(1) }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column
@@ -133,13 +133,14 @@
       :item="currenRow"
       @export="exportPoint"
     />
-  </el-card>
+  </div>
 </template>
 
 <script>
 import { company, factory, area, cell } from '@/api/station'
 import ExportFilter from '@/components/ExportFilter'
 import { devicePoint, deviceHistory, exportPointInfo } from '@/api/station'
+import sortBy from 'lodash/sortBy'
 
 export default {
   name: 'DataDevice',
@@ -195,9 +196,10 @@ export default {
 
   methods: {
     sortName(a, b) {
-      const start = a.s_name.replace(/[^\d]/g, '')
-      const end = b.s_name.replace(/[^\d]/g, '')
-      return start - end
+      // const start = a.s_name.replace(/[^\d]/g, '')
+      // const end = b.s_name.replace(/[^\d]/g, '')
+      // return start - end
+      return b.s_name.localeCompare(a.s_name, 'zh-CN', { numeric: true })
     },
     searchTable() {
       // this.data.filters(v)
@@ -270,6 +272,8 @@ export default {
       devicePoint(this.currentNode.uid)
         .then((res) => {
           this.tableData = res.data.result || []
+          this.tableData = sortBy(this.tableData, (v) => v.pick_time)
+
           this.searchResult = this.tableData
           this.total = this.tableData.length
           this.loading = false
@@ -286,22 +290,5 @@ export default {
 <style lang="scss" scoped>
 .svg {
   margin-right: 8px;
-}
-.wrap {
-  width: 100%;
-  height: calc(100vh - 84px);
-
-  .left {
-    float: left;
-    width: 240px;
-    margin-right: 30px;
-    height: 100%;
-    min-height: calc(100vh - 84px);
-    border-right: 1px solid #000;
-  }
-  .right {
-    float: left;
-    width: calc(100% - 270px);
-  }
 }
 </style>
