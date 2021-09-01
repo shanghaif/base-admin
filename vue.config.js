@@ -10,7 +10,7 @@ function resolve(dir) {
 }
 const isProd = process.env.NODE_ENV === 'production'
 
-const name = defaultSettings.title || '新视智科' // page title
+const name = defaultSettings.title || '新视智科1' // page title
 
 // If your port is set to 80,
 // use administrator privileges to execute the command line.
